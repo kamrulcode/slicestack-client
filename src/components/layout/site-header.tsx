@@ -5,6 +5,7 @@ import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { LogIn, User } from "lucide-react";
 
 export function SiteHeader() {
   return (
@@ -34,18 +35,20 @@ export function SiteHeader() {
             href="/sign-in"
             className={cn(
               buttonVariants({ variant: "outline", size: "sm" }),
-              "hidden lg:inline-flex rounded-full px-7 py-4 shadow-sm shadow-primary/25",
+              "hidden lg:inline-flex rounded-full px-4 py-4 shadow-sm shadow-primary/25",
             )}
           >
             Sign In
+            <LogIn />
           </Link>
           <Link
             href="/sign-up"
             className={cn(
               buttonVariants({ size: "sm" }),
-              "hidden lg:inline-flex rounded-full px-7 py-4 shadow-sm shadow-primary/25",
+              "hidden lg:inline-flex rounded-full px-4 py-4 shadow-sm shadow-primary/25",
             )}
           >
+            <User />
             Sign Up
           </Link>
           <MobileNav />

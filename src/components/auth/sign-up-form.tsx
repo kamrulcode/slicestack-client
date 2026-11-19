@@ -5,15 +5,97 @@ import Link from "next/link";
 import { AuthField } from "@/components/auth/auth-field";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { uploadImage } from "@/config/imgbb";
+import { authClient } from "@/lib/auth-client";
 
-const roles = [
-  { value: "customer", label: "Customer" },
-  { value: "vendor", label: "Vendor" },
-] as const;
+type SignUpErrors = {
+  name?: string;
+  email?: string;
+  password?: string;
+};
+
+function validateName(value: string) {
+  const name = value.trim();
+  if (name.length < 2) return "Name must be at least 2 characters.";
+  if (name.length > 100) return "Name must be 100 characters or fewer.";
+  return undefined;
+}
+
+function validateEmail(value: string) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())) {
+    return "Enter a valid email address.";
+  }
+  return undefined;
+}
+
+function validatePassword(value: string) {
+  if (value.length < 8) return "Password must be at least 8 characters.";
+  if (value.length > 72) return "Password must be 72 characters or fewer.";
+  if (!/[A-Z]/.test(value)) {
+    return "Password must contain at least one uppercase letter.";
+  }
+  if (!/[0-9]/.test(value)) {
+    return "Password must contain at least one number.";
+  }
+  return undefined;
+}
 
 export function SignUpForm() {
-  const [role, setRole] = useState<(typeof roles)[number]["value"]>("customer");
+  const [errors, setErrors] = useState<SignUpErrors>({});
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+    const name = String(formData.get("name") ?? "");
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+
+    const nextErrors = {
+      name: validateName(name),
+      email: validateEmail(email),
+      password: validatePassword(password),
+    };
+
+    setHasSubmitted(true);
+    setErrors(nextErrors);
+    setSubmissionError(undefined);
+
+    if (Object.values(nextErrors).some(Boolean)) return;
+
+    const imageFile = formData.get("image");
+
+    setIsSubmitting(true);
+    try {
+      const imageUrl =
+        imageFile instanceof File && imageFile.size > 0
+          ? await uploadImage(imageFile)
+          : undefined;
+
+      const { error } = await authClient.signUp.email({
+        name,
+        email,
+        password,
+        ...(imageUrl ? { image: imageUrl } : {}),
+        callbackURL: "/",
+      });
+
+      if (error) {
+        setSubmissionError(error.message || "Unable to create your account.");
+      }
+    } catch (error) {
+      setSubmissionError(
+        error instanceof Error
+          ? error.message
+          : "Unable to create your account.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div>
@@ -24,12 +106,7 @@ export function SignUpForm() {
         Join the SliceStack community.
       </p>
 
-      <form
-        className="mt-8"
-        onSubmit={(event) => {
-          event.preventDefault();
-        }}
-      >
+      <form className="mt-8" onSubmit={handleSignUp} noValidate>
         <div className="flex flex-col gap-3.5">
           <AuthField
             id="sign-up-name"
@@ -37,7 +114,28 @@ export function SignUpForm() {
             label="Full name"
             autoComplete="name"
             placeholder="Enter full name"
+            required
+            minLength={2}
+            maxLength={100}
+            aria-invalid={Boolean(errors.name)}
+            aria-describedby={errors.name ? "sign-up-name-error" : undefined}
+            onChange={(event) => {
+              if (hasSubmitted) {
+                setErrors((current) => ({
+                  ...current,
+                  name: validateName(event.currentTarget.value),
+                }));
+              }
+            }}
           />
+          {errors.name && (
+            <p
+              id="sign-up-name-error"
+              className="-mt-2 text-sm text-destructive"
+            >
+              {errors.name}
+            </p>
+          )}
           <AuthField
             id="sign-up-email"
             name="email"
@@ -45,7 +143,32 @@ export function SignUpForm() {
             type="email"
             autoComplete="email"
             placeholder="Enter email address"
+            required
+            validate={(value) => {
+              if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
+                return "Please enter a valid email address";
+              }
+              return null;
+            }}
+            aria-invalid={Boolean(errors.email)}
+            aria-describedby={errors.email ? "sign-up-email-error" : undefined}
+            onChange={(event) => {
+              if (hasSubmitted) {
+                setErrors((current) => ({
+                  ...current,
+                  email: validateEmail(event.currentTarget.value),
+                }));
+              }
+            }}
           />
+          {errors.email && (
+            <p
+              id="sign-up-email-error"
+              className="-mt-2 text-sm text-destructive"
+            >
+              {errors.email}
+            </p>
+          )}
           <AuthField
             id="sign-up-password"
             name="password"
@@ -53,47 +176,73 @@ export function SignUpForm() {
             type="password"
             autoComplete="new-password"
             placeholder="Enter password"
+            required
+            minLength={8}
+            maxLength={72}
+            validate={(value) => {
+              if (value.length < 8) {
+                return "Password must be at least 8 characters";
+              }
+              if (!/[A-Z]/.test(value)) {
+                return "Password must contain at least one uppercase letter";
+              }
+              if (!/[0-9]/.test(value)) {
+                return "Password must contain at least one number";
+              }
+              return null;
+            }}
+            aria-invalid={Boolean(errors.password)}
+            aria-describedby={
+              errors.password
+                ? "sign-up-password-error"
+                : "sign-up-password-hint"
+            }
+            onChange={(event) => {
+              if (hasSubmitted) {
+                setErrors((current) => ({
+                  ...current,
+                  password: validatePassword(event.currentTarget.value),
+                }));
+              }
+            }}
           />
+          <p
+            id="sign-up-password-hint"
+            className="-mt-2 text-sm text-muted-foreground"
+          >
+            Use 8–72 characters.
+          </p>
+          {errors.password && (
+            <p
+              id="sign-up-password-error"
+              className="-mt-2 text-sm text-destructive"
+            >
+              {errors.password}
+            </p>
+          )}
           <AuthField
             id="sign-up-image"
             name="image"
-            label="Profile image (optional)"
-            placeholder="Enter profile image (optional)"
+            type="file"
+            accept="image/*"
+            label="Profile image"
+            className="w-25"
           />
-
-          <div className="flex flex-col gap-2.5">
-            <span className="text-[15px] leading-none font-semibold text-foreground">
-              Account role
-            </span>
-            <ToggleGroup
-              aria-label="Account role"
-              value={[role]}
-              onValueChange={(value) => {
-                if (value[0]) setRole(value[0] as (typeof roles)[number]["value"]);
-              }}
-              className="gap-3"
-            >
-              {roles.map((item) => (
-                <ToggleGroupItem
-                  key={item.value}
-                  value={item.value}
-                  className="h-10 min-w-32 rounded-full border border-transparent bg-secondary/70 px-6 text-sm font-semibold text-muted-foreground hover:bg-secondary hover:text-foreground aria-pressed:bg-primary aria-pressed:text-primary-foreground aria-pressed:hover:bg-primary"
-                >
-                  {item.label}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-            <input type="hidden" name="role" value={role} />
-          </div>
         </div>
 
         <Button
           type="submit"
           size="lg"
           className="mt-6 h-12 w-full rounded-lg text-base shadow-sm shadow-primary/20"
+          disabled={isSubmitting}
         >
-          Continue with email
+          {isSubmitting ? "Creating account..." : "Continue with email"}
         </Button>
+        {submissionError && (
+          <p role="alert" className="mt-3 text-sm text-destructive">
+            {submissionError}
+          </p>
+        )}
 
         <div className="mt-3">
           <GoogleButton />
@@ -121,6 +270,15 @@ export function SignUpForm() {
       <p className="mt-6 text-[15px] font-semibold text-primary">
         <Link href="/sign-in" className="hover:underline">
           Already have an account? Sign in
+        </Link>
+      </p>
+      <p className="mt-4 text-sm text-muted-foreground">
+        Want to sell pizzas?{" "}
+        <Link
+          href="/register-as-a-vendor"
+          className="font-semibold text-primary hover:underline"
+        >
+          Apply as a vendor
         </Link>
       </p>
     </div>
