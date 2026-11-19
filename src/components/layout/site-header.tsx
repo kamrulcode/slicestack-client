@@ -29,19 +29,25 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-1.5 sm:gap-2">
           <ThemeToggle />
-          <Button
-            variant="ghost"
-            size="sm"
-            className="hidden lg:inline-flex rounded-full px-7 py-4 shadow-sm shadow-primary/25"
+
+          <Link
+            href="/sign-in"
+            className={cn(
+              buttonVariants({ variant: "outline", size: "sm" }),
+              "hidden lg:inline-flex rounded-full px-7 py-4 shadow-sm shadow-primary/25",
+            )}
           >
             Sign In
-          </Button>
-          <Button
-            size="sm"
-            className="hidden lg:inline-flex rounded-full px-7 py-4 shadow-sm shadow-primary/25"
+          </Link>
+          <Link
+            href="/sign-up"
+            className={cn(
+              buttonVariants({ size: "sm" }),
+              "hidden lg:inline-flex rounded-full px-7 py-4 shadow-sm shadow-primary/25",
+            )}
           >
             Sign Up
-          </Button>
+          </Link>
           <MobileNav />
         </div>
       </div>
