@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { AuthField } from "@/components/auth/auth-field";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
@@ -41,6 +42,7 @@ function validatePassword(value: string) {
 }
 
 export function SignUpForm() {
+  const router = useRouter();
   const [errors, setErrors] = useState<SignUpErrors>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [submissionError, setSubmissionError] = useState<string>();
@@ -80,12 +82,17 @@ export function SignUpForm() {
         email,
         password,
         ...(imageUrl ? { image: imageUrl } : {}),
-        callbackURL: "/",
+        callbackURL: "/dashboard",
       });
 
       if (error) {
         setSubmissionError(error.message || "Unable to create your account.");
+        return;
       }
+
+      // The /dashboard dispatcher reads the new user's role on the server.
+      router.replace("/dashboard");
+      router.refresh();
     } catch (error) {
       setSubmissionError(
         error instanceof Error

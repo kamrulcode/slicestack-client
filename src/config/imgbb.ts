@@ -1,4 +1,10 @@
-export const uploadImage = async (imageFile) => {
+type ImgbbResponse = {
+  success: boolean;
+  data?: { url?: string };
+  error?: { message?: string };
+};
+
+export async function uploadImage(imageFile: File): Promise<string> {
   const formData = new FormData();
   formData.append("image", imageFile);
 
@@ -10,11 +16,11 @@ export const uploadImage = async (imageFile) => {
     },
   );
 
-  const data = await response.json();
+  const data = (await response.json()) as ImgbbResponse;
 
-  if (data.success) {
+  if (data.success && data.data?.url) {
     return data.data.url;
   }
 
-  throw new Error("Image upload failed");
-};
+  throw new Error(data.error?.message || "Image upload failed");
+}

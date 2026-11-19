@@ -1,11 +1,54 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthField } from "@/components/auth/auth-field";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
 
-export function SignInForm() {
+export function SignInForm({ nextPath }: { nextPath?: string }) {
+  const router = useRouter();
+  const [error, setError] = useState<string>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const email = String(formData.get("email") ?? "").trim();
+    const password = String(formData.get("password") ?? "");
+
+    setError(undefined);
+    setIsSubmitting(true);
+
+    try {
+      const { error: signInError } = await authClient.signIn.email({
+        email,
+        password,
+      });
+
+      if (signInError) {
+        setError(signInError.message || "Unable to sign in.");
+        return;
+      }
+
+      // The dashboard dispatcher reads the role from the database on the
+      // server and redirects to the right workspace.
+      router.replace(nextPath || "/dashboard");
+      router.refresh();
+    } catch (signInError) {
+      setError(
+        signInError instanceof Error
+          ? signInError.message
+          : "Unable to sign in. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div>
       <h2 className="font-heading text-[2.25rem] leading-tight font-bold tracking-tight text-foreground sm:text-[2.75rem]">
@@ -15,12 +58,7 @@ export function SignInForm() {
         Sign in to continue your delicious journey.
       </p>
 
-      <form
-        className="mt-9"
-        onSubmit={(event) => {
-          event.preventDefault();
-        }}
-      >
+      <form className="mt-9" onSubmit={handleSignIn} noValidate>
         <div className="flex flex-col gap-4">
           <AuthField
             id="sign-in-email"
@@ -29,6 +67,7 @@ export function SignInForm() {
             type="email"
             autoComplete="email"
             placeholder="Enter email address"
+            required
           />
           <AuthField
             id="sign-in-password"
@@ -37,6 +76,7 @@ export function SignInForm() {
             type="password"
             autoComplete="current-password"
             placeholder="Enter password"
+            required
           />
         </div>
 
@@ -44,9 +84,16 @@ export function SignInForm() {
           type="submit"
           size="lg"
           className="mt-6 h-12 w-full rounded-lg text-base shadow-sm shadow-primary/20"
+          disabled={isSubmitting}
         >
-          Continue with email
+          {isSubmitting ? "Signing in..." : "Continue with email"}
         </Button>
+
+        {error && (
+          <p role="alert" className="mt-3 text-sm text-destructive">
+            {error}
+          </p>
+        )}
 
         <div className="mt-3">
           <GoogleButton />

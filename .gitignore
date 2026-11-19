@@ -1,4 +1,16 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+/src/lib/authorization.ts
+/src/lib/mongodb.ts
+/src/lib/redirects.ts
+/src/lib/users.ts
+/src/lib/utils.ts
+/src/lib/format.ts
+/src/lib/vendor-applications.ts
+/src/lib/vendor-validation.ts
+/src/components/vendor
+/src/app/dashboard/customer.*
+/src/app/dashboard/vendor.*
+
 
 # dependencies
 /node_modules
