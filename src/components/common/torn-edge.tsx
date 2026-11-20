@@ -12,7 +12,7 @@ export function BrushEdge({ className }: BrushEdgeProps) {
       aria-hidden="true"
     >
       <path
-        fill="#ff9d3d"
+        fill="var(--ember-soft)"
         d="
           M0 96
           L30 94 48 91 65 85 78 76 91 78
@@ -49,7 +49,7 @@ export function BrushEdge({ className }: BrushEdgeProps) {
       />
 
       {/* Paint splashes */}
-      <g fill="#ff9d3d">
+      <g fill="var(--ember-soft)">
         <path d="M0 88 Q12 78 19 87 L13 96 Z" />
         <path d="M70 54 L84 51 L79 57 Z" />
         <path d="M131 10 Q146 4 171 10 L160 16 L139 15 Z" />
@@ -67,7 +67,7 @@ export function BrushEdge({ className }: BrushEdgeProps) {
       </g>
 
       {/* Thin brush marks */}
-      <g fill="none" stroke="#ff9d3d" strokeWidth="3" strokeLinecap="round">
+      <g fill="none" stroke="var(--ember-soft)" strokeWidth="3" strokeLinecap="round">
         <path d="M140 70 L148 29" />
         <path d="M283 69 L277 25" />
         <path d="M1210 65 L1219 23" />

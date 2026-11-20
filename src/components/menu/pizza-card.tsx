@@ -24,14 +24,14 @@ export function PizzaCard({
   return (
     <Card
       className={cn(
-        "group h-full gap-0 overflow-hidden [--card-spacing:0px] transition-shadow duration-300 hover:shadow-lg",
+        "group h-full gap-0 overflow-hidden [--card-spacing:0px] transition duration-300 ease-out hover:ring-primary/25 hover:shadow-xl hover:shadow-foreground/5 motion-safe:hover:-translate-y-1",
         className,
       )}
     >
       <div className="relative aspect-[5/4] overflow-hidden bg-secondary/60">
         <PizzaArt
           variant={pizza.art}
-          className="transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+          className="transition-transform duration-500 ease-out motion-safe:group-hover:scale-[1.04]"
         />
       </div>
 

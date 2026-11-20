@@ -126,7 +126,7 @@ export default async function VendorDashboardPage() {
           value="Active"
           hint="Visible to customers"
           icon={<BadgeCheck aria-hidden />}
-          accent="sky"
+          accent="neutral"
         />
       </div>
 

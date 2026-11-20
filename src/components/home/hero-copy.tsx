@@ -82,7 +82,7 @@ export function HeroCopy() {
         initial={hidden(22)}
         animate={show}
         transition={{ duration: 0.9, delay: 0.24, ease: EASE }}
-        className="mt-6 max-w-xl rounded-xl  px-4 py-2 text-[15px] leading-relaxed text-pretty bg-[#fff8ed]/40text-foreground dark:bg-[#07080a]/40 dark:text-white font-semibold [text-shadow:0_2px_8px_rgba(0,0,0,0.9)] backdrop-blur-sm sm:mt-7 sm:text-[17px]"
+        className="mt-6 max-w-xl rounded-xl px-4 py-2 text-[15px] leading-relaxed text-pretty text-foreground font-semibold [text-shadow:0_2px_8px_rgba(0,0,0,0.9)] backdrop-blur-sm dark:text-white sm:mt-7 sm:text-[17px]"
       >
         Discover the ultimate pizza experience with SliceStack. Explore
         delicious pies from top kitchens near you, pick your favourite flavours,

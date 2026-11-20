@@ -68,7 +68,7 @@ export default async function AdminDashboardPage() {
           value={counts.customers}
           hint="Default platform role"
           icon={<ShieldCheck aria-hidden />}
-          accent="sky"
+          accent="neutral"
         />
         <StatCard
           label="Vendors"

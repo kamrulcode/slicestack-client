@@ -1,4 +1,5 @@
 import { BrushEdge } from "../common/torn-edge";
+import { RevealGroup, RevealItem } from "../common/reveal";
 
 const features = [
   {
@@ -24,7 +25,7 @@ const features = [
 function FeatureIcon({ type }: { type: string }) {
   const common = {
     fill: "none",
-    stroke: "#121619",
+    stroke: "currentColor",
     strokeWidth: 2.2,
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
@@ -116,15 +117,15 @@ function FeatureIcon({ type }: { type: string }) {
 
 export default function FeaturesSection() {
   return (
-    <section className="relative w-full bg-[#FD9D3E] px-4 pt-12 pb-16 text-[#121619] sm:px-6 sm:pt-14">
+    <section className="relative w-full bg-ember-soft px-4 pt-12 pb-16 text-brand-ink sm:px-6 sm:pt-14">
       <BrushEdge
-        className="text-[#ff9d3d] -top-20 absolute
-      z-100"
+        className="text-ember-soft -top-20 absolute
+      z-30"
       />
 
-      <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-6 md:gap-10">
+      <RevealGroup className="mx-auto grid max-w-5xl grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-6 md:gap-10">
         {features.map((feature) => (
-          <div
+          <RevealItem
             key={feature.title}
             className="flex flex-col items-center text-center"
           >
@@ -134,17 +135,17 @@ export default function FeaturesSection() {
             </div>
 
             {/* Heading */}
-            <h3 className="mt-4 font-heading text-[1.375rem] font-bold uppercase tracking-tight text-[#121619] sm:text-[1.625rem]">
+            <h3 className="mt-4 font-heading text-[1.375rem] font-bold uppercase tracking-tight sm:text-[1.625rem]">
               {feature.title}
             </h3>
 
             {/* Description */}
-            <p className="mt-2 max-w-[19rem] text-[13px] leading-[1.8] text-[#121619] sm:text-sm">
+            <p className="mt-2 max-w-[19rem] text-[13px] leading-[1.8] sm:text-sm">
               {feature.description}
             </p>
-          </div>
+          </RevealItem>
         ))}
-      </div>
+      </RevealGroup>
     </section>
   );
 }

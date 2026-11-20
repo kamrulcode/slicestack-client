@@ -9,7 +9,7 @@ import { HeroPizza } from "@/components/home/hero-pizza";
  */
 export function Hero() {
   return (
-    <section className="relative overflow-hidden bg-[#fff8ed] text-foreground dark:bg-[#07080a] dark:text-white">
+    <section className="relative overflow-hidden bg-background text-foreground">
       <HeroAtmosphere />
       <HeroFloaters />
 
@@ -23,7 +23,7 @@ export function Hero() {
 
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-24 bg-linear-to-t from-[#fff8ed] via-[#fff8ed]/60 to-transparent dark:from-[#07080a] dark:via-[#07080a]/60"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-24 bg-linear-to-t from-background via-background/60 to-transparent"
       />
     </section>
   );

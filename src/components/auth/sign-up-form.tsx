@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   CheckCircle2,
+  Eye,
+  EyeClosed,
   Loader2,
   Store,
   UserRound,
@@ -29,7 +31,7 @@ export type SignUpMode = "customer" | "vendor";
 type SignUpErrors = {
   name?: string;
   email?: string;
-  password?: string;
+  password?: string[];
 };
 
 const MODES = [
@@ -62,15 +64,15 @@ function validateEmail(value: string) {
 }
 
 function validatePassword(value: string) {
-  if (value.length < 8) return "Password must be at least 8 characters.";
-  if (value.length > 72) return "Password must be 72 characters or fewer.";
+  const errors: string[] = [];
+  if (value.length < 6) errors.push("Password must be at least 6 characters.");
   if (!/[A-Z]/.test(value)) {
-    return "Password must contain at least one uppercase letter.";
+    errors.push("Password must contain at least one uppercase letter.");
   }
-  if (!/[0-9]/.test(value)) {
-    return "Password must contain at least one number.";
+  if (!/[a-z]/.test(value)) {
+    errors.push("Password must contain at least one lowercase letter.");
   }
-  return undefined;
+  return errors;
 }
 
 export function SignUpForm({
@@ -78,6 +80,7 @@ export function SignUpForm({
 }: {
   defaultMode?: SignUpMode;
 }) {
+  const [isVisible, setIsVisible] = useState(false);
   const router = useRouter();
   const [mode, setMode] = useState<SignUpMode>(defaultMode);
   const [errors, setErrors] = useState<SignUpErrors>({});
@@ -113,13 +116,14 @@ export function SignUpForm({
     const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
+    const passwordErrors = validatePassword(password);
 
     const nextErrors: SignUpErrors = vendorAccountCreated
       ? {}
       : {
           name: validateName(name),
           email: validateEmail(email),
-          password: validatePassword(password),
+          password: passwordErrors.length > 0 ? passwordErrors : undefined,
         };
 
     const vendorValues = readVendorDetails(formData);
@@ -238,9 +242,7 @@ export function SignUpForm({
         <h2 className="mt-5 font-heading text-[2.25rem] leading-tight font-bold tracking-tight text-foreground">
           Your shop is live
         </h2>
-        <p className="mt-3 text-base text-muted-foreground">
-          {successMessage}
-        </p>
+        <p className="mt-3 text-base text-muted-foreground">{successMessage}</p>
         <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" aria-hidden />
           Opening your vendor dashboard...
@@ -385,41 +387,49 @@ export function SignUpForm({
               {errors.email}
             </p>
           )}
-
           <AuthField
             id="sign-up-password"
             name="password"
             label="Password"
-            type="password"
+            type={isVisible ? "text" : "password"}
             autoComplete="new-password"
             placeholder="Enter password"
             required
-            minLength={8}
-            maxLength={72}
+            minLength={6}
             disabled={vendorAccountCreated}
-            validate={(value) => {
-              if (value.length < 8) {
-                return "Password must be at least 8 characters";
-              }
-              if (!/[A-Z]/.test(value)) {
-                return "Password must contain at least one uppercase letter";
-              }
-              if (!/[0-9]/.test(value)) {
-                return "Password must contain at least one number";
-              }
-              return null;
-            }}
-            aria-invalid={Boolean(errors.password)}
+            aria-invalid={Boolean(errors.password?.length)}
             aria-describedby={
-              errors.password
+              errors.password?.length
                 ? "sign-up-password-error"
                 : "sign-up-password-hint"
             }
+            endAdornment={
+              <Button
+                type="button"
+                aria-label={isVisible ? "Hide password" : "Show password"}
+                aria-pressed={isVisible}
+                aria-controls="sign-up-password"
+                size="icon"
+                variant="ghost"
+                className="size-9 sm:size-10"
+                onClick={() => setIsVisible((visible) => !visible)}
+              >
+                {isVisible ? (
+                  <EyeClosed className="size-4" aria-hidden />
+                ) : (
+                  <Eye className="size-4" aria-hidden />
+                )}
+              </Button>
+            }
             onChange={(event) => {
               if (hasSubmitted && !vendorAccountCreated) {
+                const passwordErrors = validatePassword(
+                  event.currentTarget.value,
+                );
                 setErrors((current) => ({
                   ...current,
-                  password: validatePassword(event.currentTarget.value),
+                  password:
+                    passwordErrors.length > 0 ? passwordErrors : undefined,
                 }));
               }
             }}
@@ -428,15 +438,18 @@ export function SignUpForm({
             id="sign-up-password-hint"
             className="-mt-2 text-sm text-muted-foreground"
           >
-            Use 8–72 characters, with one uppercase letter and one number.
+            Use at least 6 characters, with at least one uppercase and one
+            lowercase letter.
           </p>
           {errors.password && (
-            <p
+            <div
               id="sign-up-password-error"
-              className="-mt-2 text-sm text-destructive"
+              className="-mt-2 space-y-1 text-sm text-destructive"
             >
-              {errors.password}
-            </p>
+              {errors.password.map((error) => (
+                <p key={error}>{error}</p>
+              ))}
+            </div>
           )}
 
           <AuthField

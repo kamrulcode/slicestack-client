@@ -107,7 +107,7 @@ export function DashboardShell({
   }
 
   const sidebar = (
-    <div className="flex h-full flex-col bg-[#121619] px-4 py-6 text-white">
+    <div className="flex h-full flex-col bg-brand-ink px-4 py-6 text-white">
       <div className="px-2">
         <Logo size="sm" className="text-white" />
         <p className="mt-3 text-[11px] font-semibold tracking-[0.18em] text-white/40 uppercase">

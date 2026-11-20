@@ -1,10 +1,16 @@
-import { useEffect, useState, type ComponentProps } from "react";
+import {
+  useEffect,
+  useState,
+  type ComponentProps,
+  type ReactNode,
+} from "react";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
 type AuthFieldProps = ComponentProps<typeof Input> & {
+  endAdornment?: ReactNode;
   label: string;
   validate?: (value: string) => string | null;
 };
@@ -13,6 +19,7 @@ export function AuthField({
   label,
   id,
   className,
+  endAdornment,
   type,
   validate,
   onChange,
@@ -44,11 +51,11 @@ export function AuthField({
           }
         >
           <div
-            className={
-              type === "file"
-                ? "relative inline-flex h-12 items-center rounded-lg border border-input bg-card px-4 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50"
-                : undefined
-            }
+            className={cn(
+              type === "file" &&
+                "relative inline-flex h-12 items-center rounded-lg border border-input bg-card px-4 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
+              endAdornment && "relative",
+            )}
           >
             {type === "file" && (
               <span className="shrink-0 text-base text-foreground">
@@ -62,6 +69,7 @@ export function AuthField({
                 type === "file"
                   ? "absolute inset-0 h-full w-full cursor-pointer opacity-0"
                   : "h-12 rounded-lg border-input bg-card px-4 text-base shadow-none placeholder:text-muted-foreground/60 md:text-base",
+                endAdornment && "pr-12",
                 className,
               )}
               {...props}
@@ -83,6 +91,11 @@ export function AuthField({
                 onChange?.(event);
               }}
             />
+            {endAdornment && (
+              <div className="absolute inset-y-0 right-1 flex items-center">
+                {endAdornment}
+              </div>
+            )}
           </div>
           {type === "file" && selectedFile && (
             <span className="min-w-0 truncate text-sm text-muted-foreground">

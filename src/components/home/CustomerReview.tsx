@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Quote, Star } from "lucide-react";
 import { SectionHeading } from "@/components/common/section-heading";
+import { Reveal } from "@/components/common/reveal";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Carousel,
@@ -84,13 +85,15 @@ export default function CustomerReviews() {
       className="scroll-mt-24 border-t border-border/60 bg-secondary/30"
     >
       <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <SectionHeading
-          title="What our guests are saying"
-          description="Real notes from real pizza nights — no paid reviews, just regulars."
-          align="center"
-        />
+        <Reveal>
+          <SectionHeading
+            title="What our guests are saying"
+            description="Real notes from real pizza nights — no paid reviews, just regulars."
+            align="center"
+          />
+        </Reveal>
 
-        <div className="mx-auto mt-10 max-w-3xl">
+        <Reveal className="mx-auto mt-10 max-w-3xl" delay={0.1}>
           <Carousel setApi={setApi} opts={{ loop: true }} className="w-full">
             <CarouselContent>
               {reviews.map((review) => (
@@ -180,7 +183,7 @@ export default function CustomerReviews() {
               />
             </div>
           </Carousel>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

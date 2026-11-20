@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, MapPin, Sparkles } from "lucide-react";
 import { PizzaArt } from "@/components/brand/pizza-art";
+import { Reveal } from "@/components/common/reveal";
 import { AddToOrderButton } from "@/components/menu/add-to-order-button";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -50,17 +51,19 @@ export default async function PizzaPage({ params }: PageProps<"/menu/[slug]">) {
       </Link>
 
       <div className="mt-6 grid items-center gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
-        <div className="relative overflow-hidden rounded-3xl border bg-secondary/40 shadow-sm">
-          <PizzaArt variant={pizza.art} className="aspect-[5/4]" />
-          <Badge
-            variant="secondary"
-            className="absolute top-4 left-4 shadow-sm backdrop-blur"
-          >
-            {getCategoryName(pizza.categoryId)}
-          </Badge>
-        </div>
+        <Reveal y={20}>
+          <div className="relative overflow-hidden rounded-3xl border bg-secondary/40 shadow-sm">
+            <PizzaArt variant={pizza.art} className="aspect-[5/4]" />
+            <Badge
+              variant="secondary"
+              className="absolute top-4 left-4 shadow-sm backdrop-blur"
+            >
+              {getCategoryName(pizza.categoryId)}
+            </Badge>
+          </div>
+        </Reveal>
 
-        <div className="flex flex-col">
+        <Reveal className="flex flex-col" delay={0.1}>
           <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase sm:text-[13px]">
             {getCategoryName(pizza.categoryId)}
           </p>
@@ -108,7 +111,7 @@ export default async function PizzaPage({ params }: PageProps<"/menu/[slug]">) {
               Made with fresh, locally sourced ingredients
             </p>
           </div>
-        </div>
+        </Reveal>
       </div>
     </div>
   );

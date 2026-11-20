@@ -34,7 +34,7 @@ export function HeroAtmosphere() {
       aria-hidden
       className="pointer-events-none absolute inset-0 overflow-hidden"
     >
-      <div className="absolute inset-0 bg-[#fff8ed] dark:bg-[#07080a]" />
+      <div className="absolute inset-0 bg-background" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_45%_at_50%_12%,rgba(255,64,76,0.1),transparent_70%)] dark:bg-[radial-gradient(ellipse_65%_45%_at_50%_12%,rgba(255,64,76,0.18),transparent_70%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_48%_at_50%_82%,rgba(255,122,26,0.18),transparent_72%)] dark:bg-[radial-gradient(ellipse_55%_48%_at_50%_82%,rgba(255,122,26,0.32),transparent_72%)]" />
       <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,248,237,0.25),transparent_28%,transparent_62%,rgba(255,248,237,0.82))] dark:bg-[linear-gradient(to_bottom,rgba(7,8,10,0.35),transparent_28%,transparent_62%,rgba(7,8,10,0.9))]" />

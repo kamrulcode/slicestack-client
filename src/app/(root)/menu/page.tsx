@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionHeading } from "@/components/common/section-heading";
+import { Reveal } from "@/components/common/reveal";
 import { buttonVariants } from "@/components/ui/button";
 import {
   getPizzasByCategory,
@@ -25,7 +26,7 @@ export default function MenuPage() {
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
-      <div className="max-w-2xl">
+      <Reveal className="max-w-2xl">
         <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase sm:text-[13px]">
           Browse menu
         </p>
@@ -36,9 +37,9 @@ export default function MenuPage() {
           Hand-tossed dough, fresh toppings and a stone-baked finish. Pick a
           category or scroll the whole menu.
         </p>
-      </div>
+      </Reveal>
 
-      <div className="mt-8 flex flex-wrap gap-2">
+      <Reveal className="mt-8 flex flex-wrap gap-2" delay={0.08}>
         {groups.map(({ category }) => (
           <Link
             key={category.id}
@@ -52,16 +53,18 @@ export default function MenuPage() {
             {category.name}
           </Link>
         ))}
-      </div>
+      </Reveal>
 
       <div className="mt-14 space-y-16">
         {groups.map(({ category }) => (
-          <section key={category.id} id={category.id} className="scroll-mt-24">
-            <SectionHeading
-              title={category.name}
-              description={category.blurb}
-            />
-          </section>
+          <Reveal key={category.id}>
+            <section id={category.id} className="scroll-mt-24">
+              <SectionHeading
+                title={category.name}
+                description={category.blurb}
+              />
+            </section>
+          </Reveal>
         ))}
       </div>
     </div>

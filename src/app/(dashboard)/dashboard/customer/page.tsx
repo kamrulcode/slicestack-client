@@ -58,7 +58,7 @@ export default async function CustomerDashboardPage() {
           value={0}
           hint="Add delivery addresses soon"
           icon={<MapPin aria-hidden />}
-          accent="sky"
+          accent="neutral"
         />
         <StatCard
           label="Vendor account"
