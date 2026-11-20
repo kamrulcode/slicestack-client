@@ -30,3 +30,18 @@ export interface Pizza {
   art: PizzaArtVariant;
   description: string;
 }
+
+export interface VendorMenuItemRecord {
+  _id: string;
+  itemName: string;
+  category: string;
+  description: string;
+  price: number;
+  location?: string;
+  images?: string[] | null;
+  status?: string;
+  isAvailable?: boolean;
+  logoUrl?: string | null;
+  shopName?: string;
+  ownerId: string;
+}
