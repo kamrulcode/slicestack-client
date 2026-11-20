@@ -1,6 +1,5 @@
 export const VENDOR_LIMITS = {
   shopName: { min: 2, max: 100 },
-  ownerName: { min: 2, max: 100 },
   phone: { min: 7, max: 20 },
   address: { min: 10, max: 300 },
   description: { min: 20, max: 1000 },
@@ -9,7 +8,6 @@ export const VENDOR_LIMITS = {
 
 export type VendorField =
   | "shopName"
-  | "ownerName"
   | "phone"
   | "address"
   | "description"
@@ -17,34 +15,36 @@ export type VendorField =
 
 export type VendorFieldErrors = Partial<Record<VendorField, string>>;
 
-export type VendorFormValues = {
+/**
+ * Vendor fields collected at signup. The owner name is intentionally absent:
+ * the server resolves it from the authenticated Better Auth account.
+ */
+export type VendorDetailsValues = {
   shopName: string;
-  ownerName: string;
   phone: string;
   address: string;
   description: string;
   logoUrl: string;
 };
 
-/** Shape returned by the vendor application server action. */
-export type VendorFormState = {
+/** Payload accepted by the secure vendor activation server action. */
+export type VendorActivationInput = {
+  shopName: string;
+  phone: string;
+  address: string;
+  description: string;
+  logoUrl?: string | null;
+};
+
+export type VendorActivationResult = {
   ok: boolean;
   message: string;
-  errors: VendorFieldErrors;
-  /** Echoed back so a failed submission does not wipe the form. */
-  values?: VendorFormValues;
+  errors?: VendorFieldErrors;
 };
 
-export const EMPTY_VENDOR_FORM_STATE: VendorFormState = {
-  ok: false,
-  message: "",
-  errors: {},
-};
-
-export function readVendorForm(formData: FormData): VendorFormValues {
+export function readVendorDetails(formData: FormData): VendorDetailsValues {
   return {
     shopName: String(formData.get("shopName") ?? "").trim(),
-    ownerName: String(formData.get("ownerName") ?? "").trim(),
     phone: String(formData.get("phone") ?? "").trim(),
     address: String(formData.get("address") ?? "").trim(),
     description: String(formData.get("description") ?? "").trim(),
@@ -52,8 +52,12 @@ export function readVendorForm(formData: FormData): VendorFormValues {
   };
 }
 
-export function validateVendorApplication(
-  values: VendorFormValues,
+/**
+ * Validate the shop fields shared by signup and onboarding. Called on the
+ * client for fast feedback and again in the server action before any write.
+ */
+export function validateVendorDetails(
+  values: VendorDetailsValues,
 ): VendorFieldErrors {
   const errors: VendorFieldErrors = {};
 
@@ -61,12 +65,6 @@ export function validateVendorApplication(
     errors.shopName = "Shop name must be at least 2 characters.";
   } else if (values.shopName.length > VENDOR_LIMITS.shopName.max) {
     errors.shopName = "Shop name must be 100 characters or fewer.";
-  }
-
-  if (values.ownerName.length < VENDOR_LIMITS.ownerName.min) {
-    errors.ownerName = "Owner name must be at least 2 characters.";
-  } else if (values.ownerName.length > VENDOR_LIMITS.ownerName.max) {
-    errors.ownerName = "Owner name must be 100 characters or fewer.";
   }
 
   if (!/^[+]?[\d\s()-]{7,20}$/.test(values.phone)) {

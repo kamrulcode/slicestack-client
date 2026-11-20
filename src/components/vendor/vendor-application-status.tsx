@@ -36,8 +36,8 @@ export function VendorApplicationStatusCard({
             Sell on SliceStack
           </CardTitle>
           <CardDescription>
-            Apply to open your own pizza shop. Our team reviews every
-            application before vendor tools are unlocked.
+            Open your own pizza shop in minutes. Vendor accounts are activated
+            instantly — there is no approval queue.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -45,7 +45,7 @@ export function VendorApplicationStatusCard({
             href="/register-as-a-vendor"
             className={buttonVariants({ size: "sm" })}
           >
-            Apply as a vendor
+            Open your shop
             <ArrowRight className="size-3.5" aria-hidden />
           </Link>
         </CardContent>
@@ -66,11 +66,20 @@ export function VendorApplicationStatusCard({
       </CardHeader>
       <CardContent className="flex flex-col gap-4 text-sm">
         {application.status === "PENDING" && (
-          <p className="flex items-start gap-2 text-muted-foreground">
-            <Clock className="mt-0.5 size-4 shrink-0" aria-hidden />
-            Your vendor application is under review. We will notify you when a
-            decision is made.
-          </p>
+          <>
+            <p className="flex items-start gap-2 text-muted-foreground">
+              <Clock className="mt-0.5 size-4 shrink-0" aria-hidden />
+              Your vendor profile is ready to activate. Confirm your shop
+              details to unlock the vendor dashboard immediately.
+            </p>
+            <Link
+              href="/register-as-a-vendor"
+              className={buttonVariants({ size: "sm" })}
+            >
+              Finish vendor setup
+              <ArrowRight className="size-3.5" aria-hidden />
+            </Link>
+          </>
         )}
 
         {application.status === "APPROVED" && (
@@ -93,8 +102,8 @@ export function VendorApplicationStatusCard({
           <>
             <p className="text-muted-foreground">
               {application.rejectionReason
-                ? `Reason: ${application.rejectionReason}`
-                : "Your application was not approved. You can update the details and resubmit it."}
+                ? `Previous review note: ${application.rejectionReason}. You can now set up your shop instantly.`
+                : "Your previous application was not approved. You can now set up your shop instantly."}
             </p>
             {application.reviewedAt ? (
               <p className="text-xs text-muted-foreground">
@@ -105,7 +114,7 @@ export function VendorApplicationStatusCard({
               href="/register-as-a-vendor"
               className={buttonVariants({ size: "sm", variant: "outline" })}
             >
-              Update and resubmit
+              Open your shop
             </Link>
           </>
         )}

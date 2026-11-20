@@ -31,7 +31,7 @@ export default async function CustomerDashboardPage() {
   return (
     <DashboardPage
       title={`Welcome back, ${user.name.split(" ")[0]}`}
-      description="Track your orders, manage your profile and follow your vendor application."
+      description="Track your orders, manage your profile and open your own shop."
       actions={
         <Link href="/menu" className={buttonVariants()}>
           <UtensilsCrossed className="size-4" aria-hidden />
@@ -61,11 +61,11 @@ export default async function CustomerDashboardPage() {
           accent="sky"
         />
         <StatCard
-          label="Vendor application"
+          label="Vendor account"
           value={
-            application ? VENDOR_STATUS_LABEL[application.status] : "Not started"
+            application ? VENDOR_STATUS_LABEL[application.status] : "Not active"
           }
-          hint={application ? application.shopName : "Sell your own pizza"}
+          hint={application ? application.shopName : "Open your own shop"}
           icon={<Store aria-hidden />}
           accent={application?.status === "APPROVED" ? "emerald" : "primary"}
         />
@@ -112,10 +112,10 @@ export default async function CustomerDashboardPage() {
             },
             {
               href: "/register-as-a-vendor",
-              title: application ? "Vendor status" : "Become a vendor",
+              title: application ? "Vendor status" : "Open a shop",
               description: application
-                ? "Follow your application review."
-                : "Apply to open your own shop.",
+                ? "Review your vendor account status."
+                : "Activate your vendor account instantly.",
               icon: <Store aria-hidden />,
             },
           ]}

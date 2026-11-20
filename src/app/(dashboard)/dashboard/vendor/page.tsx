@@ -58,7 +58,7 @@ export default async function VendorDashboardPage() {
     return (
       <DashboardPage
         title="Vendor dashboard"
-        description="Your shop tools unlock once your application is approved and active."
+        description="Your shop tools unlock once your vendor profile and shop are active."
       >
         <EmptyState
           icon={suspended ? <ShieldAlert aria-hidden /> : <Store aria-hidden />}
@@ -68,14 +68,14 @@ export default async function VendorDashboardPage() {
           description={
             suspended
               ? "Your shop is temporarily suspended, so menu, order and profile tools are locked. Contact the SliceStack team if you believe this is a mistake."
-              : "Your vendor application is under review. We will notify you when a decision is made."
+              : "Your vendor profile is not active yet. Finish your shop setup from the account you registered with, or contact support if you need help."
           }
           action={
             <Link
-              href="/dashboard/customer"
+              href="/menu"
               className={buttonVariants({ size: "sm", variant: "outline" })}
             >
-              Back to customer dashboard
+              Browse the menu
             </Link>
           }
         />

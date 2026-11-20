@@ -3,17 +3,49 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Loader2,
+  Store,
+  UserRound,
+} from "lucide-react";
+import { activateVendorAccountAction } from "@/app/(auth)/sign-up/actions";
 import { AuthField } from "@/components/auth/auth-field";
 import { GoogleButton } from "@/components/auth/google-button";
-import { Button } from "@/components/ui/button";
+import { VendorDetailsFields } from "@/components/vendor/vendor-details-fields";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { uploadImage } from "@/config/imgbb";
 import { authClient } from "@/lib/auth-client";
+import { cn } from "@/lib/utils";
+import {
+  readVendorDetails,
+  validateVendorDetails,
+  type VendorFieldErrors,
+} from "@/lib/vendor-validation";
+
+export type SignUpMode = "customer" | "vendor";
 
 type SignUpErrors = {
   name?: string;
   email?: string;
   password?: string;
 };
+
+const MODES = [
+  {
+    value: "customer",
+    label: "Customer",
+    hint: "Order pizza",
+    icon: UserRound,
+  },
+  {
+    value: "vendor",
+    label: "Vendor",
+    hint: "Sell your pizza",
+    icon: Store,
+  },
+] as const;
 
 function validateName(value: string) {
   const name = value.trim();
@@ -41,58 +73,151 @@ function validatePassword(value: string) {
   return undefined;
 }
 
-export function SignUpForm() {
+export function SignUpForm({
+  defaultMode = "customer",
+}: {
+  defaultMode?: SignUpMode;
+}) {
   const router = useRouter();
+  const [mode, setMode] = useState<SignUpMode>(defaultMode);
   const [errors, setErrors] = useState<SignUpErrors>({});
+  const [vendorErrors, setVendorErrors] = useState<VendorFieldErrors>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const [submissionError, setSubmissionError] = useState<string>();
+  const [successMessage, setSuccessMessage] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  // A vendor account exists as soon as Better Auth creates it. If shop
+  // activation fails (for example a network drop), we keep this flag so the
+  // retry only re-runs the secure activation step.
+  const [vendorAccountCreated, setVendorAccountCreated] = useState(false);
 
-  const handleSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const isVendor = mode === "vendor";
+  const isBusy = isSubmitting || isUploadingLogo;
 
-    const formData = new FormData(e.currentTarget);
-    const name = String(formData.get("name") ?? "");
+  function switchMode(next: SignUpMode) {
+    if (next === mode || vendorAccountCreated) return;
+
+    setMode(next);
+    setErrors({});
+    setVendorErrors({});
+    setSubmissionError(undefined);
+    setHasSubmitted(false);
+  }
+
+  const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (isBusy) return;
+
+    const formData = new FormData(event.currentTarget);
+    const name = String(formData.get("name") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
 
-    const nextErrors = {
-      name: validateName(name),
-      email: validateEmail(email),
-      password: validatePassword(password),
-    };
+    const nextErrors: SignUpErrors = vendorAccountCreated
+      ? {}
+      : {
+          name: validateName(name),
+          email: validateEmail(email),
+          password: validatePassword(password),
+        };
+
+    const vendorValues = readVendorDetails(formData);
+    const nextVendorErrors: VendorFieldErrors = isVendor
+      ? validateVendorDetails(vendorValues)
+      : {};
 
     setHasSubmitted(true);
     setErrors(nextErrors);
+    setVendorErrors(nextVendorErrors);
     setSubmissionError(undefined);
 
-    if (Object.values(nextErrors).some(Boolean)) return;
+    if (
+      Object.values(nextErrors).some(Boolean) ||
+      Object.keys(nextVendorErrors).length > 0
+    ) {
+      return;
+    }
 
-    const imageFile = formData.get("image");
+    if (isVendor && isUploadingLogo) {
+      setSubmissionError("Please wait for the shop logo to finish uploading.");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
-      const imageUrl =
-        imageFile instanceof File && imageFile.size > 0
-          ? await uploadImage(imageFile)
-          : undefined;
+      if (!isVendor) {
+        const imageFile = formData.get("image");
+        const imageUrl =
+          imageFile instanceof File && imageFile.size > 0
+            ? await uploadImage(imageFile)
+            : undefined;
 
-      const { error } = await authClient.signUp.email({
-        name,
-        email,
-        password,
-        ...(imageUrl ? { image: imageUrl } : {}),
-        callbackURL: "/dashboard",
-      });
+        const { error } = await authClient.signUp.email({
+          name,
+          email,
+          password,
+          ...(imageUrl ? { image: imageUrl } : {}),
+          callbackURL: "/dashboard",
+        });
 
-      if (error) {
-        setSubmissionError(error.message || "Unable to create your account.");
+        if (error) {
+          setSubmissionError(error.message || "Unable to create your account.");
+          return;
+        }
+
+        // The /dashboard dispatcher reads the new user's role on the server.
+        router.replace("/dashboard");
+        router.refresh();
         return;
       }
 
-      // The /dashboard dispatcher reads the new user's role on the server.
-      router.replace("/dashboard");
-      router.refresh();
+      if (!vendorAccountCreated) {
+        const imageFile = formData.get("image");
+        const imageUrl =
+          imageFile instanceof File && imageFile.size > 0
+            ? await uploadImage(imageFile)
+            : undefined;
+
+        // Better Auth creates the account with its default `customer` role and
+        // signs the browser in. The role is raised to `vendor` only by the
+        // server action below, after the shop data is validated and saved.
+        const { error } = await authClient.signUp.email({
+          name,
+          email,
+          password,
+          ...(imageUrl ? { image: imageUrl } : {}),
+          callbackURL: "/dashboard/vendor",
+        });
+
+        if (error) {
+          setSubmissionError(error.message || "Unable to create your account.");
+          return;
+        }
+
+        setVendorAccountCreated(true);
+      }
+
+      const result = await activateVendorAccountAction({
+        shopName: vendorValues.shopName,
+        phone: vendorValues.phone,
+        address: vendorValues.address,
+        description: vendorValues.description,
+        logoUrl: vendorValues.logoUrl || null,
+      });
+
+      if (!result.ok) {
+        setVendorErrors(result.errors ?? {});
+        setSubmissionError(result.message);
+        return;
+      }
+
+      setSuccessMessage(result.message);
+      // Give the confirmation a beat, then open the vendor workspace.
+      window.setTimeout(() => {
+        router.replace("/dashboard/vendor");
+        router.refresh();
+      }, 800);
     } catch (error) {
       setSubmissionError(
         error instanceof Error
@@ -104,16 +229,97 @@ export function SignUpForm() {
     }
   };
 
+  if (successMessage) {
+    return (
+      <div>
+        <div className="flex size-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
+          <CheckCircle2 className="size-6" aria-hidden />
+        </div>
+        <h2 className="mt-5 font-heading text-[2.25rem] leading-tight font-bold tracking-tight text-foreground">
+          Your shop is live
+        </h2>
+        <p className="mt-3 text-base text-muted-foreground">
+          {successMessage}
+        </p>
+        <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" aria-hidden />
+          Opening your vendor dashboard...
+        </p>
+        <Link
+          href="/dashboard/vendor"
+          className={cn(buttonVariants(), "mt-6 h-12")}
+        >
+          Go to vendor dashboard
+          <ArrowRight className="size-4" aria-hidden />
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <h2 className="font-heading text-[2.25rem] leading-tight font-bold tracking-tight text-foreground sm:text-[2.75rem]">
-        Create your account
+      <div
+        role="group"
+        aria-label="Choose account type"
+        className="grid grid-cols-2 gap-1.5 rounded-2xl border border-border bg-card p-1.5 shadow-sm"
+      >
+        {MODES.map(({ value, label, hint, icon: Icon }) => {
+          const active = mode === value;
+
+          return (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={active}
+              disabled={vendorAccountCreated}
+              onClick={() => switchMode(value)}
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-2.5 transition-all duration-200 outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                active
+                  ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                vendorAccountCreated && "cursor-not-allowed opacity-60",
+              )}
+            >
+              <span className="flex items-center gap-2 text-sm font-semibold">
+                <Icon className="size-4" aria-hidden />
+                {label}
+              </span>
+              <span
+                className={cn(
+                  "text-[11px]",
+                  active
+                    ? "text-primary-foreground/80"
+                    : "text-muted-foreground/80",
+                )}
+              >
+                {hint}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <h2 className="mt-6 font-heading text-[2.25rem] leading-tight font-bold tracking-tight text-foreground sm:text-[2.75rem]">
+        {isVendor ? "Open your pizza shop" : "Create your account"}
       </h2>
       <p className="mt-3 text-base text-muted-foreground">
-        Join the SliceStack community.
+        {isVendor
+          ? "Set up your shop and start selling on SliceStack. No approval queue — your workspace unlocks instantly."
+          : "Join the SliceStack community and get your next pizza sorted."}
       </p>
 
-      <form className="mt-8" onSubmit={handleSignUp} noValidate>
+      {vendorAccountCreated && (
+        <div className="mt-5 rounded-lg border border-amber-300/60 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+          <p className="font-semibold">Your account was created</p>
+          <p className="mt-1">
+            We just need to finish your shop setup. Fix any highlighted fields
+            and press &ldquo;Retry shop setup&rdquo;.
+          </p>
+        </div>
+      )}
+
+      <form className="mt-6" onSubmit={handleSignUp} noValidate>
         <div className="flex flex-col gap-3.5">
           <AuthField
             id="sign-up-name"
@@ -124,10 +330,11 @@ export function SignUpForm() {
             required
             minLength={2}
             maxLength={100}
+            disabled={vendorAccountCreated}
             aria-invalid={Boolean(errors.name)}
             aria-describedby={errors.name ? "sign-up-name-error" : undefined}
             onChange={(event) => {
-              if (hasSubmitted) {
+              if (hasSubmitted && !vendorAccountCreated) {
                 setErrors((current) => ({
                   ...current,
                   name: validateName(event.currentTarget.value),
@@ -143,6 +350,7 @@ export function SignUpForm() {
               {errors.name}
             </p>
           )}
+
           <AuthField
             id="sign-up-email"
             name="email"
@@ -151,6 +359,7 @@ export function SignUpForm() {
             autoComplete="email"
             placeholder="Enter email address"
             required
+            disabled={vendorAccountCreated}
             validate={(value) => {
               if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(value)) {
                 return "Please enter a valid email address";
@@ -160,7 +369,7 @@ export function SignUpForm() {
             aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? "sign-up-email-error" : undefined}
             onChange={(event) => {
-              if (hasSubmitted) {
+              if (hasSubmitted && !vendorAccountCreated) {
                 setErrors((current) => ({
                   ...current,
                   email: validateEmail(event.currentTarget.value),
@@ -176,6 +385,7 @@ export function SignUpForm() {
               {errors.email}
             </p>
           )}
+
           <AuthField
             id="sign-up-password"
             name="password"
@@ -186,6 +396,7 @@ export function SignUpForm() {
             required
             minLength={8}
             maxLength={72}
+            disabled={vendorAccountCreated}
             validate={(value) => {
               if (value.length < 8) {
                 return "Password must be at least 8 characters";
@@ -205,7 +416,7 @@ export function SignUpForm() {
                 : "sign-up-password-hint"
             }
             onChange={(event) => {
-              if (hasSubmitted) {
+              if (hasSubmitted && !vendorAccountCreated) {
                 setErrors((current) => ({
                   ...current,
                   password: validatePassword(event.currentTarget.value),
@@ -217,7 +428,7 @@ export function SignUpForm() {
             id="sign-up-password-hint"
             className="-mt-2 text-sm text-muted-foreground"
           >
-            Use 8–72 characters.
+            Use 8–72 characters, with one uppercase letter and one number.
           </p>
           {errors.password && (
             <p
@@ -227,33 +438,75 @@ export function SignUpForm() {
               {errors.password}
             </p>
           )}
+
           <AuthField
             id="sign-up-image"
             name="image"
             type="file"
             accept="image/*"
-            label="Profile image"
+            label="Profile image (optional)"
+            disabled={vendorAccountCreated}
             className="w-25"
           />
+
+          <div
+            className={cn(
+              "mt-3 border-t border-border/70 pt-6",
+              !isVendor && "hidden",
+            )}
+          >
+            <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+              <Store className="size-4" aria-hidden />
+              Shop details
+            </div>
+            <p className="mt-2 text-sm text-muted-foreground">
+              These details appear on your storefront. You can refine them
+              later.
+            </p>
+
+            <div className="mt-4">
+              <VendorDetailsFields
+                errors={vendorErrors}
+                disabled={!isVendor}
+                idPrefix="sign-up-vendor"
+                onUploadingChange={setIsUploadingLogo}
+              />
+            </div>
+          </div>
         </div>
 
         <Button
           type="submit"
           size="lg"
           className="mt-6 h-12 w-full rounded-lg text-base shadow-sm shadow-primary/20"
-          disabled={isSubmitting}
+          disabled={isBusy}
         >
-          {isSubmitting ? "Creating account..." : "Continue with email"}
+          {isSubmitting
+            ? isVendor
+              ? vendorAccountCreated
+                ? "Activating your shop..."
+                : "Creating your shop..."
+              : "Creating account..."
+            : isUploadingLogo
+              ? "Uploading logo..."
+              : isVendor
+                ? vendorAccountCreated
+                  ? "Retry shop setup"
+                  : "Create vendor account"
+                : "Create customer account"}
         </Button>
+
         {submissionError && (
           <p role="alert" className="mt-3 text-sm text-destructive">
             {submissionError}
           </p>
         )}
 
-        <div className="mt-3">
-          <GoogleButton />
-        </div>
+        {!isVendor && (
+          <div className="mt-3">
+            <GoogleButton />
+          </div>
+        )}
       </form>
 
       <p className="mt-8 text-[13px] leading-6 text-muted-foreground">
@@ -277,15 +530,6 @@ export function SignUpForm() {
       <p className="mt-6 text-[15px] font-semibold text-primary">
         <Link href="/sign-in" className="hover:underline">
           Already have an account? Sign in
-        </Link>
-      </p>
-      <p className="mt-4 text-sm text-muted-foreground">
-        Want to sell pizzas?{" "}
-        <Link
-          href="/register-as-a-vendor"
-          className="font-semibold text-primary hover:underline"
-        >
-          Apply as a vendor
         </Link>
       </p>
     </div>

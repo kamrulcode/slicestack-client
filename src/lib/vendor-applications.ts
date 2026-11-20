@@ -137,62 +137,127 @@ export async function listVendorApplications(
 }
 
 /**
- * Create or resubmit the signed-in user's application. Returns the document id.
- * Only a REJECTED application may be edited back into PENDING.
+ * Direct vendor activation used by the self-service vendor signup flow.
+ *
+ * There is no admin review step anymore, but the security boundary is the same:
+ * the caller passes the verified session user id, never a role. Inside one
+ * transaction we:
+ *   1. create/update the vendor profile (`vendorApplications`, auto-APPROVED),
+ *   2. upsert the storefront (`shops`, active),
+ *   3. set the user role to `vendor`.
+ *
+ * Suspended applications/shops are never silently reactivated — only an admin
+ * can lift a suspension.
  */
-export async function submitVendorApplication(
+export async function activateVendorAccount(
   input: VendorApplicationInput,
-): Promise<string> {
+): Promise<void> {
   await ensureIndexes();
 
-  const now = new Date();
-  const values = {
-    shopName: input.shopName,
-    ownerName: input.ownerName,
-    phone: input.phone,
-    address: input.address,
-    description: input.description,
-    logoUrl: input.logoUrl ?? null,
-  };
+  const session = mongoClient.startSession();
 
-  const existing = await applications().findOne({ userId: input.userId });
+  try {
+    await session.withTransaction(async () => {
+      const userObjectId = objectIdFromString(input.userId);
+      if (!userObjectId) {
+        throw new VendorApplicationError("Account is invalid.");
+      }
 
-  if (!existing) {
-    const result = await applications().insertOne({
-      _id: new ObjectId(),
-      userId: input.userId,
-      ...values,
-      status: "PENDING",
-      rejectionReason: null,
-      reviewedBy: null,
-      reviewedAt: null,
-      createdAt: now,
-      updatedAt: now,
+      const account = await db
+        .collection(USERS_COLLECTION)
+        .findOne({ _id: userObjectId }, { session });
+
+      if (!account) {
+        throw new VendorApplicationError("Account no longer exists.");
+      }
+
+      if ((account as { role?: unknown }).role === "admin") {
+        throw new VendorApplicationError(
+          "Admin accounts cannot be converted into vendors.",
+        );
+      }
+
+      const [existingApplication, existingShop] = await Promise.all([
+        applications().findOne({ userId: input.userId }, { session }),
+        shops().findOne({ ownerId: input.userId }, { session }),
+      ]);
+
+      if (
+        existingApplication?.status === "SUSPENDED" ||
+        existingShop?.status === "suspended"
+      ) {
+        throw new VendorApplicationError(
+          "This vendor account is suspended. Contact the SliceStack team for help.",
+        );
+      }
+
+      const now = new Date();
+      const profile = {
+        shopName: input.shopName,
+        ownerName: input.ownerName,
+        phone: input.phone,
+        address: input.address,
+        description: input.description,
+        logoUrl: input.logoUrl ?? null,
+      };
+
+      const application = await applications().findOneAndUpdate(
+        { userId: input.userId },
+        {
+          $set: {
+            ...profile,
+            status: "APPROVED",
+            rejectionReason: null,
+            reviewedBy: null,
+            reviewedAt: null,
+            updatedAt: now,
+          },
+          $setOnInsert: {
+            userId: input.userId,
+            createdAt: now,
+          },
+        },
+        { upsert: true, returnDocument: "after", session },
+      );
+
+      if (!application) {
+        throw new VendorApplicationError(
+          "The vendor profile could not be created.",
+        );
+      }
+
+      await shops().updateOne(
+        { ownerId: input.userId },
+        {
+          $set: {
+            applicationId: application._id.toString(),
+            name: input.shopName,
+            description: input.description,
+            address: input.address,
+            phone: input.phone,
+            logoUrl: input.logoUrl ?? null,
+            status: "active",
+            updatedAt: now,
+          },
+          $setOnInsert: {
+            ownerId: input.userId,
+            createdAt: now,
+          },
+        },
+        { upsert: true, session },
+      );
+
+      // Server-only role assignment. Better Auth keeps `role` as `input: false`,
+      // so no client payload can reach this value.
+      await db.collection(USERS_COLLECTION).updateOne(
+        { _id: userObjectId },
+        { $set: { role: "vendor", updatedAt: now } },
+        { session },
+      );
     });
-    return result.insertedId.toString();
+  } finally {
+    await session.endSession();
   }
-
-  if (existing.status !== "REJECTED") {
-    throw new VendorApplicationError(
-      "You already have a vendor application in progress.",
-    );
-  }
-
-  await applications().updateOne(
-    { _id: existing._id, status: "REJECTED" },
-    {
-      $set: {
-        ...values,
-        status: "PENDING",
-        rejectionReason: null,
-        reviewedBy: null,
-        reviewedAt: null,
-        updatedAt: now,
-      },
-    },
-  );
-
-  return existing._id.toString();
 }
 
 export async function getShopForOwner(ownerId: string) {

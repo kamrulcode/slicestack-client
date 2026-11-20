@@ -117,7 +117,10 @@ function FeatureIcon({ type }: { type: string }) {
 export default function FeaturesSection() {
   return (
     <section className="relative w-full bg-[#FD9D3E] px-4 pt-12 pb-16 text-[#121619] sm:px-6 sm:pt-14">
-      <BrushEdge className="text-[#ff9d3d] -top-20" />
+      <BrushEdge
+        className="text-[#ff9d3d] -top-20 absolute
+      z-100"
+      />
 
       <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 sm:grid-cols-3 sm:gap-6 md:gap-10">
         {features.map((feature) => (

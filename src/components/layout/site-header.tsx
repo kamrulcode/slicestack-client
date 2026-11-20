@@ -2,14 +2,23 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { LogIn, User } from "lucide-react";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { NavUser } from "./userAvatar";
 
-export function SiteHeader() {
+export async function SiteHeader() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const user = session?.user;
+
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur supports-backdrop-filter:bg-background/70">
+    <header className="sticky top-0 z-40 border-b border-border/60 bg-secondary/40">
       <div className="mx-auto flex h-20 w-full max-w-6xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Logo size="md" />
 
@@ -31,26 +40,32 @@ export function SiteHeader() {
         <div className="flex items-center gap-1.5 sm:gap-2">
           <ThemeToggle />
 
-          <Link
-            href="/sign-in"
-            className={cn(
-              buttonVariants({ variant: "outline", size: "sm" }),
-              "hidden lg:inline-flex rounded-full px-4 py-4 shadow-sm shadow-primary/25",
-            )}
-          >
-            Sign In
-            <LogIn />
-          </Link>
-          <Link
-            href="/sign-up"
-            className={cn(
-              buttonVariants({ size: "sm" }),
-              "hidden lg:inline-flex rounded-full px-4 py-4 shadow-sm shadow-primary/25",
-            )}
-          >
-            <User />
-            Sign Up
-          </Link>
+          {user ? (
+            <NavUser user={{ ...user, image: user.image ?? "" }} />
+          ) : (
+            <>
+              <Link
+                href="/sign-in"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "sm" }),
+                  "hidden lg:inline-flex rounded-full px-4 py-4 shadow-sm shadow-primary/25",
+                )}
+              >
+                Sign In
+                <LogIn />
+              </Link>
+              <Link
+                href="/sign-up"
+                className={cn(
+                  buttonVariants({ size: "sm" }),
+                  "hidden lg:inline-flex rounded-full px-4 py-4 shadow-sm shadow-primary/25",
+                )}
+              >
+                <User />
+                Sign Up
+              </Link>
+            </>
+          )}
           <MobileNav />
         </div>
       </div>

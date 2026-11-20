@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fredoka, Nunito } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import "./globals.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -40,7 +41,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableColorScheme
           disableTransitionOnChange
         >
-          {children}
+          {" "}
+          <TooltipProvider>{children}</TooltipProvider>
         </ThemeProvider>
       </body>
     </html>

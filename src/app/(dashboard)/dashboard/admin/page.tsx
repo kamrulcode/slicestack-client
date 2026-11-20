@@ -52,7 +52,7 @@ export default async function AdminDashboardPage() {
           className={buttonVariants()}
         >
           <ClipboardList className="size-4" aria-hidden />
-          Review applications
+          Manage vendors
         </Link>
       }
     >
@@ -73,7 +73,7 @@ export default async function AdminDashboardPage() {
         <StatCard
           label="Vendors"
           value={counts.vendors}
-          hint="Approved shop owners"
+          hint="Active shop owners"
           icon={<Store aria-hidden />}
           accent="emerald"
         />
@@ -144,8 +144,8 @@ export default async function AdminDashboardPage() {
         actions={[
           {
             href: "/dashboard/admin/vendors",
-            title: "Vendor applications",
-            description: "Approve, reject or suspend shops.",
+            title: "Vendors",
+            description: "Review shops, suspend or reactivate access.",
             icon: <Store aria-hidden />,
           },
           {

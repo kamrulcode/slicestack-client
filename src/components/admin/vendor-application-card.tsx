@@ -207,7 +207,9 @@ export function VendorApplicationCard({
             ) : null}
 
             <span className="text-xs text-muted-foreground">
-              Approval assigns the vendor role and activates the shop.
+              {application.status === "APPROVED"
+                ? "Vendors activate instantly at signup. Suspending locks their shop tools."
+                : "Approval assigns the vendor role and activates the shop."}
             </span>
           </div>
         )}

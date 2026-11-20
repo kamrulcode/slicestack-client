@@ -15,7 +15,7 @@ import {
 } from "@/types/vendor";
 
 export const metadata: Metadata = {
-  title: "Vendor applications",
+  title: "Vendors",
 };
 
 export default async function AdminVendorsPage({
@@ -43,8 +43,8 @@ export default async function AdminVendorsPage({
 
   return (
     <DashboardPage
-      title="Vendor applications"
-      description="Review shop applications. Approving assigns the vendor role and activates the shop in one transaction."
+      title="Vendors"
+      description="New vendor accounts activate instantly at signup. Use this page to review shop details and suspend or reactivate access."
       actions={
         <Link
           href="/dashboard/admin/users"
@@ -88,8 +88,8 @@ export default async function AdminVendorsPage({
           }
           description={
             status
-              ? "Try another status filter to see more applications."
-              : "When customers apply to open a shop, their applications will appear here for review."
+              ? "Try another status filter to see more vendors."
+              : "Vendors appear here as soon as they activate their shop at signup."
           }
         />
       ) : (

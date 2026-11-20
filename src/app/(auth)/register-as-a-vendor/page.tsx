@@ -1,30 +1,41 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ShieldAlert } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
-import { VendorApplicationForm } from "@/components/vendor/vendor-application-form";
-import { VendorApplicationStatusCard } from "@/components/vendor/vendor-application-status";
 import { buttonVariants } from "@/components/ui/button";
-import { requireAuth } from "@/lib/authorization";
-import { getVendorApplicationForUser } from "@/lib/vendor-applications";
+import { VendorOnboardingForm } from "@/components/vendor/vendor-onboarding-form";
+import { getCurrentUser } from "@/lib/authorization";
+import {
+  getShopForOwner,
+  getVendorApplicationForUser,
+} from "@/lib/vendor-applications";
 import { dashboardPathForRole } from "@/types/auth";
 
 export const metadata: Metadata = {
-  title: "Apply as a vendor",
+  title: "Open your shop",
   description:
-    "Apply to open your own pizza shop on SliceStack. Admin approval is required before vendor tools unlock.",
+    "Add your restaurant details and activate your SliceStack vendor account instantly.",
 };
 
 export default async function RegisterVendorPage() {
-  const user = await requireAuth("/register-as-a-vendor");
+  const user = await getCurrentUser();
 
-  // Vendors and admins already have access; send them to their dashboard.
+  // New accounts should use the vendor tab on the signup page.
+  if (!user) redirect("/sign-up?mode=vendor");
+
+  // Vendors and admins already have a workspace.
   if (user.role !== "customer") {
     redirect(dashboardPathForRole(user.role));
   }
 
-  const application = await getVendorApplicationForUser(user.id);
-  const canApply = !application || application.status === "REJECTED";
+  const [application, shop] = await Promise.all([
+    getVendorApplicationForUser(user.id),
+    getShopForOwner(user.id),
+  ]);
+
+  const suspended =
+    application?.status === "SUSPENDED" || shop?.status === "suspended";
 
   return (
     <AuthShell
@@ -33,22 +44,18 @@ export default async function RegisterVendorPage() {
         alt: "The SliceStack dining room at golden hour",
       }}
     >
-      {canApply ? (
-        <VendorApplicationForm
-          defaultOwnerName={user.name}
-          application={application}
-        />
-      ) : (
+      {suspended ? (
         <div>
-          <h2 className="font-heading text-[2.25rem] leading-tight font-bold tracking-tight text-foreground sm:text-[2.75rem]">
-            Application status
+          <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+            <ShieldAlert className="size-6" aria-hidden />
+          </div>
+          <h2 className="mt-5 font-heading text-[2.25rem] leading-tight font-bold tracking-tight text-foreground">
+            Vendor access suspended
           </h2>
           <p className="mt-3 text-base text-muted-foreground">
-            Here is the latest update on your vendor application.
+            Your shop is temporarily suspended, so vendor setup is locked.
+            Contact the SliceStack team if you believe this is a mistake.
           </p>
-          <div className="mt-7">
-            <VendorApplicationStatusCard application={application} />
-          </div>
           <Link
             href="/dashboard/customer"
             className={buttonVariants({ variant: "outline", className: "mt-6" })}
@@ -56,6 +63,16 @@ export default async function RegisterVendorPage() {
             Back to dashboard
           </Link>
         </div>
+      ) : (
+        <VendorOnboardingForm
+          defaults={{
+            shopName: application?.shopName ?? shop?.name ?? "",
+            phone: application?.phone ?? shop?.phone ?? "",
+            address: application?.address ?? shop?.address ?? "",
+            description: application?.description ?? shop?.description ?? "",
+            logoUrl: application?.logoUrl ?? shop?.logoUrl ?? "",
+          }}
+        />
       )}
     </AuthShell>
   );

@@ -1,60 +1,30 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { HeroBackdrop } from "@/components/home/hero-backdrop";
+import { HeroAtmosphere } from "@/components/home/hero-atmosphere";
+import { HeroCopy } from "@/components/home/hero-copy";
 import { HeroFloaters } from "@/components/home/hero-floaters";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { HeroPizza } from "@/components/home/hero-pizza";
 
+/**
+ * Cinematic hero: a night-oven backdrop, centred copy, and the cheese-pull
+ * pizza rising from the bottom of the frame.
+ */
 export function Hero() {
   return (
-    <section className="relative isolate flex min-h-[90dvh] w-full items-center overflow-x-clip bg-background px-4 pt-8 pb-24 text-foreground sm:px-6 sm:pt-10 sm:pb-20 lg:px-8">
-      {/* <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_45%,rgba(255,64,76,0.12),transparent_62%)]"
-      /> */}
-      <HeroBackdrop />
+    <section className="relative overflow-hidden bg-[#fff8ed] text-foreground dark:bg-[#07080a] dark:text-white">
+      <HeroAtmosphere />
       <HeroFloaters />
 
-      <div className="mx-auto w-full max-w-4xl">
-        <div className="relative isolate overflow-hidden">
-          <div className=" relative z-10 mx-auto flex w-full max-w-2xl flex-col items-center px-5 py-12 text-center sm:px-8 sm:py-20 glassmorphisom">
-            <span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/85 px-3 py-1.5 text-[11px] font-semibold tracking-[0.2em] text-foreground/80 uppercase backdrop-blur sm:text-xs">
-              <span className="size-1.5 rounded-full bg-primary" aria-hidden />
-              Fresh from the oven
-            </span>
-
-            <h1 className="mt-6 font-heading text-4xl leading-[1.05] font-semibold tracking-tight text-balance uppercase sm:text-5xl">
-              Crave More &middot; Bite{" "}
-              <span className="text-primary">Better</span>.
-            </h1>
-
-            <p className="mt-4 text-[11px] font-semibold tracking-[0.32em] text-foreground/75 uppercase sm:text-sm ">
-              Your Favorite Pizza, Delivered Fresh &amp; Fast.
-            </p>
-
-            <p className="mt-5 max-w-xl text-[15px] leading-relaxed text-foreground/80 text-pretty sm:text-lg">
-              Discover the ultimate pizza experience with SliceStack. Explore
-              delicious pizzas from top restaurants near you, choose your
-              favorite flavors, and we&apos;ll handle the rest.
-            </p>
-
-            <Link
-              href="/menu"
-              className={cn(
-                buttonVariants({ size: "lg" }),
-                "mt-8 h-12 gap-2 rounded-full px-7 shadow-lg shadow-primary/25 z-100 relative",
-              )}
-            >
-              Explore Pizza Menu
-              <ArrowRight className="size-4" aria-hidden />
-            </Link>
-
-            <p className="mt-4 text-[11px] tracking-[0.18em] text-foreground uppercase sm:text-xs">
-              Freshly made · Delivered with love
-            </p>
-          </div>
-        </div>
+      <div className="relative z-30 px-4 pt-10 sm:px-6 sm:pt-12 lg:pt-16">
+        <HeroCopy />
       </div>
+
+      <div className="relative z-10 -mt-70">
+        <HeroPizza />
+      </div>
+
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-24 bg-linear-to-t from-[#fff8ed] via-[#fff8ed]/60 to-transparent dark:from-[#07080a] dark:via-[#07080a]/60"
+      />
     </section>
   );
 }
