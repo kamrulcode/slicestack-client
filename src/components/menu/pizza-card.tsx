@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, MapPin } from "lucide-react";
+import { ArrowRight, MapPin, Store } from "lucide-react";
+import Image from "next/image";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -12,7 +13,6 @@ import { getCategoryName } from "@/data/menu";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { MenuItem } from "@/types/menu";
-import Image from "next/image";
 
 export function MenuItemCard({
   menuItem,
@@ -21,6 +21,8 @@ export function MenuItemCard({
   menuItem: MenuItem;
   className?: string;
 }) {
+  const image = menuItem.images?.[0];
+
   return (
     <Card
       className={cn(
@@ -29,7 +31,20 @@ export function MenuItemCard({
       )}
     >
       <div className="relative aspect-5/4 overflow-hidden bg-secondary/60">
-        <Image src={menuItem.images[0]} alt={menuItem.itemName} fill />
+        {image ? (
+          <Image
+            src={image}
+            alt={menuItem.itemName}
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+            unoptimized
+            className="object-cover transition-transform duration-500 ease-out motion-safe:group-hover:scale-[1.03]"
+          />
+        ) : (
+          <div className="grid h-full place-items-center text-sm text-muted-foreground">
+            No image
+          </div>
+        )}
       </div>
 
       <CardHeader className="gap-1.5 px-4 pt-4">
@@ -43,16 +58,29 @@ export function MenuItemCard({
 
       <CardContent className="flex-1 px-4 pt-2">
         <div className="flex items-center gap-2">
-          <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary/10 font-heading text-[0.7rem] font-bold text-primary">
-            S
-          </span>
-          <span className="text-xs font-medium text-muted-foreground sm:text-[13px]">
-            SliceStack partner
+          {menuItem.logoUrl ? (
+            <span className="relative size-6 shrink-0 overflow-hidden rounded-full bg-secondary">
+              <Image
+                src={menuItem.logoUrl}
+                alt=""
+                fill
+                sizes="24px"
+                unoptimized
+                className="object-cover"
+              />
+            </span>
+          ) : (
+            <span className="grid size-6 shrink-0 place-items-center rounded-full bg-primary/10 font-heading text-[0.7rem] font-bold text-primary">
+              <Store className="size-3" aria-hidden />
+            </span>
+          )}
+          <span className="truncate text-xs font-medium text-muted-foreground sm:text-[13px]">
+            {menuItem.shopName || "SliceStack partner"}
           </span>
         </div>
         <p className="mt-1.5 flex items-center gap-1 text-xs text-muted-foreground sm:text-[13px]">
           <MapPin className="size-3.5" aria-hidden />
-          Location not listed
+          {menuItem.location || "Location not listed"}
         </p>
       </CardContent>
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   CalendarDays,
   Check,
@@ -11,7 +12,7 @@ import {
   UserRound,
   X,
 } from "lucide-react";
-import { reviewVendorApplicationAction } from "@/app/(dashboard)/dashboard/admin/vendors/actions";
+import { toast } from "sonner";
 import { VendorStatusBadge } from "@/components/vendor/vendor-status-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,17 +24,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import type { PlatformUser } from "@/lib/users";
+import { errorMessage } from "@/lib/api/client";
+import { adminService } from "@/services/admin.service";
+import type { PlatformUser } from "@/types/admin";
 import type { VendorApplication } from "@/types/vendor";
 
-const INITIAL_STATE = { ok: false, message: "" };
-
-function formatDate(value: Date | null) {
+function formatDate(value: string | null) {
   if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(value);
+  }).format(date);
 }
 
 export function VendorApplicationCard({
@@ -43,11 +46,10 @@ export function VendorApplicationCard({
   application: VendorApplication;
   applicant?: PlatformUser;
 }) {
-  const [state, formAction, isPending] = useActionState(
-    reviewVendorApplicationAction,
-    INITIAL_STATE,
-  );
+  const router = useRouter();
+  const [isPending, setIsPending] = useState(false);
   const [showReject, setShowReject] = useState(false);
+  const [reason, setReason] = useState("");
 
   const canApprove =
     application.status === "PENDING" ||
@@ -55,6 +57,26 @@ export function VendorApplicationCard({
     application.status === "SUSPENDED";
   const canReject = application.status === "PENDING";
   const canSuspend = application.status === "APPROVED";
+
+  async function review(action: "approve" | "reject" | "suspend") {
+    setIsPending(true);
+
+    try {
+      const result = await adminService.reviewVendorApplication(
+        application.id,
+        action,
+        action === "reject" ? reason.trim() : undefined,
+      );
+      toast.success(result.message);
+      setShowReject(false);
+      setReason("");
+      router.refresh();
+    } catch (error) {
+      toast.error(errorMessage(error));
+    } finally {
+      setIsPending(false);
+    }
+  }
 
   return (
     <Card>
@@ -116,9 +138,7 @@ export function VendorApplicationCard({
 
       <CardFooter className="flex flex-col gap-3">
         {showReject ? (
-          <form action={formAction} className="w-full">
-            <input type="hidden" name="applicationId" value={application.id} />
-            <input type="hidden" name="action" value="reject" />
+          <div className="w-full">
             <label
               htmlFor={`reason-${application.id}`}
               className="text-sm font-semibold"
@@ -127,18 +147,20 @@ export function VendorApplicationCard({
             </label>
             <Textarea
               id={`reason-${application.id}`}
-              name="reason"
               rows={2}
               maxLength={500}
+              value={reason}
+              onChange={(event) => setReason(event.target.value)}
               placeholder="Tell the applicant what to fix before resubmitting."
               className="mt-2 bg-card"
             />
             <div className="mt-3 flex flex-wrap gap-2">
               <Button
-                type="submit"
+                type="button"
                 variant="destructive"
                 size="sm"
                 disabled={isPending}
+                onClick={() => review("reject")}
               >
                 <X className="size-3.5" aria-hidden />
                 {isPending ? "Rejecting..." : "Confirm rejection"}
@@ -153,24 +175,21 @@ export function VendorApplicationCard({
                 Cancel
               </Button>
             </div>
-          </form>
+          </div>
         ) : (
           <div className="flex w-full flex-wrap items-center gap-2">
             {canApprove ? (
-              <form action={formAction}>
-                <input
-                  type="hidden"
-                  name="applicationId"
-                  value={application.id}
-                />
-                <input type="hidden" name="action" value="approve" />
-                <Button type="submit" size="sm" disabled={isPending}>
-                  <Check className="size-3.5" aria-hidden />
-                  {application.status === "SUSPENDED"
-                    ? "Reactivate vendor"
-                    : "Approve application"}
-                </Button>
-              </form>
+              <Button
+                type="button"
+                size="sm"
+                disabled={isPending}
+                onClick={() => review("approve")}
+              >
+                <Check className="size-3.5" aria-hidden />
+                {application.status === "SUSPENDED"
+                  ? "Reactivate vendor"
+                  : "Approve application"}
+              </Button>
             ) : null}
 
             {canReject ? (
@@ -187,23 +206,16 @@ export function VendorApplicationCard({
             ) : null}
 
             {canSuspend ? (
-              <form action={formAction}>
-                <input
-                  type="hidden"
-                  name="applicationId"
-                  value={application.id}
-                />
-                <input type="hidden" name="action" value="suspend" />
-                <Button
-                  type="submit"
-                  variant="destructive"
-                  size="sm"
-                  disabled={isPending}
-                >
-                  <ShieldAlert className="size-3.5" aria-hidden />
-                  Suspend vendor
-                </Button>
-              </form>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                disabled={isPending}
+                onClick={() => review("suspend")}
+              >
+                <ShieldAlert className="size-3.5" aria-hidden />
+                Suspend vendor
+              </Button>
             ) : null}
 
             <span className="text-xs text-muted-foreground">
@@ -213,19 +225,6 @@ export function VendorApplicationCard({
             </span>
           </div>
         )}
-
-        {state.message ? (
-          <p
-            role="status"
-            className={
-              state.ok
-                ? "text-sm font-medium text-emerald-700 dark:text-emerald-300"
-                : "text-sm text-destructive"
-            }
-          >
-            {state.message}
-          </p>
-        ) : null}
       </CardFooter>
     </Card>
   );
@@ -243,12 +242,12 @@ function InfoRow({
   mono?: boolean;
 }) {
   return (
-    <div className="flex items-start gap-2.5">
-      <span className="mt-0.5 text-muted-foreground [&_svg]:size-4">
-        {icon}
-      </span>
+    <div className="flex items-start gap-2">
+      <span className="mt-0.5 text-muted-foreground [&_svg]:size-4">{icon}</span>
       <div className="min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
+        <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+          {label}
+        </p>
         <p className={mono ? "truncate font-mono text-xs" : "break-words"}>
           {value}
         </p>

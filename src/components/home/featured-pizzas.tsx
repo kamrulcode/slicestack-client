@@ -4,12 +4,22 @@ import { SectionHeading } from "@/components/common/section-heading";
 import { Reveal, RevealGroup, RevealItem } from "@/components/common/reveal";
 import { MenuItemCard } from "@/components/menu/pizza-card";
 import { buttonVariants } from "@/components/ui/button";
-
 import { cn } from "@/lib/utils";
-import { getPublicMenuItems } from "@/data/action/getData";
+import { serverApi } from "@/services/server";
+import type { MenuItem } from "@/types/menu";
 
 export async function FeaturedPizzas() {
-  const menuItems = await getPublicMenuItems();
+  let menuItems: MenuItem[] = [];
+
+  try {
+    const all = await serverApi.menu.list();
+    menuItems = all.slice(0, 3);
+  } catch {
+    menuItems = [];
+  }
+
+  if (menuItems.length === 0) return null;
+
   return (
     <section id="menu" className="scroll-mt-24">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import {
   BadgeCheck,
-  CircleDollarSign,
+  CheckCircle2,
   ClipboardList,
   Plus,
   Receipt,
@@ -20,6 +20,7 @@ import {
   VendorApplicationSummary,
 } from "@/components/vendor/vendor-application-status";
 import { VendorStatusBadge } from "@/components/vendor/vendor-status-badge";
+import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -28,12 +29,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { requireRole } from "@/lib/authorization";
-import { formatPrice } from "@/lib/format";
-import {
-  getShopForOwner,
-  getVendorApplicationForUser,
-} from "@/lib/vendor-applications";
+import { getAccountContext, requireRole } from "@/lib/authorization";
+import { errorMessage } from "@/lib/api/client";
+import { serverApi } from "@/services/server";
 
 export const metadata: Metadata = {
   title: "Vendor dashboard",
@@ -41,10 +39,24 @@ export const metadata: Metadata = {
 
 export default async function VendorDashboardPage() {
   const user = await requireRole(["vendor"], "/dashboard/vendor");
-  const [application, shop] = await Promise.all([
-    getVendorApplicationForUser(user.id),
-    getShopForOwner(user.id),
-  ]);
+  const me = await getAccountContext();
+
+  if (!me) {
+    return (
+      <DashboardPage
+        title="Vendor dashboard"
+        description="Manage your shop, menu and incoming orders."
+      >
+        <EmptyState
+          icon={<ShieldAlert aria-hidden />}
+          title="We could not load your shop"
+          description="The vendor service is unavailable right now. Refresh the page to try again."
+        />
+      </DashboardPage>
+    );
+  }
+
+  const { application, shop } = me;
 
   if (
     !application ||
@@ -83,6 +95,25 @@ export default async function VendorDashboardPage() {
     );
   }
 
+  let stats;
+
+  try {
+    stats = await serverApi.orders.vendorDashboard();
+  } catch (error) {
+    return (
+      <DashboardPage
+        title={`Welcome back, ${user.name.split(" ")[0]}`}
+        description={`Manage ${shop.name}, your menu and incoming orders.`}
+      >
+        <EmptyState
+          icon={<ShieldAlert aria-hidden />}
+          title="Dashboard data is unavailable"
+          description={errorMessage(error)}
+        />
+      </DashboardPage>
+    );
+  }
+
   return (
     <DashboardPage
       title={`Welcome back, ${user.name.split(" ")[0]}`}
@@ -90,6 +121,9 @@ export default async function VendorDashboardPage() {
       actions={
         <>
           <VendorStatusBadge status={application.status} />
+          <Badge variant={stats.plan === "premium" ? "default" : "outline"}>
+            {stats.plan === "premium" ? "Premium plan" : "Free plan"}
+          </Badge>
           <Link
             href="/dashboard/vendor/menu-items/add"
             className={buttonVariants()}
@@ -102,30 +136,30 @@ export default async function VendorDashboardPage() {
     >
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          label="Today's orders"
-          value={0}
-          hint="New orders will appear here"
-          icon={<ClipboardList aria-hidden />}
-        />
-        <StatCard
           label="Menu items"
-          value={0}
-          hint="Create your first pizza"
+          value={stats.totalItems}
+          hint={`${stats.pendingItems} awaiting review`}
           icon={<UtensilsCrossed aria-hidden />}
-          accent="amber"
         />
         <StatCard
-          label="Revenue"
-          value={formatPrice(0)}
-          hint="Completed orders"
-          icon={<CircleDollarSign aria-hidden />}
+          label="Active items"
+          value={stats.activeItems}
+          hint="Approved and available"
+          icon={<BadgeCheck aria-hidden />}
           accent="emerald"
         />
         <StatCard
-          label="Shop status"
-          value="Active"
-          hint="Visible to customers"
-          icon={<BadgeCheck aria-hidden />}
+          label="Pending orders"
+          value={stats.pendingOrders}
+          hint="Waiting for your decision"
+          icon={<ClipboardList aria-hidden />}
+          accent="amber"
+        />
+        <StatCard
+          label="Accepted orders"
+          value={stats.acceptedOrders}
+          hint={`${stats.rejectedOrders} rejected`}
+          icon={<CheckCircle2 aria-hidden />}
           accent="neutral"
         />
       </div>
@@ -133,10 +167,11 @@ export default async function VendorDashboardPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
         <PerformanceChart
           title="Shop performance"
-          description="Orders across the last seven days"
+          description="Your orders across the last seven days"
+          data={stats.weekly}
         />
         <div className="flex flex-col gap-6">
-          <ShopSummaryCard shop={shop} />
+          <ShopSummaryCard shop={shop} plan={stats.plan} />
           <QuickActions
             actions={[
               {

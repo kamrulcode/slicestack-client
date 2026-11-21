@@ -4,23 +4,17 @@ import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { Eye, Trash2 } from "lucide-react";
+import { Check, Eye, Loader2, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 
-import { BASE_URL } from "@/config/baseURL";
-import type { VendorMenuItemRecord } from "@/types/menu";
+import type { MenuItemStatus, VendorMenuItemRecord } from "@/types/menu";
 import { formatPrice } from "@/lib/format";
+import { errorMessage } from "@/lib/api/client";
+import { adminService } from "@/services/admin.service";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 import {
   Sheet,
@@ -44,19 +38,11 @@ import {
 
 import { cn } from "@/lib/utils";
 
-// ---------------------------------------------
-// Types
-// ---------------------------------------------
-
 export type ApprovalStatus = "approved" | "pending" | "rejected";
 
 interface MenuItemCardProps {
   item: VendorMenuItemRecord;
 }
-
-// ---------------------------------------------
-// Status styles
-// ---------------------------------------------
 
 const approvalStyles: Record<ApprovalStatus, string> = {
   approved:
@@ -68,10 +54,6 @@ const approvalStyles: Record<ApprovalStatus, string> = {
   rejected:
     "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950/50 dark:text-red-300",
 };
-
-// ---------------------------------------------
-// Helpers
-// ---------------------------------------------
 
 function getApprovalStatus(status?: string | null): ApprovalStatus {
   switch (status?.toLowerCase()) {
@@ -86,39 +68,6 @@ function getApprovalStatus(status?: string | null): ApprovalStatus {
   }
 }
 
-function isApprovalStatus(status: string): status is ApprovalStatus {
-  return status === "approved" || status === "pending" || status === "rejected";
-}
-
-function isApiResult(
-  result: unknown,
-): result is { ok: boolean; message?: string } {
-  return typeof result === "object" && result !== null && "ok" in result;
-}
-
-async function requestAdminMenuItem(
-  itemId: string,
-  init: RequestInit,
-): Promise<string> {
-  const response = await fetch(
-    `${BASE_URL}/api/admin/menu-items/${encodeURIComponent(itemId)}`,
-    init,
-  );
-  const result: unknown = await response.json();
-
-  if (!response.ok || !isApiResult(result) || !result.ok) {
-    const message =
-      isApiResult(result) && typeof result.message === "string"
-        ? result.message
-        : "Unable to update menu item.";
-    throw new Error(message);
-  }
-
-  return typeof result.message === "string"
-    ? result.message
-    : "Menu item updated successfully.";
-}
-
 function ApprovalBadge({ status }: { status: ApprovalStatus }) {
   return (
     <Badge
@@ -131,10 +80,6 @@ function ApprovalBadge({ status }: { status: ApprovalStatus }) {
   );
 }
 
-// ---------------------------------------------
-// Menu Item Card
-// ---------------------------------------------
-
 export function MenuItemCard({ item }: MenuItemCardProps) {
   const router = useRouter();
   const [viewingItem, setViewingItem] = useState<VendorMenuItemRecord | null>(
@@ -142,79 +87,49 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
   );
 
   const status = getApprovalStatus(item.status);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [rejecting, setRejecting] = useState(false);
+  const [reason, setReason] = useState("");
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  // -------------------------------------------
-  // Update Approval Status
-  // -------------------------------------------
-
-  async function handleStatusChange(value: ApprovalStatus | null) {
-    if (value === null || !isApprovalStatus(value)) return;
-    const newStatus = value;
-
-    if (newStatus === status || updatingStatus) return;
-
-    setUpdatingStatus(true);
+  async function setStatus(next: MenuItemStatus) {
+    setBusy(true);
 
     try {
-      await requestAdminMenuItem(item._id, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          itemName: item.itemName,
-          category: item.category,
-          price: item.price,
-          status: newStatus,
-        }),
-      });
-
-      toast.success(`Menu item status updated to ${newStatus}.`);
+      const result = await adminService.setMenuStatus(
+        item._id,
+        next,
+        next === "rejected" ? reason.trim() || undefined : undefined,
+      );
+      toast.success(result.message);
+      setRejecting(false);
+      setReason("");
       router.refresh();
     } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : "Unable to update menu item status.",
-      );
+      toast.error(errorMessage(error));
     } finally {
-      setUpdatingStatus(false);
+      setBusy(false);
     }
   }
-
-  // -------------------------------------------
-  // Delete Menu Item
-  // -------------------------------------------
 
   async function handleDelete() {
-    setDeleting(true);
+    setBusy(true);
 
     try {
-      const message = await requestAdminMenuItem(item._id, {
-        method: "DELETE",
-      });
-
+      const result = await adminService.deleteMenuItem(item._id);
       setDeleteDialogOpen(false);
-      toast.success(message);
+      toast.success(result.message);
       router.refresh();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Unable to delete menu item.",
-      );
+      toast.error(errorMessage(error));
     } finally {
-      setDeleting(false);
+      setBusy(false);
     }
   }
-
-  // -------------------------------------------
-  // Render
-  // -------------------------------------------
 
   return (
     <>
       <article className="flex flex-col gap-4 rounded-2xl border bg-card p-4 sm:flex-row sm:items-center">
-        {/* Menu Image */}
         <div className="relative h-24 w-full shrink-0 overflow-hidden rounded-xl bg-muted sm:h-24 sm:w-28">
           {item.images?.[0] ? (
             <Image
@@ -222,6 +137,7 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
               alt={item.itemName}
               fill
               sizes="112px"
+              unoptimized
               className="object-cover"
             />
           ) : (
@@ -231,7 +147,6 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
           )}
         </div>
 
-        {/* Menu Information */}
         <div className="min-w-0 flex-1 space-y-1">
           <h3 className="truncate font-semibold">{item.itemName}</h3>
 
@@ -241,7 +156,6 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
 
           <p className="text-sm font-semibold">{formatPrice(item.price)}</p>
 
-          {/* Status Badges */}
           <div className="flex flex-wrap gap-2 pt-1">
             <ApprovalBadge status={status} />
 
@@ -249,11 +163,15 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
               {item.isAvailable ? "Available" : "Unavailable"}
             </Badge>
           </div>
+
+          {item.status === "rejected" && item.rejectionReason ? (
+            <p className="rounded-lg bg-red-50 p-2 text-xs text-red-800 dark:bg-red-500/10 dark:text-red-300">
+              Reason: {item.rejectionReason}
+            </p>
+          ) : null}
         </div>
 
-        {/* Right Side Actions */}
         <div className="flex shrink-0 flex-col gap-2 sm:items-end">
-          {/* Details and Status */}
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
@@ -262,30 +180,82 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
               className="gap-1.5"
               onClick={() => setViewingItem(item)}
             >
-              <Eye className="size-4" />
+              <Eye className="size-4" aria-hidden />
               Details
             </Button>
 
-            <Select
-              value={status}
-              onValueChange={handleStatusChange}
-              disabled={updatingStatus || deleting}
-            >
-              <SelectTrigger className="h-9 w-36.25">
-                <SelectValue placeholder="Change status" />
-              </SelectTrigger>
+            {status !== "approved" ? (
+              <Button
+                type="button"
+                size="sm"
+                className="gap-1.5"
+                disabled={busy}
+                onClick={() => setStatus("approved")}
+              >
+                {busy ? (
+                  <Loader2 className="size-3.5 animate-spin" aria-hidden />
+                ) : (
+                  <Check className="size-3.5" aria-hidden />
+                )}
+                Approve
+              </Button>
+            ) : null}
 
-              <SelectContent>
-                <SelectItem value="approved">Approved</SelectItem>
-
-                <SelectItem value="pending">Pending</SelectItem>
-
-                <SelectItem value="rejected">Rejected</SelectItem>
-              </SelectContent>
-            </Select>
+            {status !== "rejected" ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                disabled={busy}
+                onClick={() => setRejecting((current) => !current)}
+              >
+                <X className="size-3.5" aria-hidden />
+                Reject
+              </Button>
+            ) : null}
           </div>
 
-          {/* Delete Button */}
+          {rejecting ? (
+            <div className="w-full rounded-lg border border-border/70 p-3 sm:max-w-xs">
+              <label
+                htmlFor={`reason-${item._id}`}
+                className="text-xs font-semibold text-muted-foreground"
+              >
+                Rejection reason (optional)
+              </label>
+              <Textarea
+                id={`reason-${item._id}`}
+                rows={2}
+                maxLength={500}
+                value={reason}
+                onChange={(event) => setReason(event.target.value)}
+                placeholder="Tell the vendor what to fix."
+                className="mt-1.5"
+              />
+              <div className="mt-2 flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setRejecting(false)}
+                  disabled={busy}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setStatus("rejected")}
+                  disabled={busy}
+                >
+                  Reject item
+                </Button>
+              </div>
+            </div>
+          ) : null}
+
           <AlertDialog
             open={deleteDialogOpen}
             onOpenChange={setDeleteDialogOpen}
@@ -297,9 +267,9 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
                   variant="destructive"
                   size="sm"
                   className="gap-1.5"
-                  disabled={deleting || updatingStatus}
+                  disabled={busy}
                 >
-                  <Trash2 className="size-4" />
+                  <Trash2 className="size-4" aria-hidden />
                   Delete
                 </Button>
               }
@@ -317,19 +287,17 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
               </AlertDialogHeader>
 
               <AlertDialogFooter>
-                <AlertDialogCancel disabled={deleting}>
-                  Cancel
-                </AlertDialogCancel>
+                <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
 
                 <AlertDialogAction
-                  disabled={deleting}
+                  disabled={busy}
                   className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   onClick={(event) => {
                     event.preventDefault();
                     void handleDelete();
                   }}
                 >
-                  {deleting ? "Deleting..." : "Yes, Delete"}
+                  {busy ? "Deleting..." : "Yes, Delete"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -337,7 +305,6 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
         </div>
       </article>
 
-      {/* Details Sheet */}
       <Sheet
         open={viewingItem !== null}
         onOpenChange={(open) => {
@@ -357,7 +324,6 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
               </SheetHeader>
 
               <div className="space-y-5 p-5 sm:p-6">
-                {/* Image */}
                 {viewingItem.images?.[0] && (
                   <div className="relative aspect-4/3 overflow-hidden rounded-xl bg-muted">
                     <Image
@@ -371,7 +337,6 @@ export function MenuItemCard({ item }: MenuItemCardProps) {
                   </div>
                 )}
 
-                {/* Details */}
                 <dl className="grid gap-4">
                   <div>
                     <dt className="text-sm text-muted-foreground">Item name</dt>

@@ -6,17 +6,11 @@ import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { LogIn, User } from "lucide-react";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
+import { getCurrentUser } from "@/lib/authorization";
 import { NavUser } from "./userAvatar";
 
 export async function SiteHeader() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  const user = session?.user;
-  console.log(user);
+  const user = await getCurrentUser();
 
   return (
     <header className="sticky top-0 z-40 border-b border-border/60 bg-background/85 backdrop-blur-md supports-backdrop-filter:bg-background/75">
@@ -49,7 +43,7 @@ export async function SiteHeader() {
                 href="/sign-in"
                 className={cn(
                   buttonVariants({ variant: "outline", size: "sm" }),
-                  "hidden lg:inline-flex rounded-full px-4 py-4 shadow-sm shadow-primary/25",
+                  "hidden rounded-full px-4 py-4 shadow-sm shadow-primary/25 lg:inline-flex",
                 )}
               >
                 Sign In
@@ -59,7 +53,7 @@ export async function SiteHeader() {
                 href="/sign-up"
                 className={cn(
                   buttonVariants({ size: "sm" }),
-                  "hidden lg:inline-flex rounded-full px-4 py-4 shadow-sm shadow-primary/25",
+                  "hidden rounded-full px-4 py-4 shadow-sm shadow-primary/25 lg:inline-flex",
                 )}
               >
                 <User />

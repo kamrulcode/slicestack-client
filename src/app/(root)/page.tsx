@@ -5,6 +5,8 @@ import { Hero } from "@/components/home/hero";
 import FeaturesSection from "@/components/home/hero-features";
 import { HowItWorks } from "@/components/home/how-it-works";
 
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
   return (
     <>

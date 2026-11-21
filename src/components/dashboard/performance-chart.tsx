@@ -6,47 +6,63 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const values = [18, 26, 22, 38, 31, 44, 52];
-const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+type ChartPoint = { date: string; count: number };
+
+function weekdayLabel(date: string) {
+  const value = new Date(`${date}T00:00:00Z`);
+  if (Number.isNaN(value.getTime())) return date;
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    timeZone: "UTC",
+  }).format(value);
+}
 
 /**
- * Lightweight, dependency-free performance chart. It is intentionally static
- * until order analytics models exist; swap the values for real aggregates.
+ * Lightweight, dependency-free order chart. The series always comes from the
+ * backend's real daily counts; an empty week renders a flat line at zero.
  */
 export function PerformanceChart({
-  title = "Weekly performance",
+  title = "Weekly activity",
   description = "Orders across the last seven days",
+  data = [],
 }: {
   title?: string;
   description?: string;
+  data?: ChartPoint[];
 }) {
+  const values = data.map((point) => point.count);
+  const labels = data.map((point) => weekdayLabel(point.date));
   const width = 640;
   const height = 220;
   const padding = 24;
-  const max = Math.max(...values) * 1.15;
-  const stepX = (width - padding * 2) / (values.length - 1);
+  const peak = Math.max(...values, 1) * 1.15;
+  const stepX =
+    values.length > 1 ? (width - padding * 2) / (values.length - 1) : 0;
 
   const points = values.map((value, index) => {
     const x = padding + index * stepX;
-    const y = height - padding - (value / max) * (height - padding * 2);
+    const y = height - padding - (value / peak) * (height - padding * 2);
     return { x, y };
   });
 
   const line = points.map((point) => `${point.x},${point.y}`).join(" ");
   const area = `${padding},${height - padding} ${line} ${width - padding},${height - padding}`;
+  const total = values.reduce((sum, value) => sum + value, 0);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>{title}</CardTitle>
-        <CardDescription>{description}</CardDescription>
+        <CardDescription>
+          {description} · {total} total
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="w-full overflow-hidden">
           <svg
             viewBox={`0 0 ${width} ${height}`}
             role="img"
-            aria-label={`${title}: values trending from ${values[0]} to ${values[values.length - 1]}`}
+            aria-label={`${title}: ${total} orders across the last seven days`}
             className="h-auto w-full"
           >
             <defs>
@@ -80,7 +96,7 @@ export function PerformanceChart({
             />
             {points.map((point, index) => (
               <circle
-                key={labels[index]}
+                key={data[index]?.date ?? index}
                 cx={point.x}
                 cy={point.y}
                 r="4"
@@ -92,10 +108,12 @@ export function PerformanceChart({
           </svg>
           <div
             className="grid text-xs text-muted-foreground"
-            style={{ gridTemplateColumns: `repeat(${labels.length}, minmax(0, 1fr))` }}
+            style={{
+              gridTemplateColumns: `repeat(${Math.max(labels.length, 1)}, minmax(0, 1fr))`,
+            }}
           >
-            {labels.map((label) => (
-              <span key={label} className="text-center">
+            {labels.map((label, index) => (
+              <span key={`${label}-${index}`} className="text-center">
                 {label}
               </span>
             ))}

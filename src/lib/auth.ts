@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
+import { jwt } from "better-auth/plugins";
 import { db, mongoClient } from "@/lib/mongodb";
 
 export const auth = betterAuth({
@@ -10,6 +11,13 @@ export const auth = betterAuth({
         required: false,
         defaultValue: "customer",
         // Clients can never send a role during signup or profile updates.
+        input: false,
+      },
+      blocked: {
+        type: "boolean",
+        required: false,
+        defaultValue: false,
+        // Only the Express admin API may block an account.
         input: false,
       },
     },
@@ -27,4 +35,7 @@ export const auth = betterAuth({
   database: mongodbAdapter(db, {
     client: mongoClient,
   }),
+  // The Express API verifies these JWTs through /api/auth/jwks. The token's
+  // `sub` is the Better Auth user id.
+  plugins: [jwt()],
 });

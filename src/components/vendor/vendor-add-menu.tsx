@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -18,9 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { uploadImage } from "@/config/imgbb";
-import postData from "@/data/action/postData";
-import type { Shop } from "@/types/vendor";
+import { errorMessage } from "@/lib/api/client";
+import { menuService } from "@/services/menu.service";
+import { uploadService } from "@/services/uploads.service";
 
 const categories = [
   "Classic Pizzas",
@@ -42,12 +43,11 @@ const menuItemSchema = z.object({
 type MenuItemFormInput = z.input<typeof menuItemSchema>;
 type MenuItemFormValues = z.output<typeof menuItemSchema>;
 
-export default function AddMenuItemForm({ shop }: { shop: Shop }) {
+export default function AddMenuItemForm() {
+  const router = useRouter();
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const { logoUrl, name: shopName, ownerId } = shop;
 
   const form = useForm<MenuItemFormInput, unknown, MenuItemFormValues>({
     resolver: zodResolver(menuItemSchema),
@@ -117,40 +117,27 @@ export default function AddMenuItemForm({ shop }: { shop: Shop }) {
     try {
       setIsSubmitting(true);
 
-      // Upload all images to ImgBB
-      const imageUrls = await Promise.all(
-        imageFiles.map((file) => uploadImage(file)),
-      );
+      const imageUrls = await uploadService.images(imageFiles);
 
-      const menuItemData = {
+      const result = await menuService.create({
         itemName: values.name,
         category: values.category,
         description: values.description,
         price: values.price,
         location: values.location,
         images: imageUrls,
-        status: "pending",
-        logoUrl,
-        shopName,
-        ownerId,
-      };
+      });
 
-      console.log(menuItemData);
-
-      await postData({ data: menuItemData });
-
-      toast.success("Menu item submitted successfully!");
+      toast.success(result.message);
 
       form.reset();
-
       previews.forEach((preview) => URL.revokeObjectURL(preview));
-
       setImageFiles([]);
       setPreviews([]);
+      router.push("/dashboard/vendor/menu-items");
+      router.refresh();
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Something went wrong.",
-      );
+      toast.error(errorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -161,7 +148,8 @@ export default function AddMenuItemForm({ shop }: { shop: Shop }) {
       <div className="mb-6">
         <h1 className="text-2xl font-bold tracking-tight">Add Menu Item</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Add a delicious pizza or food item to your restaurant menu.
+          Add a delicious pizza or food item to your restaurant menu. New items
+          are reviewed by an admin before they appear publicly.
         </p>
       </div>
 
@@ -281,7 +269,7 @@ export default function AddMenuItemForm({ shop }: { shop: Shop }) {
                     type="button"
                     size="icon"
                     variant="destructive"
-                    className="absolute right-2 top-2 h-7 w-7"
+                    className="absolute top-2 right-2 h-7 w-7"
                     onClick={() => removeImage(index)}
                   >
                     <X className="h-4 w-4" />

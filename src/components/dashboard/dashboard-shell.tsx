@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   ClipboardList,
+  Heart,
   LayoutDashboard,
   LogOut,
   Menu as MenuIcon,
@@ -42,6 +43,7 @@ const NAV_BY_ROLE: Record<SessionUser["role"], NavItem[]> = {
   customer: [
     { label: "Overview", href: "/dashboard/customer", icon: LayoutDashboard, exact: true },
     { label: "My orders", href: "/dashboard/customer/orders", icon: ShoppingBag },
+    { label: "Favorites", href: "/dashboard/customer/favorites", icon: Heart },
     { label: "Profile", href: "/dashboard/customer/profile", icon: UserRound },
   ],
   vendor: [

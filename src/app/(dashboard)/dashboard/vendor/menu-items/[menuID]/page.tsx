@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PackageSearch } from "lucide-react";
+import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { DashboardPage } from "@/components/dashboard/dashboard-page";
-import { EmptyState } from "@/components/dashboard/empty-state";
+import { VendorMenuItems } from "@/components/vendor/vendor-menu-items";
 import { buttonVariants } from "@/components/ui/button";
 import { requireVendorWorkspace } from "@/lib/authorization";
+import { serverApi } from "@/services/server";
 
 export const metadata: Metadata = {
   title: "Edit menu item",
@@ -18,24 +20,26 @@ export default async function VendorMenuItemPage({
   const { shop } = await requireVendorWorkspace();
   const { menuID } = await params;
 
+  const items = await serverApi.menu.vendorItems();
+  const item = items.find((entry) => entry._id === menuID);
+
+  if (!item) notFound();
+
   return (
     <DashboardPage
-      title={`Menu item ${menuID}`}
+      title={item.itemName}
       description={`Editing items for ${shop.name}.`}
+      actions={
+        <Link
+          href="/dashboard/vendor/menu-items"
+          className={buttonVariants({ size: "sm", variant: "outline" })}
+        >
+          <ArrowLeft className="size-4" aria-hidden />
+          Back to menu items
+        </Link>
+      }
     >
-      <EmptyState
-        icon={<PackageSearch aria-hidden />}
-        title="Menu item editor coming soon"
-        description="This page is guarded for your shop only. The editor arrives with the menu module."
-        action={
-          <Link
-            href="/dashboard/vendor/menu-items"
-            className={buttonVariants({ size: "sm", variant: "outline" })}
-          >
-            Back to menu items
-          </Link>
-        }
-      />
+      <VendorMenuItems menusItems={[item]} />
     </DashboardPage>
   );
 }

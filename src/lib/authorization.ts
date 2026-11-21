@@ -1,7 +1,9 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { getShopForOwner, getVendorApplicationForUser } from "@/lib/vendor-applications";
+import { serverApiFetch } from "@/lib/api/server";
+import { createProfileService } from "@/services/profile.service";
+import type { AuthMe } from "@/types/vendor";
 import {
   dashboardPathForRole,
   normalizeRole,
@@ -14,7 +16,10 @@ export type SessionUser = {
   email: string;
   image: string | null;
   role: Role;
+  blocked: boolean;
 };
+
+const profileApi = createProfileService(serverApiFetch);
 
 /**
  * Read the Better Auth session on the server. The role is always read from
@@ -24,7 +29,10 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session?.user) return null;
 
-  const user = session.user as typeof session.user & { role?: unknown };
+  const user = session.user as typeof session.user & {
+    role?: unknown;
+    blocked?: unknown;
+  };
 
   return {
     id: user.id,
@@ -32,12 +40,13 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
     email: user.email,
     image: user.image ?? null,
     role: normalizeRole(user.role),
+    blocked: user.blocked === true,
   };
 }
 
 export async function requireAuth(nextPath?: string): Promise<SessionUser> {
   const user = await getCurrentUser();
-  if (!user) {
+  if (!user || user.blocked) {
     const query = nextPath ? `?next=${encodeURIComponent(nextPath)}` : "";
     redirect(`/sign-in${query}`);
   }
@@ -61,6 +70,15 @@ export async function requireRole(
   return user;
 }
 
+/** Account, vendor application and shop, fetched from the Express API. */
+export async function getAccountContext(): Promise<AuthMe | null> {
+  try {
+    return await profileApi.me();
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Guard vendor-only features: the user needs the vendor role, an approved
  * application and an active shop. Suspended or stale vendor accounts are sent
@@ -68,15 +86,16 @@ export async function requireRole(
  */
 export async function requireVendorWorkspace() {
   const user = await requireRole(["vendor"]);
+  const me = await getAccountContext();
 
-  const [application, shop] = await Promise.all([
-    getVendorApplicationForUser(user.id),
-    getShopForOwner(user.id),
-  ]);
-
-  if (application?.status !== "APPROVED" || shop?.status !== "active") {
+  if (
+    !me?.application ||
+    me.application.status !== "APPROVED" ||
+    !me.shop ||
+    me.shop.status !== "active"
+  ) {
     redirect("/dashboard/vendor");
   }
 
-  return { user, application, shop };
+  return { user, application: me.application, shop: me.shop };
 }

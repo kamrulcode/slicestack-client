@@ -1,22 +1,26 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ClipboardList, Store } from "lucide-react";
+import { AlertTriangle, ClipboardList, Store } from "lucide-react";
 import { VendorApplicationCard } from "@/components/admin/vendor-application-card";
 import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { buttonVariants } from "@/components/ui/button";
 import { requireRole } from "@/lib/authorization";
-import { getUsersByIds } from "@/lib/users";
-import { listVendorApplications } from "@/lib/vendor-applications";
+import { errorMessage } from "@/lib/api/client";
+import { serverApi } from "@/services/server";
+import type { PlatformUser } from "@/types/admin";
 import {
   VENDOR_APPLICATION_STATUSES,
   VENDOR_STATUS_LABEL,
+  type VendorApplication,
   type VendorApplicationStatus,
 } from "@/types/vendor";
 
 export const metadata: Metadata = {
   title: "Vendors",
 };
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminVendorsPage({
   searchParams,
@@ -30,16 +34,26 @@ export default async function AdminVendorsPage({
     (value) => value === params.status,
   );
 
-  const applications = await listVendorApplications();
-  const filtered = status
-    ? applications.filter((application) => application.status === status)
-    : applications;
-  const applicants = await getUsersByIds(
-    filtered.map((application) => application.userId),
-  );
+  let allApplications: VendorApplication[] = [];
+  let applications: VendorApplication[] = [];
+  let users: PlatformUser[] = [];
+  let loadError: string | null = null;
+
+  try {
+    [allApplications, applications, users] = await Promise.all([
+      serverApi.admin.vendorApplications(),
+      serverApi.admin.vendorApplications(status ?? "all"),
+      serverApi.admin.users(),
+    ]);
+  } catch (error) {
+    loadError = errorMessage(error);
+  }
+
+  const applicants = new Map(users.map((user) => [user.id, user]));
 
   const countFor = (value: VendorApplicationStatus) =>
-    applications.filter((application) => application.status === value).length;
+    allApplications.filter((application) => application.status === value)
+      .length;
 
   return (
     <DashboardPage
@@ -62,7 +76,7 @@ export default async function AdminVendorsPage({
             variant: status ? "outline" : "default",
           })}
         >
-          All ({applications.length})
+          All ({allApplications.length})
         </Link>
         {VENDOR_APPLICATION_STATUSES.map((value) => (
           <Link
@@ -78,7 +92,13 @@ export default async function AdminVendorsPage({
         ))}
       </div>
 
-      {filtered.length === 0 ? (
+      {loadError ? (
+        <EmptyState
+          icon={<AlertTriangle aria-hidden />}
+          title="We could not load vendor applications"
+          description={loadError}
+        />
+      ) : applications.length === 0 ? (
         <EmptyState
           icon={status ? <ClipboardList aria-hidden /> : <Store aria-hidden />}
           title={
@@ -94,9 +114,9 @@ export default async function AdminVendorsPage({
         />
       ) : (
         <div className="flex flex-col gap-4">
-          {filtered.map((application) => (
+          {applications.map((application) => (
             <VendorApplicationCard
-              key={application.id}
+              key={application.userId}
               application={application}
               applicant={applicants.get(application.userId)}
             />
@@ -106,5 +126,3 @@ export default async function AdminVendorsPage({
     </DashboardPage>
   );
 }
-
-export const dynamic = "force-dynamic";

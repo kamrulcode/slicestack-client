@@ -9,13 +9,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatPrice } from "@/lib/format";
 import type { VendorApplication } from "@/types/vendor";
 
-function formatDate(value: Date) {
+function formatDate(value: string | null) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
-  }).format(value);
+  }).format(date);
 }
 
 /**
@@ -168,10 +170,10 @@ function Detail({ label, value }: { label: string; value: string }) {
 
 export function ShopSummaryCard({
   shop,
-  revenue = 0,
+  plan,
 }: {
   shop: { name: string; address: string; phone: string; status: string };
-  revenue?: number;
+  plan?: "free" | "premium";
 }) {
   return (
     <Card>
@@ -182,7 +184,10 @@ export function ShopSummaryCard({
       <CardContent className="grid gap-3 text-sm sm:grid-cols-3">
         <Detail label="Phone" value={shop.phone} />
         <Detail label="Shop status" value={shop.status} />
-        <Detail label="Revenue" value={formatPrice(revenue)} />
+        <Detail
+          label="Plan"
+          value={plan === "premium" ? "Premium" : "Free"}
+        />
       </CardContent>
     </Card>
   );

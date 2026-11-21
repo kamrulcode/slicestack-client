@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ClipboardList, Pizza } from "lucide-react";
-
+import { AlertTriangle, ClipboardList, Pizza, Search } from "lucide-react";
 import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { MenuItemCard } from "@/components/admin/menu-item-card";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { requireRole } from "@/lib/authorization";
-import { getAdminMenuItems } from "@/lib/admin-menu-items";
-import type { MenuItemStatus } from "@/types/menu";
+import { errorMessage } from "@/lib/api/client";
+import { serverApi } from "@/services/server";
+import type { MenuItemStatus, VendorMenuItemRecord } from "@/types/menu";
 
 export const metadata: Metadata = {
   title: "Menu Items",
@@ -29,23 +30,33 @@ const STATUS_LABEL: Record<MenuItemStatus, string> = {
   rejected: "Rejected",
 };
 
+function isStatus(value: string | undefined): value is MenuItemStatus {
+  return value === "approved" || value === "pending" || value === "rejected";
+}
+
 export default async function AdminMenuItemsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>;
+  searchParams: Promise<{ status?: string; search?: string }>;
 }) {
   await requireRole(["admin"], "/dashboard/admin/menu-items");
 
   const params = await searchParams;
+  const selectedStatus = isStatus(params.status) ? params.status : "all";
+  const search = typeof params.search === "string" ? params.search.trim() : "";
 
-  const selectedStatus =
-    MENU_FILTERS.find((filter) => filter.value === params.status)?.value ??
-    "all";
-  const allItems = await getAdminMenuItems();
-  const filteredItems =
-    selectedStatus === "all"
-      ? allItems
-      : allItems.filter((item) => item.status === selectedStatus);
+  let allItems: VendorMenuItemRecord[] = [];
+  let items: VendorMenuItemRecord[] = [];
+  let loadError: string | null = null;
+
+  try {
+    [allItems, items] = await Promise.all([
+      serverApi.admin.menuItems(),
+      serverApi.admin.menuItems({ status: selectedStatus, search }),
+    ]);
+  } catch (error) {
+    loadError = errorMessage(error);
+  }
 
   const countFor = (status: MenuItemStatus) =>
     allItems.filter((item) => item.status === status).length;
@@ -60,19 +71,54 @@ export default async function AdminMenuItemsPage({
         </Link>
       }
     >
+      <form
+        action="/dashboard/admin/menu-items"
+        className="flex flex-col gap-2 sm:flex-row"
+      >
+        {selectedStatus !== "all" ? (
+          <input type="hidden" name="status" value={selectedStatus} />
+        ) : null}
+        <div className="relative flex-1">
+          <Search
+            className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden
+          />
+          <Input
+            name="search"
+            defaultValue={search}
+            placeholder="Search by item, shop or category"
+            className="pl-9"
+            aria-label="Search menu items"
+          />
+        </div>
+        <Button type="submit">Search</Button>
+        {search ? (
+          <Link
+            href={
+              selectedStatus === "all"
+                ? "/dashboard/admin/menu-items"
+                : `/dashboard/admin/menu-items?status=${selectedStatus}`
+            }
+            className={buttonVariants({ variant: "ghost" })}
+          >
+            Clear
+          </Link>
+        ) : null}
+      </form>
+
       <div className="flex flex-wrap gap-2">
         {MENU_FILTERS.map((filter) => {
+          const query = new URLSearchParams();
+          if (filter.value !== "all") query.set("status", filter.value);
+          if (search) query.set("search", search);
+          const suffix = query.toString();
           const count =
             filter.value === "all" ? allItems.length : countFor(filter.value);
 
           return (
             <Link
               key={filter.value}
-              href={
-                filter.value === "all"
-                  ? "/dashboard/admin/menu-items"
-                  : `/dashboard/admin/menu-items?status=${filter.value}`
-              }
+              href={`/dashboard/admin/menu-items${suffix ? `?${suffix}` : ""}`}
               className={buttonVariants({
                 size: "sm",
                 variant:
@@ -85,7 +131,13 @@ export default async function AdminMenuItemsPage({
         })}
       </div>
 
-      {filteredItems.length === 0 ? (
+      {loadError ? (
+        <EmptyState
+          icon={<AlertTriangle aria-hidden />}
+          title="We could not load menu items"
+          description={loadError}
+        />
+      ) : items.length === 0 ? (
         <EmptyState
           icon={
             selectedStatus === "all" ? (
@@ -95,15 +147,17 @@ export default async function AdminMenuItemsPage({
             )
           }
           title={
-            selectedStatus === "all"
-              ? "No menu items yet"
-              : `No ${STATUS_LABEL[selectedStatus].toLowerCase()} menu items`
+            search
+              ? "No items match this search"
+              : selectedStatus === "all"
+                ? "No menu items yet"
+                : `No ${STATUS_LABEL[selectedStatus].toLowerCase()} menu items`
           }
           description="Menu items submitted by vendors will appear here."
         />
       ) : (
         <div className="flex flex-col gap-4">
-          {filteredItems.map((item) => (
+          {items.map((item) => (
             <MenuItemCard key={item._id} item={item} />
           ))}
         </div>
@@ -111,40 +165,3 @@ export default async function AdminMenuItemsPage({
     </DashboardPage>
   );
 }
-
-// import type { Metadata } from "next";
-// import Link from "next/link";
-// import { UtensilsCrossed } from "lucide-react";
-// import { DashboardPage } from "@/components/dashboard/dashboard-page";
-// import { EmptyState } from "@/components/dashboard/empty-state";
-// import { buttonVariants } from "@/components/ui/button";
-// import { requireRole } from "@/lib/authorization";
-
-// export const metadata: Metadata = {
-//   title: "Platform menu items",
-// };
-
-// export default async function AdminMenuItemsPage() {
-//   await requireRole(["admin"], "/dashboard/admin/menu-items");
-
-//   return (
-//     <DashboardPage
-//       title="Menu items"
-//       description="A platform-wide view of every vendor's menu."
-//     >
-//       <EmptyState
-//         icon={<UtensilsCrossed aria-hidden />}
-//         title="Menu moderation is on the way"
-//         description="Vendor menus will be searchable and moderatable from here once the menu module is connected."
-//         action={
-//           <Link
-//             href="/dashboard/admin"
-//             className={buttonVariants({ size: "sm", variant: "outline" })}
-//           >
-//             Back to overview
-//           </Link>
-//         }
-//       />
-//     </DashboardPage>
-//   );
-// }

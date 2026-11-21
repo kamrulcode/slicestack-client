@@ -20,9 +20,9 @@ export type VendorApplication = {
   status: VendorApplicationStatus;
   rejectionReason: string | null;
   reviewedBy: string | null;
-  reviewedAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+  reviewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type ShopStatus = "active" | "suspended";
@@ -37,8 +37,24 @@ export type Shop = {
   phone: string;
   logoUrl: string | null;
   status: ShopStatus;
-  createdAt: Date;
-  updatedAt: Date;
+  plan?: "free" | "premium";
+  premiumUntil?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AuthMe = {
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    image: string | null;
+    role: "customer" | "vendor" | "admin";
+    blocked: boolean;
+    createdAt: string | null;
+  };
+  application: VendorApplication | null;
+  shop: Shop | null;
 };
 
 export const VENDOR_STATUS_LABEL: Record<VendorApplicationStatus, string> = {
