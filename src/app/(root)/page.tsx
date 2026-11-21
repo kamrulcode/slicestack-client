@@ -1,5 +1,4 @@
 import { CategoryGrid } from "@/components/home/category-grid";
-import CustomerReviews from "@/components/home/CustomerReview";
 import { FeaturedPizzas } from "@/components/home/featured-pizzas";
 import { Hero } from "@/components/home/hero";
 import FeaturesSection from "@/components/home/hero-features";
@@ -15,7 +14,6 @@ export default function HomePage() {
       <FeaturedPizzas />
       <CategoryGrid />
       <HowItWorks />
-      <CustomerReviews />
     </>
   );
 }

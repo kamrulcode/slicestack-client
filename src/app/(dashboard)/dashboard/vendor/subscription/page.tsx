@@ -1,5 +1,11 @@
 import type { Metadata } from "next";
-import { AlertTriangle, BadgeCheck, Check, Receipt, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  BadgeCheck,
+  Check,
+  Receipt,
+  Sparkles,
+} from "lucide-react";
 import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { UpgradeButton } from "@/components/vendor/upgrade-button";
@@ -25,7 +31,8 @@ export const metadata: Metadata = {
 const STATUS_STYLES: Record<string, string> = {
   succeeded:
     "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300",
-  pending: "bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-300",
+  pending:
+    "bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-300",
   failed: "bg-red-100 text-red-900 dark:bg-red-500/15 dark:text-red-300",
   refunded: "bg-muted text-muted-foreground",
 };
@@ -53,6 +60,14 @@ export default async function VendorSubscriptionPage({
     subscription = await serverApi.subscriptions.get();
   } catch (error) {
     loadError = errorMessage(error);
+  }
+
+  const { canceled } = await searchParams;
+
+  if (canceled) {
+    console.log(
+      "Order canceled -- continue to shop around and check out when you're ready.",
+    );
   }
 
   const plan = subscription?.plan ?? "free";
@@ -96,16 +111,23 @@ export default async function VendorSubscriptionPage({
                     <Badge variant="outline">Current plan</Badge>
                   ) : null}
                 </CardTitle>
-                <CardDescription>Included with your vendor account.</CardDescription>
+                <CardDescription>
+                  Included with your vendor account.
+                </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col gap-3 text-sm">
                 <ul className="flex flex-col gap-2">
-                  {(subscription?.plans.free.features ?? [
-                    "Up to 3 active menu items",
-                    "Vendor dashboard and order management",
-                  ]).map((feature) => (
+                  {(
+                    subscription?.plans.free.features ?? [
+                      "Up to 3 active menu items",
+                      "Vendor dashboard and order management",
+                    ]
+                  ).map((feature) => (
                     <li key={feature} className="flex items-start gap-2">
-                      <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" aria-hidden />
+                      <Check
+                        className="mt-0.5 size-4 shrink-0 text-emerald-600"
+                        aria-hidden
+                      />
                       {feature}
                     </li>
                   ))}
@@ -125,9 +147,7 @@ export default async function VendorSubscriptionPage({
                 <CardTitle className="flex items-center gap-2">
                   <Sparkles className="size-4 text-primary" aria-hidden />
                   Premium plan
-                  {plan === "premium" ? (
-                    <Badge>Current plan</Badge>
-                  ) : null}
+                  {plan === "premium" ? <Badge>Current plan</Badge> : null}
                 </CardTitle>
                 <CardDescription>
                   {subscription
@@ -141,13 +161,18 @@ export default async function VendorSubscriptionPage({
               </CardHeader>
               <CardContent className="flex flex-col gap-3 text-sm">
                 <ul className="flex flex-col gap-2">
-                  {(subscription?.plans.premium.features ?? [
-                    "Unlimited active menu items",
-                    "Premium vendor badge",
-                    "Featured menu placement",
-                  ]).map((feature) => (
+                  {(
+                    subscription?.plans.premium.features ?? [
+                      "Unlimited active menu items",
+                      "Premium vendor badge",
+                      "Featured menu placement",
+                    ]
+                  ).map((feature) => (
                     <li key={feature} className="flex items-start gap-2">
-                      <Check className="mt-0.5 size-4 shrink-0 text-emerald-600" aria-hidden />
+                      <Check
+                        className="mt-0.5 size-4 shrink-0 text-emerald-600"
+                        aria-hidden
+                      />
                       {feature}
                     </li>
                   ))}
@@ -155,7 +180,10 @@ export default async function VendorSubscriptionPage({
 
                 {plan === "premium" ? (
                   <p className="flex items-center gap-2 text-muted-foreground">
-                    <BadgeCheck className="size-4 text-emerald-600" aria-hidden />
+                    <BadgeCheck
+                      className="size-4 text-emerald-600"
+                      aria-hidden
+                    />
                     Active until{" "}
                     {subscription?.premiumUntil
                       ? formatDateTime(subscription.premiumUntil)
@@ -163,7 +191,9 @@ export default async function VendorSubscriptionPage({
                   </p>
                 ) : (
                   <UpgradeButton
-                    disabled={subscription ? !subscription.paymentsEnabled : true}
+                    disabled={
+                      subscription ? !subscription.paymentsEnabled : true
+                    }
                   />
                 )}
                 {subscription && !subscription.paymentsEnabled ? (
@@ -221,6 +251,13 @@ export default async function VendorSubscriptionPage({
               )}
             </CardContent>
           </Card>
+          <form action="/api/checkout_sessions" method="POST">
+            <section>
+              <button type="submit" role="link">
+                Checkout
+              </button>
+            </section>
+          </form>
         </>
       )}
     </DashboardPage>
