@@ -20,6 +20,7 @@ import { UserTooltip } from "@/components/utils/Tooltip";
 import { Settings } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 export function NavUser({
   user,
 }: {
@@ -27,6 +28,7 @@ export function NavUser({
     name: string;
     email: string;
     image: string;
+    role: string;
   };
 }) {
   const router = useRouter();
@@ -87,7 +89,9 @@ export function NavUser({
         <DropdownMenuSeparator />
 
         <DropdownMenuGroup>
-          <DropdownMenuItem>
+          <DropdownMenuItem
+            render={<Link href={`/dashboard/${user.role}`}></Link>}
+          >
             <IconUserCircle />
             Dashboard
           </DropdownMenuItem>

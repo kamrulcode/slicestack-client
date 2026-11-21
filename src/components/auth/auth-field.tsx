@@ -42,12 +42,10 @@ export function AuthField({
       >
         {label}
       </Label>
-      <div>
+      <div className="relative">
         <div
           className={
-            type === "file"
-              ? "flex items-center gap-3"
-              : undefined
+            type === "file" ? "flex items-top gap-3 relative" : undefined
           }
         >
           <div
@@ -68,7 +66,7 @@ export function AuthField({
               className={cn(
                 type === "file"
                   ? "absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                  : "h-12 rounded-lg border-input bg-card px-4 text-base shadow-none placeholder:text-muted-foreground/60 md:text-base",
+                  : "h-12 rounded-lg border-input bg-card px-4 text-base shadow-none placeholder:text-muted-foreground/60 md:text-base top-0",
                 endAdornment && "pr-12",
                 className,
               )}
@@ -97,21 +95,23 @@ export function AuthField({
               </div>
             )}
           </div>
-          {type === "file" && selectedFile && (
-            <span className="min-w-0 truncate text-sm text-muted-foreground">
-              {selectedFile.name}
-            </span>
+          {type === "file" && previewUrl && selectedFile && (
+            <Image
+              src={previewUrl}
+              alt={`Preview of ${selectedFile.name}`}
+              width={96}
+              height={96}
+              unoptimized
+              className="mt-3 size-24 rounded-lg object-cover top-0"
+            />
           )}
         </div>
-        {type === "file" && previewUrl && selectedFile && (
-          <Image
-            src={previewUrl}
-            alt={`Preview of ${selectedFile.name}`}
-            width={96}
-            height={96}
-            unoptimized
-            className="mt-3 size-24 rounded-lg object-cover"
-          />
+
+        {type === "file" && selectedFile && (
+          <span className="min-w-0 truncate text-sm text-muted-foreground absolute bottom-8">
+            {selectedFile?.name &&
+              `${selectedFile.name.slice(0, 3)}...${selectedFile.name.slice(-6)}`}
+          </span>
         )}
       </div>
     </div>

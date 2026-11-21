@@ -23,13 +23,19 @@ export const metadata: Metadata = {
 
 const FILTERS = ["all", ...ROLES] as const;
 
-function formatDate(value: Date | null) {
+function formatDate(value: Date | string | null | undefined) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("en-US", { dateStyle: "medium" }).format(
-    value,
-  );
-}
 
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+}
 export default async function AdminUsersPage({
   searchParams,
 }: {

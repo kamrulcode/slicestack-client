@@ -3,11 +3,9 @@ import Link from "next/link";
 import { SectionHeading } from "@/components/common/section-heading";
 import { Reveal } from "@/components/common/reveal";
 import { buttonVariants } from "@/components/ui/button";
-import {
-  getPizzasByCategory,
-  menuCategories,
-  pizzaCategoryOrder,
-} from "@/data/menu";
+import { getMenuItemsByCategory, menuCategories } from "@/data/menu";
+import { getPublicMenuItems } from "@/data/action/getData";
+import { MenuItemCard } from "@/components/menu/pizza-card";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -16,13 +14,14 @@ export const metadata: Metadata = {
     "Explore classic, vegetarian, meat lovers and specialty pizzas from SliceStack.",
 };
 
-export default function MenuPage() {
-  const groups = pizzaCategoryOrder.flatMap((id) => {
-    const category = menuCategories.find((item) => item.id === id);
-    const items = getPizzasByCategory(id);
-
-    return category && items.length > 0 ? [{ category, items }] : [];
-  });
+export default async function MenuPage() {
+  const menuItems = await getPublicMenuItems();
+  const groups = menuCategories
+    .map((category) => ({
+      category,
+      items: getMenuItemsByCategory(menuItems, category.name),
+    }))
+    .filter(({ items }) => items.length > 0);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
@@ -56,13 +55,23 @@ export default function MenuPage() {
       </Reveal>
 
       <div className="mt-14 space-y-16">
-        {groups.map(({ category }) => (
+        {groups.length === 0 && (
+          <p className="rounded-xl border border-dashed border-border px-6 py-10 text-center text-muted-foreground">
+            No menu items are available right now. Please check back soon.
+          </p>
+        )}
+        {groups.map(({ category, items }) => (
           <Reveal key={category.id}>
             <section id={category.id} className="scroll-mt-24">
               <SectionHeading
                 title={category.name}
                 description={category.blurb}
               />
+              <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {items.map((item) => (
+                  <MenuItemCard key={item._id} menuItem={item} />
+                ))}
+              </div>
             </section>
           </Reveal>
         ))}

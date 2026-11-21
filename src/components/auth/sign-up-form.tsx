@@ -387,80 +387,76 @@ export function SignUpForm({
               {errors.email}
             </p>
           )}
-          <AuthField
-            id="sign-up-password"
-            name="password"
-            label="Password"
-            type={isVisible ? "text" : "password"}
-            autoComplete="new-password"
-            placeholder="Enter password"
-            required
-            minLength={6}
-            disabled={vendorAccountCreated}
-            aria-invalid={Boolean(errors.password?.length)}
-            aria-describedby={
-              errors.password?.length
-                ? "sign-up-password-error"
-                : "sign-up-password-hint"
-            }
-            endAdornment={
-              <Button
-                type="button"
-                aria-label={isVisible ? "Hide password" : "Show password"}
-                aria-pressed={isVisible}
-                aria-controls="sign-up-password"
-                size="icon"
-                variant="ghost"
-                className="size-9 sm:size-10"
-                onClick={() => setIsVisible((visible) => !visible)}
-              >
-                {isVisible ? (
-                  <EyeClosed className="size-4" aria-hidden />
-                ) : (
-                  <Eye className="size-4" aria-hidden />
-                )}
-              </Button>
-            }
-            onChange={(event) => {
-              if (hasSubmitted && !vendorAccountCreated) {
-                const passwordErrors = validatePassword(
-                  event.currentTarget.value,
-                );
-                setErrors((current) => ({
-                  ...current,
-                  password:
-                    passwordErrors.length > 0 ? passwordErrors : undefined,
-                }));
+          <div className="flex gap-4">
+            <AuthField
+              id="sign-up-password"
+              name="password"
+              label="Password"
+              type={isVisible ? "text" : "password"}
+              autoComplete="new-password"
+              placeholder="Enter password"
+              required
+              minLength={6}
+              disabled={vendorAccountCreated}
+              aria-invalid={Boolean(errors.password?.length)}
+              aria-describedby={
+                errors.password?.length
+                  ? "sign-up-password-error"
+                  : "sign-up-password-hint"
               }
-            }}
-          />
-          <p
-            id="sign-up-password-hint"
-            className="-mt-2 text-sm text-muted-foreground"
-          >
-            Use at least 6 characters, with at least one uppercase and one
-            lowercase letter.
-          </p>
-          {errors.password && (
-            <div
-              id="sign-up-password-error"
-              className="-mt-2 space-y-1 text-sm text-destructive"
-            >
-              {errors.password.map((error) => (
-                <p key={error}>{error}</p>
-              ))}
-            </div>
-          )}
+              endAdornment={
+                <Button
+                  type="button"
+                  aria-label={isVisible ? "Hide password" : "Show password"}
+                  aria-pressed={isVisible}
+                  aria-controls="sign-up-password"
+                  size="icon"
+                  variant="ghost"
+                  className="size-9 sm:size-10"
+                  onClick={() => setIsVisible((visible) => !visible)}
+                >
+                  {isVisible ? (
+                    <EyeClosed className="size-4" aria-hidden />
+                  ) : (
+                    <Eye className="size-4" aria-hidden />
+                  )}
+                </Button>
+              }
+              onChange={(event) => {
+                if (hasSubmitted && !vendorAccountCreated) {
+                  const passwordErrors = validatePassword(
+                    event.currentTarget.value,
+                  );
+                  setErrors((current) => ({
+                    ...current,
+                    password:
+                      passwordErrors.length > 0 ? passwordErrors : undefined,
+                  }));
+                }
+              }}
+            />
 
-          <AuthField
-            id="sign-up-image"
-            name="image"
-            type="file"
-            accept="image/*"
-            label="Profile image (optional)"
-            disabled={vendorAccountCreated}
-            className="w-25"
-          />
+            {errors.password && (
+              <div
+                id="sign-up-password-error"
+                className="-mt-2 space-y-1 text-sm text-destructive"
+              >
+                {errors.password.map((error) => (
+                  <p key={error}>{error}</p>
+                ))}
+              </div>
+            )}
+
+            <AuthField
+              id="sign-up-image"
+              name="image"
+              type="file"
+              accept="image/*"
+              label="Profile image (optional)"
+              disabled={vendorAccountCreated}
+              className="w-25"
+            />
+          </div>
 
           <div
             className={cn(

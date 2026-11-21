@@ -1,10 +1,10 @@
-export type PizzaCategoryId =
+export type MenuCategoryId =
   | "classic"
   | "vegetarian"
   | "meat-lovers"
-  | "specialty";
-
-export type MenuCategoryId = PizzaCategoryId | "sides" | "beverages";
+  | "specialty"
+  | "sides"
+  | "beverages";
 
 export type PizzaArtVariant =
   | "pepperoni"
@@ -14,6 +14,8 @@ export type PizzaArtVariant =
   | "bbq"
   | "margherita";
 
+export type MenuItemStatus = "pending" | "approved" | "rejected";
+
 export interface MenuCategory {
   id: MenuCategoryId;
   name: string;
@@ -22,26 +24,38 @@ export interface MenuCategory {
   href: string;
 }
 
-export interface Pizza {
-  slug: string;
-  name: string;
-  categoryId: PizzaCategoryId;
-  price: number;
-  art: PizzaArtVariant;
-  description: string;
-}
-
-export interface VendorMenuItemRecord {
+export interface MenuItem {
   _id: string;
   itemName: string;
   category: string;
-  description: string;
   price: number;
+  images: string[];
+  description: string;
   location?: string;
-  images?: string[] | null;
-  status?: string;
+  status?: MenuItemStatus;
   isAvailable?: boolean;
   logoUrl?: string | null;
   shopName?: string;
+}
+
+export interface VendorMenuItemRecord extends MenuItem {
+  ownerId: string;
+}
+
+export interface MenuItem {
+  _id: string;
+  itemName: string;
+  category: string;
+  price: number;
+  images: string[];
+  description: string;
+  location?: string;
+  status?: MenuItemStatus;
+  isAvailable?: boolean;
+  logoUrl?: string | null;
+  shopName?: string;
+}
+
+export interface VendorMenuItemRecord extends MenuItem {
   ownerId: string;
 }

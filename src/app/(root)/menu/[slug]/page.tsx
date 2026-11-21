@@ -2,41 +2,42 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, MapPin, Sparkles } from "lucide-react";
-import { PizzaArt } from "@/components/brand/pizza-art";
+import Image from "next/image";
 import { Reveal } from "@/components/common/reveal";
 import { AddToOrderButton } from "@/components/menu/add-to-order-button";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { getCategoryName, getPizzaBySlug, pizzas } from "@/data/menu";
+import { getCategoryName } from "@/data/menu";
+import { getPublicMenuItems } from "@/data/action/getData";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
-
-export function generateStaticParams() {
-  return pizzas.map((pizza) => ({ slug: pizza.slug }));
-}
 
 export async function generateMetadata({
   params,
 }: PageProps<"/menu/[slug]">): Promise<Metadata> {
   const { slug } = await params;
-  const pizza = getPizzaBySlug(slug);
+  const menuItems = await getPublicMenuItems();
+  const menuItem = menuItems.find((item) => item._id === slug);
 
-  if (!pizza) {
-    return { title: "Pizza not found" };
+  if (!menuItem) {
+    return { title: "Menu item not found" };
   }
 
   return {
-    title: pizza.name,
-    description: pizza.description,
+    title: menuItem.itemName,
+    description: menuItem.description,
   };
 }
 
-export default async function PizzaPage({ params }: PageProps<"/menu/[slug]">) {
+export default async function MenuItemPage({
+  params,
+}: PageProps<"/menu/[slug]">) {
   const { slug } = await params;
-  const pizza = getPizzaBySlug(slug);
+  const menuItems = await getPublicMenuItems();
+  const menuItem = menuItems.find((item) => item._id === slug);
 
-  if (!pizza) {
+  if (!menuItem) {
     notFound();
   }
 
@@ -53,43 +54,53 @@ export default async function PizzaPage({ params }: PageProps<"/menu/[slug]">) {
       <div className="mt-6 grid items-center gap-8 lg:grid-cols-[1.05fr_1fr] lg:gap-12">
         <Reveal y={20}>
           <div className="relative overflow-hidden rounded-3xl border bg-secondary/40 shadow-sm">
-            <PizzaArt variant={pizza.art} className="aspect-[5/4]" />
+            <div className="relative aspect-[5/4]">
+              <Image
+                src={menuItem.images[0]}
+                alt={menuItem.itemName}
+                fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                unoptimized
+                className="object-cover"
+              />
+            </div>
             <Badge
               variant="secondary"
               className="absolute top-4 left-4 shadow-sm backdrop-blur"
             >
-              {getCategoryName(pizza.categoryId)}
+              {getCategoryName(menuItem.category)}
             </Badge>
           </div>
         </Reveal>
 
         <Reveal className="flex flex-col" delay={0.1}>
           <p className="text-xs font-semibold tracking-[0.18em] text-primary uppercase sm:text-[13px]">
-            {getCategoryName(pizza.categoryId)}
+            {getCategoryName(menuItem.category)}
           </p>
           <h1 className="mt-3 font-heading text-4xl font-semibold tracking-tight text-balance sm:text-5xl">
-            {pizza.name}
+            {menuItem.itemName}
           </h1>
           <p className="mt-4 leading-relaxed text-muted-foreground">
-            {pizza.description}
+            {menuItem.description}
           </p>
 
           <p className="mt-5 flex items-center gap-1.5 text-xs text-muted-foreground sm:text-[13px]">
             <MapPin className="size-4" aria-hidden />
-            SliceStack partner · Location not listed
+            {menuItem.shopName ?? "SliceStack partner"} ·{" "}
+            {menuItem.location ?? "Location not listed"}
           </p>
 
           <Separator className="my-6" />
 
           <div className="flex items-baseline gap-2">
             <span className="font-heading text-3xl font-semibold tracking-tight">
-              {formatPrice(pizza.price)}
+              {formatPrice(menuItem.price)}
             </span>
-            <span className="text-sm text-muted-foreground">per pizza</span>
+            <span className="text-sm text-muted-foreground">per item</span>
           </div>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <AddToOrderButton price={pizza.price} />
+            <AddToOrderButton price={menuItem.price} />
             <Link
               href="/menu"
               className={cn(

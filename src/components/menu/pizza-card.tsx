@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { ArrowRight, MapPin } from "lucide-react";
-import { PizzaArt } from "@/components/brand/pizza-art";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -12,13 +11,14 @@ import {
 import { getCategoryName } from "@/data/menu";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import type { Pizza } from "@/types/menu";
+import type { MenuItem } from "@/types/menu";
+import Image from "next/image";
 
-export function PizzaCard({
-  pizza,
+export function MenuItemCard({
+  menuItem,
   className,
 }: {
-  pizza: Pizza;
+  menuItem: MenuItem;
   className?: string;
 }) {
   return (
@@ -28,19 +28,16 @@ export function PizzaCard({
         className,
       )}
     >
-      <div className="relative aspect-[5/4] overflow-hidden bg-secondary/60">
-        <PizzaArt
-          variant={pizza.art}
-          className="transition-transform duration-500 ease-out motion-safe:group-hover:scale-[1.04]"
-        />
+      <div className="relative aspect-5/4 overflow-hidden bg-secondary/60">
+        <Image src={menuItem.images[0]} alt={menuItem.itemName} fill />
       </div>
 
       <CardHeader className="gap-1.5 px-4 pt-4">
         <p className="text-xs font-semibold tracking-[0.14em] text-primary uppercase sm:text-[13px]">
-          {getCategoryName(pizza.categoryId)}
+          {getCategoryName(menuItem.category)}
         </p>
         <CardTitle className="font-sans text-xl font-bold tracking-tight sm:text-[22px]">
-          {pizza.name}
+          {menuItem.itemName}
         </CardTitle>
       </CardHeader>
 
@@ -61,11 +58,11 @@ export function PizzaCard({
 
       <CardFooter className="mt-4 justify-between border-t bg-muted/30 px-4 py-3">
         <p className="font-heading text-xl font-semibold tracking-tight">
-          {formatPrice(pizza.price)}
+          {formatPrice(menuItem.price)}
         </p>
         <Link
-          href={`/menu/${pizza.slug}`}
-          aria-label={`View details for ${pizza.name}`}
+          href={`/menu/${menuItem._id}`}
+          aria-label={`View details for ${menuItem.itemName}`}
           className={cn(
             buttonVariants({ variant: "outline", size: "sm" }),
             "gap-1.5",

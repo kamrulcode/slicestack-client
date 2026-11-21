@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
-import { Eye, Pencil, Trash2 } from "lucide-react";
+import { Eye, Pencil } from "lucide-react";
 import { toast } from "sonner";
 import { PizzaArt } from "@/components/brand/pizza-art";
 import { Badge } from "@/components/ui/badge";

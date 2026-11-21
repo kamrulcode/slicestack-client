@@ -2,12 +2,14 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { SectionHeading } from "@/components/common/section-heading";
 import { Reveal, RevealGroup, RevealItem } from "@/components/common/reveal";
-import { PizzaCard } from "@/components/menu/pizza-card";
+import { MenuItemCard } from "@/components/menu/pizza-card";
 import { buttonVariants } from "@/components/ui/button";
-import { pizzas } from "@/data/menu";
-import { cn } from "@/lib/utils";
 
-export function FeaturedPizzas() {
+import { cn } from "@/lib/utils";
+import { getPublicMenuItems } from "@/data/action/getData";
+
+export async function FeaturedPizzas() {
+  const menuItems = await getPublicMenuItems();
   return (
     <section id="menu" className="scroll-mt-24">
       <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
@@ -31,9 +33,9 @@ export function FeaturedPizzas() {
         </Reveal>
 
         <RevealGroup className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {pizzas.map((pizza) => (
-            <RevealItem key={pizza.slug} className="h-full">
-              <PizzaCard pizza={pizza} />
+          {menuItems.map((menuItem) => (
+            <RevealItem key={menuItem._id} className="h-full">
+              <MenuItemCard menuItem={menuItem} />
             </RevealItem>
           ))}
         </RevealGroup>
