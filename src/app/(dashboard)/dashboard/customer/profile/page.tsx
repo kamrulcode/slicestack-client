@@ -23,7 +23,10 @@ export default async function CustomerProfilePage() {
       description="Your SliceStack account details."
     >
       <div className="grid gap-6 lg:grid-cols-2">
-        <AccountProfileCard user={user} />
+        <AccountProfileCard
+          key={`${user.id}-${user.name}-${user.email}-${user.image ?? ""}`}
+          user={user}
+        />
 
         <div className="flex flex-col gap-6">
           <VendorApplicationStatusCard application={application} />

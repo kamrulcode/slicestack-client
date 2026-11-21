@@ -18,6 +18,24 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
+## Account profile email changes
+
+Customers, vendors, and admins can update their name and profile photo. Email
+changes take effect only after verification. Verified accounts confirm at the
+current email first, then at the new email. Configure these SMTP variables in
+the Next.js app environment to enable email changes:
+
+```env
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=
+SMTP_PASS=
+MAIL_FROM="SliceStack <no-reply@slicestack.app>"
+```
+
+Profile roles are read-only and managed by the server.
+
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
 ## Learn More

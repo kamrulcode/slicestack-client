@@ -16,7 +16,10 @@ export default async function AdminProfilePage() {
       description="Your SliceStack administrator account details."
     >
       <div className="max-w-2xl">
-        <AccountProfileCard user={user} />
+        <AccountProfileCard
+          key={`${user.id}-${user.name}-${user.email}-${user.image ?? ""}`}
+          user={user}
+        />
       </div>
     </DashboardPage>
   );

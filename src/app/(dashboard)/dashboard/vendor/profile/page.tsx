@@ -27,7 +27,10 @@ export default async function VendorProfilePage() {
       description="Your SliceStack account and shop details."
     >
       <div className="grid gap-6 lg:grid-cols-2">
-        <AccountProfileCard user={user} />
+        <AccountProfileCard
+          key={`${user.id}-${user.name}-${user.email}-${user.image ?? ""}`}
+          user={user}
+        />
         <ShopSummaryCard shop={shop} />
         {application ? <VendorApplicationSummary application={application} /> : null}
       </div>
