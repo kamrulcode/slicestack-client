@@ -79,6 +79,11 @@ export interface SubscriptionPlan {
 export interface TransactionRecord {
   _id: string;
   stripeSessionId?: string;
+  stripeSubscriptionId?: string;
+  stripeSubscriptionStatus?: string;
+  stripeCustomerId?: string;
+  stripeInvoiceId?: string;
+  stripePaymentIntentId?: string;
   vendorId: string;
   shopId?: string;
   vendorName?: string;

@@ -16,10 +16,7 @@ import {
 } from "@/components/ui/card";
 import { requireRole } from "@/lib/authorization";
 import { ApiError } from "@/types/api";
-import {
-  formatDateTime,
-  formatDeliveryDate,
-} from "@/lib/order-format";
+import { formatDateTime, formatDeliveryDate } from "@/lib/order-format";
 import { formatPrice } from "@/lib/format";
 import { serverApi } from "@/services/server";
 import type { Order } from "@/types/order";
@@ -100,7 +97,11 @@ export default async function CustomerOrderDetailPage({
 
           <Link
             href={`/menu/${order.menuItemId}`}
-            className={buttonVariants({ variant: "outline", size: "sm", className: "w-fit" })}
+            className={buttonVariants({
+              variant: "outline",
+              size: "sm",
+              className: "w-fit",
+            })}
           >
             View the menu item
           </Link>
@@ -157,7 +158,7 @@ function Detail({
         <span className="[&_svg]:size-3.5">{icon}</span>
         {label}
       </p>
-      <p className="mt-1 break-words">{value}</p>
+      <p className="mt-1 wrap-break-word">{value}</p>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import type { SubscriptionState } from "@/types/order";
 export function createSubscriptionService(request: ApiFetcher) {
   return {
     get() {
-      return request<SubscriptionState>("/api/vendor/subscription");
+      return request<SubscriptionState>(`/api/vendor/subscription`);
     },
 
     checkout() {
@@ -13,6 +13,19 @@ export function createSubscriptionService(request: ApiFetcher) {
         "/api/vendor/subscription/checkout",
         { method: "POST" },
       );
+    },
+
+    verify(sessionId: string) {
+      return request<{
+        ok: boolean;
+        paymentStatus: string;
+        sessionStatus: string;
+        plan: string;
+        transaction: import("@/types/order").TransactionRecord | null;
+      }>("/api/vendor/subscription/verify", {
+        method: "POST",
+        body: { session_id: sessionId },
+      });
     },
   };
 }

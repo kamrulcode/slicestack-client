@@ -96,9 +96,9 @@ function toVendorApplication(doc: VendorApplicationDoc): VendorApplication {
     status: doc.status,
     rejectionReason: doc.rejectionReason ?? null,
     reviewedBy: doc.reviewedBy ?? null,
-    reviewedAt: doc.reviewedAt ?? null,
-    createdAt: doc.createdAt,
-    updatedAt: doc.updatedAt,
+    reviewedAt: doc.reviewedAt?.toISOString() ?? null,
+    createdAt: doc.createdAt.toISOString(),
+    updatedAt: doc.updatedAt.toISOString(),
   };
 }
 
@@ -113,8 +113,8 @@ function toShop(doc: ShopDoc): Shop {
     phone: doc.phone,
     logoUrl: doc.logoUrl ?? null,
     status: doc.status,
-    createdAt: doc.createdAt,
-    updatedAt: doc.updatedAt,
+    createdAt: doc.createdAt.toISOString(),
+    updatedAt: doc.updatedAt.toISOString(),
   };
 }
 

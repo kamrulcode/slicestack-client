@@ -97,8 +97,9 @@ export default async function AdminTransactionsPage() {
                   <th className="py-2 pr-3 font-semibold">Plan</th>
                   <th className="py-2 pr-3 font-semibold">Amount</th>
                   <th className="py-2 pr-3 font-semibold">Status</th>
-                  <th className="py-2 pr-3 font-semibold">Created</th>
-                  <th className="py-2 font-semibold">Session</th>
+                  <th className="py-2 pr-3 font-semibold">Transaction ID</th>
+                  <th className="py-2 pr-3 font-semibold">Date</th>
+                  <th className="py-2 font-semibold">Stripe details</th>
                 </tr>
               </thead>
               <tbody>
@@ -129,13 +130,45 @@ export default async function AdminTransactionsPage() {
                         {transaction.status}
                       </Badge>
                     </td>
-                    <td className="py-3 pr-3 text-muted-foreground">
-                      {formatDateTime(transaction.createdAt)}
+                    <td className="py-3 pr-3 font-mono text-xs text-muted-foreground">
+                      {transaction.stripePaymentIntentId ||
+                        transaction.stripeSessionId ||
+                        transaction._id}
                     </td>
-                    <td className="py-3 font-mono text-xs text-muted-foreground">
-                      {transaction.stripeSessionId
-                        ? `${transaction.stripeSessionId.slice(0, 12)}…`
-                        : "—"}
+                    <td className="py-3 pr-3 text-xs text-muted-foreground">
+                      <p>Created {formatDateTime(transaction.createdAt)}</p>
+                      {transaction.paidAt ? (
+                        <p>Paid {formatDateTime(transaction.paidAt)}</p>
+                      ) : null}
+                    </td>
+                    <td className="max-w-72 py-3 font-mono text-[10px] break-all text-muted-foreground">
+                      {transaction.stripeSessionId ? (
+                        <p>Session: {transaction.stripeSessionId}</p>
+                      ) : null}
+                      {transaction.stripeSubscriptionId ? (
+                        <p>
+                          Subscription: {transaction.stripeSubscriptionId}
+                          {transaction.stripeSubscriptionStatus
+                            ? ` (${transaction.stripeSubscriptionStatus})`
+                            : ""}
+                        </p>
+                      ) : null}
+                      {transaction.stripeInvoiceId ? (
+                        <p>Invoice: {transaction.stripeInvoiceId}</p>
+                      ) : null}
+                      {transaction.stripePaymentIntentId ? (
+                        <p>Payment: {transaction.stripePaymentIntentId}</p>
+                      ) : null}
+                      {transaction.stripeCustomerId ? (
+                        <p>Customer: {transaction.stripeCustomerId}</p>
+                      ) : null}
+                      {!transaction.stripeSessionId &&
+                      !transaction.stripeSubscriptionId &&
+                      !transaction.stripeInvoiceId &&
+                      !transaction.stripePaymentIntentId &&
+                      !transaction.stripeCustomerId
+                        ? "—"
+                        : null}
                     </td>
                   </tr>
                 ))}

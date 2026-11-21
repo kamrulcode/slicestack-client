@@ -9,6 +9,7 @@ import {
 import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { UpgradeButton } from "@/components/vendor/upgrade-button";
+import { PaymentVerifier } from "@/components/vendor/payment-verifier";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -52,22 +53,17 @@ export default async function VendorSubscriptionPage({
   await requireVendorWorkspace();
   const params = await searchParams;
   const payment = typeof params.payment === "string" ? params.payment : null;
+  const sessionId =
+    typeof params.session_id === "string" ? params.session_id : null;
 
   let subscription: SubscriptionState | null = null;
   let loadError: string | null = null;
 
   try {
     subscription = await serverApi.subscriptions.get();
+    console.log(subscription);
   } catch (error) {
     loadError = errorMessage(error);
-  }
-
-  const { canceled } = await searchParams;
-
-  if (canceled) {
-    console.log(
-      "Order canceled -- continue to shop around and check out when you're ready.",
-    );
   }
 
   const plan = subscription?.plan ?? "free";
@@ -87,6 +83,9 @@ export default async function VendorSubscriptionPage({
           Payment received. Premium activates as soon as Stripe confirms the
           payment — refresh in a moment if the badge still shows Free.
         </div>
+      ) : null}
+      {payment === "success" && sessionId ? (
+        <PaymentVerifier sessionId={sessionId} />
       ) : null}
       {payment === "cancelled" ? (
         <div className="mb-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
@@ -251,13 +250,6 @@ export default async function VendorSubscriptionPage({
               )}
             </CardContent>
           </Card>
-          <form action="/api/checkout_sessions" method="POST">
-            <section>
-              <button type="submit" role="link">
-                Checkout
-              </button>
-            </section>
-          </form>
         </>
       )}
     </DashboardPage>

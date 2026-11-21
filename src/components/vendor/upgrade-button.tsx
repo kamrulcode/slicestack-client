@@ -29,7 +29,7 @@ export function UpgradeButton({ disabled }: { disabled?: boolean }) {
       ) : (
         <CreditCard className="size-4" aria-hidden />
       )}
-      {isLoading ? "Opening checkout..." : "Upgrade to Premium"}
+      {isLoading ? "Opening checkout..." : "Subscribe to Premium"}
     </Button>
   );
 }
