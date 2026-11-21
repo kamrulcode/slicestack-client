@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { errorMessage } from "@/lib/api/client";
 import { subscriptionService } from "@/services/subscriptions.service";
 
-export function UpgradeButton({ disabled }: { disabled?: boolean }) {
+export function UpgradeButton({
+  disabled,
+  pending = false,
+}: {
+  disabled?: boolean;
+  pending?: boolean;
+}) {
   const [isLoading, setIsLoading] = useState(false);
 
   async function upgrade() {
@@ -29,7 +35,11 @@ export function UpgradeButton({ disabled }: { disabled?: boolean }) {
       ) : (
         <CreditCard className="size-4" aria-hidden />
       )}
-      {isLoading ? "Opening checkout..." : "Subscribe to Premium"}
+      {isLoading
+        ? "Opening checkout..."
+        : pending
+          ? "Payment pending"
+          : "Subscribe to Premium"}
     </Button>
   );
 }

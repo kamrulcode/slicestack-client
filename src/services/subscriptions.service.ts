@@ -15,16 +15,20 @@ export function createSubscriptionService(request: ApiFetcher) {
       );
     },
 
-    verify(sessionId: string) {
+    verify(sessionId: string, cancelCheckout = false) {
       return request<{
         ok: boolean;
         paymentStatus: string;
         sessionStatus: string;
+        transactionStatus: "pending" | "succeeded" | "failed" | "refunded";
         plan: string;
         transaction: import("@/types/order").TransactionRecord | null;
       }>("/api/vendor/subscription/verify", {
         method: "POST",
-        body: { session_id: sessionId },
+        body: {
+          session_id: sessionId,
+          cancel_checkout: cancelCheckout,
+        },
       });
     },
   };

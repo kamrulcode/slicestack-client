@@ -67,6 +67,9 @@ export default async function VendorSubscriptionPage({
   }
 
   const plan = subscription?.plan ?? "free";
+  const pendingPayment = subscription?.transactions.find(
+    (transaction) => transaction.status === "pending",
+  );
   const usage = subscription
     ? subscription.itemLimit === null
       ? `${subscription.activeItems} active items`
@@ -78,18 +81,23 @@ export default async function VendorSubscriptionPage({
       title="Subscription"
       description="Your SliceStack vendor plan and billing."
     >
-      {payment === "success" ? (
-        <div className="mb-5 rounded-xl border border-emerald-300 bg-emerald-50 p-4 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200">
-          Payment received. Premium activates as soon as Stripe confirms the
-          payment — refresh in a moment if the badge still shows Free.
+      {(payment === "success" && sessionId) || payment === "cancelled" ? (
+        <PaymentVerifier
+          sessionId={sessionId ?? undefined}
+          returnState={payment}
+        />
+      ) : null}
+      {payment === "cancelled" && !sessionId ? (
+        <div className="mb-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
+          Checkout was cancelled. We are checking the payment status with
+          Stripe.
         </div>
       ) : null}
-      {payment === "success" && sessionId ? (
-        <PaymentVerifier sessionId={sessionId} />
-      ) : null}
-      {payment === "cancelled" ? (
+      {pendingPayment ? (
         <div className="mb-5 rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200">
-          Checkout was cancelled. Your plan has not changed.
+          Payment pending. Your Premium plan will activate after Stripe
+          confirms payment. A new checkout cannot be started while this payment
+          is being resolved.
         </div>
       ) : null}
 
@@ -190,9 +198,10 @@ export default async function VendorSubscriptionPage({
                   </p>
                 ) : (
                   <UpgradeButton
-                    disabled={
-                      subscription ? !subscription.paymentsEnabled : true
-                    }
+                    disabled={subscription
+                      ? !subscription.paymentsEnabled || Boolean(pendingPayment)
+                      : true}
+                    pending={Boolean(pendingPayment)}
                   />
                 )}
                 {subscription && !subscription.paymentsEnabled ? (

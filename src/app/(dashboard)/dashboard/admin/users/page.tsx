@@ -49,9 +49,11 @@ export default async function AdminUsersPage({
   const admin = await requireRole(["admin"], "/dashboard/admin/users");
 
   const params = await searchParams;
-  const role: (typeof FILTERS)[number] =
-    params.role && FILTERS.includes(params.role as (typeof FILTERS)[number])
-      ? (params.role as (typeof FILTERS)[number])
+  type UserRoleFilter = (typeof FILTERS)[number];
+
+  const role: UserRoleFilter =
+    params.role && FILTERS.includes(params.role as UserRoleFilter)
+      ? (params.role as UserRoleFilter)
       : "all";
   const search = typeof params.search === "string" ? params.search.trim() : "";
 

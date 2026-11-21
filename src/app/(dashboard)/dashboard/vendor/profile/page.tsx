@@ -1,7 +1,17 @@
 import type { Metadata } from "next";
-import { ShopSummaryCard, VendorApplicationSummary } from "@/components/vendor/vendor-application-status";
+import { AccountProfileCard } from "@/components/dashboard/account-profile-card";
 import { DashboardPage } from "@/components/dashboard/dashboard-page";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ShopSummaryCard,
+  VendorApplicationSummary,
+} from "@/components/vendor/vendor-application-status";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { requireVendorWorkspace } from "@/lib/authorization";
 
 export const metadata: Metadata = {
@@ -9,18 +19,18 @@ export const metadata: Metadata = {
 };
 
 export default async function VendorProfilePage() {
-  const { application, shop } = await requireVendorWorkspace();
+  const { user, application, shop } = await requireVendorWorkspace();
 
   return (
     <DashboardPage
-      title="Shop profile"
-      description="These are the details customers see on your storefront."
+      title="My profile"
+      description="Your SliceStack account and shop details."
     >
       <div className="grid gap-6 lg:grid-cols-2">
+        <AccountProfileCard user={user} />
         <ShopSummaryCard shop={shop} />
         {application ? <VendorApplicationSummary application={application} /> : null}
       </div>
-
       <Card>
         <CardHeader>
           <CardTitle>Editing shop details</CardTitle>

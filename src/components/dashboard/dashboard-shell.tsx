@@ -50,11 +50,12 @@ const NAV_BY_ROLE: Record<SessionUser["role"], NavItem[]> = {
     { label: "Overview", href: "/dashboard/vendor", icon: LayoutDashboard, exact: true },
     { label: "Menu items", href: "/dashboard/vendor/menu-items", icon: UtensilsCrossed },
     { label: "Orders", href: "/dashboard/vendor/orders", icon: ClipboardList },
-    { label: "Shop profile", href: "/dashboard/vendor/profile", icon: Store },
+    { label: "Profile", href: "/dashboard/vendor/profile", icon: Store },
     { label: "Subscription", href: "/dashboard/vendor/subscription", icon: Receipt },
   ],
   admin: [
     { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard, exact: true },
+    { label: "Profile", href: "/dashboard/admin/profile", icon: UserRound },
     { label: "Vendor applications", href: "/dashboard/admin/vendors", icon: Store },
     { label: "Users", href: "/dashboard/admin/users", icon: Users },
     { label: "Menu items", href: "/dashboard/admin/menu-items", icon: UtensilsCrossed },

@@ -12,7 +12,13 @@ import { errorMessage } from "@/lib/api/client";
  * payment with Stripe and activates premium if payment succeeded. After
  * verification completes, it reloads the page to show the updated plan.
  */
-export function PaymentVerifier({ sessionId }: { sessionId: string }) {
+export function PaymentVerifier({
+  sessionId,
+  returnState,
+}: {
+  sessionId?: string;
+  returnState: "success" | "cancelled";
+}) {
   const router = useRouter();
   const [verifying, setVerifying] = useState(true);
 
@@ -21,25 +27,49 @@ export function PaymentVerifier({ sessionId }: { sessionId: string }) {
 
     async function verify() {
       try {
-        const result = await subscriptionService.verify(sessionId);
+        const result = await subscriptionService.verify(
+          sessionId ?? "",
+          returnState === "cancelled",
+        );
         if (cancelled) return;
 
-        if (result.paymentStatus === "paid" && result.plan === "premium") {
-          toast.success("Premium activated! Your plan has been upgraded.");
-        } else if (result.paymentStatus === "unpaid") {
-          toast.info(
-            "Payment is still being processed. Refresh in a moment.",
+        if (result.transactionStatus === "succeeded" && result.plan === "premium") {
+          toast.success(
+            "Payment successful! Your Premium subscription is now active.",
+            { position: "top-center" },
           );
+          router.replace("/dashboard/vendor/subscription");
+        } else if (
+          result.transactionStatus === "failed" &&
+          returnState === "cancelled"
+        ) {
+          toast.info("Checkout was cancelled. No payment was made.", {
+            position: "top-center",
+          });
+        } else if (result.transactionStatus === "failed") {
+          toast.error("Payment failed. You can try subscribing again.", {
+            position: "top-center",
+          });
+        } else if (returnState === "cancelled") {
+          toast.info(
+            "Checkout was cancelled, but Stripe is still processing the payment.",
+            { position: "top-center" },
+          );
+        } else if (result.transactionStatus === "pending") {
+          toast.info("Payment is pending confirmation from Stripe.", {
+            position: "top-center",
+          });
         }
       } catch (error) {
         if (cancelled) return;
-        // Don't show an error toast if verification fails — the success banner
-        // is already visible and webhooks may still activate premium.
         console.error("Payment verification:", errorMessage(error));
+        toast.error("We could not verify your payment with Stripe.", {
+          position: "top-center",
+        });
       } finally {
         if (!cancelled) {
           setVerifying(false);
-          // Refresh the page data to show updated plan status.
+          // Refresh the page data to show the verified plan and payment state.
           router.refresh();
         }
       }
@@ -49,7 +79,7 @@ export function PaymentVerifier({ sessionId }: { sessionId: string }) {
     return () => {
       cancelled = true;
     };
-  }, [sessionId, router]);
+  }, [sessionId, returnState, router]);
 
   if (!verifying) return null;
 

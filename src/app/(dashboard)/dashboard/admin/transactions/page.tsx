@@ -27,7 +27,8 @@ export const dynamic = "force-dynamic";
 const STATUS_STYLES: Record<string, string> = {
   succeeded:
     "bg-emerald-100 text-emerald-900 dark:bg-emerald-500/15 dark:text-emerald-300",
-  pending: "bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-300",
+  pending:
+    "bg-amber-100 text-amber-900 dark:bg-amber-500/15 dark:text-amber-300",
   failed: "bg-red-100 text-red-900 dark:bg-red-500/15 dark:text-red-300",
   refunded: "bg-muted text-muted-foreground",
 };
@@ -90,7 +91,7 @@ export default async function AdminTransactionsPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="overflow-x-auto">
-            <table className="w-full min-w-[48rem] border-collapse text-sm">
+            <table className="w-full min-w-3xl border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border text-left text-xs tracking-wide text-muted-foreground uppercase">
                   <th className="py-2 pr-3 font-semibold">Vendor</th>
