@@ -180,3 +180,481 @@
     @apply bg-[radial-gradient(ellipse_52%_50%_at_50%_42%,color-mix(in_srgb,var(--primary)_16.08%,transparent)_0%,color-mix(in_srgb,var(--primary)_16.08%,transparent)_58%,transparent_100%)] backdrop-blur-md opacity-95 rounded-2xl;
   }
 }
+
+/* ========== 404 Page Styles ========== */
+
+.notfound-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff9f0;
+  font-family:
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+
+.notfound-bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.35;
+  z-index: 0;
+  pointer-events: none;
+}
+.notfound-bg1 {
+  width: 420px;
+  height: 420px;
+  background: #ffd8a8;
+  top: -120px;
+  left: -80px;
+}
+.notfound-bg2 {
+  width: 380px;
+  height: 380px;
+  background: #ffc9a0;
+  bottom: -100px;
+  right: -60px;
+}
+
+.notfound-container {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  max-width: 900px;
+  padding: 20px;
+}
+
+.notfound-error-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  height: 280px;
+  margin-bottom: 10px;
+}
+
+.notfound-number {
+  font-size: 220px;
+  font-weight: 900;
+  color: #ff8c2e;
+  line-height: 1;
+  text-shadow:
+    8px 8px 0 #ff6b00,
+    0 12px 30px rgba(255, 107, 0, 0.25);
+  letter-spacing: -12px;
+  user-select: none;
+}
+
+.notfound-pizza {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 160px;
+  height: 180px;
+  z-index: 5;
+  animation: notfound-bob 2.8s ease-in-out infinite;
+}
+
+@keyframes notfound-bob {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-12px);
+  }
+}
+
+.notfound-pizza svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.12));
+}
+
+/* Pepperoni */
+.notfound-pepperoni {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: #e03a2f;
+  border-radius: 50%;
+  box-shadow: inset -4px -3px 0 #c22e25;
+  z-index: 4;
+}
+.notfound-pepperoni::after {
+  content: "";
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border-radius: 50%;
+  top: 6px;
+  left: 7px;
+  opacity: 0.7;
+}
+.notfound-p1 {
+  top: 30px;
+  left: 18%;
+  animation: notfound-float1 4.5s ease-in-out infinite;
+}
+.notfound-p2 {
+  top: 90px;
+  left: 8%;
+  animation: notfound-float2 5.2s ease-in-out infinite;
+}
+.notfound-p3 {
+  top: 40px;
+  right: 15%;
+  animation: notfound-float3 4.8s ease-in-out infinite;
+}
+
+@keyframes notfound-float1 {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(15px, -25px) rotate(18deg);
+  }
+}
+@keyframes notfound-float2 {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-12px, -18px) rotate(-22deg);
+  }
+}
+@keyframes notfound-float3 {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(10px, -22px) rotate(15deg);
+  }
+}
+
+/* Leaves */
+.notfound-leaf {
+  position: absolute;
+  width: 22px;
+  height: 14px;
+  background: #5cb85c;
+  border-radius: 50% 0 50% 50%;
+  z-index: 3;
+  opacity: 0.9;
+}
+.notfound-l1 {
+  top: 55px;
+  left: 12%;
+  transform: rotate(-30deg);
+  animation: notfound-leaf1 6s ease-in-out infinite;
+}
+.notfound-l2 {
+  top: 70px;
+  right: 12%;
+  transform: rotate(40deg);
+  animation: notfound-leaf2 5.5s ease-in-out infinite;
+}
+
+@keyframes notfound-leaf1 {
+  0%,
+  100% {
+    transform: rotate(-30deg) translateY(0);
+  }
+  50% {
+    transform: rotate(-15deg) translateY(-18px);
+  }
+}
+@keyframes notfound-leaf2 {
+  0%,
+  100% {
+    transform: rotate(40deg) translateY(0);
+  }
+  50% {
+    transform: rotate(55deg) translateY(-14px);
+  }
+}
+
+/* Motion lines */
+.notfound-motion {
+  position: absolute;
+  width: 18px;
+  height: 4px;
+  background: #ff9a4d;
+  border-radius: 4px;
+  opacity: 0.7;
+}
+.notfound-m1 {
+  top: 80px;
+  left: 22%;
+  transform: rotate(-25deg);
+  animation: notfound-motion 1.8s ease-in-out infinite;
+}
+.notfound-m2 {
+  top: 105px;
+  left: 19%;
+  transform: rotate(-25deg);
+  animation: notfound-motion 1.8s ease-in-out infinite 0.3s;
+}
+
+@keyframes notfound-motion {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: rotate(-25deg) scaleX(0.7);
+  }
+  50% {
+    opacity: 0.9;
+    transform: rotate(-25deg) scaleX(1.1);
+  }
+}
+
+/* Stars */
+.notfound-star {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #ffb347;
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+  animation: notfound-twinkle 2.4s ease-in-out infinite;
+}
+.notfound-s1 {
+  top: 25px;
+  left: 38%;
+}
+.notfound-s2 {
+  top: 15px;
+  right: 36%;
+  animation-delay: 0.6s;
+}
+.notfound-s3 {
+  top: 55px;
+  right: 28%;
+  animation-delay: 1.2s;
+}
+
+@keyframes notfound-twinkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+/* Pizza box */
+.notfound-box {
+  position: absolute;
+  bottom: 35px;
+  right: 18%;
+  width: 90px;
+  height: 55px;
+  z-index: 2;
+}
+.notfound-box-bottom {
+  position: absolute;
+  bottom: 0;
+  width: 90px;
+  height: 28px;
+  background: #f0c27a;
+  border-radius: 4px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.notfound-box-lid {
+  position: absolute;
+  bottom: 26px;
+  left: 0;
+  width: 90px;
+  height: 32px;
+  background: #f5d9a8;
+  border-radius: 4px 4px 0 0;
+  transform-origin: bottom center;
+  animation: notfound-lid 4s ease-in-out infinite;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+}
+.notfound-box-lid::after {
+  content: "🍕";
+  position: absolute;
+  font-size: 18px;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0.7;
+}
+.notfound-cheese-drip {
+  position: absolute;
+  bottom: -8px;
+  left: 30px;
+  width: 18px;
+  height: 14px;
+  background: #ffcc4d;
+  border-radius: 0 0 10px 10px;
+  animation: notfound-drip 2.5s ease-in-out infinite;
+}
+
+@keyframes notfound-lid {
+  0%,
+  100% {
+    transform: rotateX(0deg);
+  }
+  40%,
+  60% {
+    transform: rotateX(-28deg);
+  }
+}
+@keyframes notfound-drip {
+  0%,
+  100% {
+    height: 10px;
+    opacity: 0.8;
+  }
+  50% {
+    height: 18px;
+    opacity: 1;
+  }
+}
+
+/* Text */
+.notfound-title {
+  font-size: 48px;
+  font-weight: 900;
+  color: #2d2d2d;
+  margin: 10px 0 12px;
+  letter-spacing: -1px;
+}
+.notfound-title span {
+  color: #ff3b3b;
+}
+
+.notfound-subtitle {
+  font-size: 18px;
+  color: #777;
+  font-weight: 600;
+  max-width: 420px;
+  margin: 0 auto 36px;
+  line-height: 1.5;
+}
+
+/* Button */
+.notfound-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(90deg, #ff9a2e, #ff4d4d);
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
+  padding: 16px 36px;
+  border-radius: 50px;
+  text-decoration: none;
+  box-shadow: 0 10px 25px rgba(255, 90, 50, 0.35);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  overflow: hidden;
+}
+.notfound-btn:hover {
+  transform: translateY(-4px) scale(1.04);
+  box-shadow: 0 16px 32px rgba(255, 90, 50, 0.45);
+}
+.notfound-btn:active {
+  transform: translateY(-1px) scale(0.98);
+}
+.notfound-btn svg {
+  width: 20px;
+  height: 20px;
+}
+.notfound-btn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.35),
+    transparent
+  );
+  transition: 0.5s;
+}
+.notfound-btn:hover::before {
+  left: 120%;
+}
+
+/* Crumbs */
+.notfound-crumb {
+  position: absolute;
+  width: 10px;
+  height: 8px;
+  background: #ffcc4d;
+  border-radius: 50%;
+  opacity: 0.8;
+}
+.notfound-c1 {
+  bottom: 42px;
+  left: 42%;
+}
+.notfound-c2 {
+  bottom: 38px;
+  left: 48%;
+  width: 7px;
+  height: 6px;
+}
+.notfound-c3 {
+  bottom: 45px;
+  left: 54%;
+  width: 9px;
+  height: 7px;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .notfound-number {
+    font-size: 140px;
+    letter-spacing: -8px;
+  }
+  .notfound-error-wrapper {
+    height: 200px;
+  }
+  .notfound-pizza {
+    width: 120px;
+    height: 140px;
+    bottom: 10px;
+  }
+  .notfound-title {
+    font-size: 34px;
+  }
+  .notfound-subtitle {
+    font-size: 16px;
+  }
+  .notfound-box {
+    right: 8%;
+    transform: scale(0.85);
+  }
+}
