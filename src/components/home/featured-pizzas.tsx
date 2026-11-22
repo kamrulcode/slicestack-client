@@ -13,7 +13,7 @@ export async function FeaturedPizzas() {
 
   try {
     const all = await serverApi.menu.list();
-    menuItems = all.slice(0, 3);
+    menuItems = all.slice(0, 6);
   } catch {
     menuItems = [];
   }

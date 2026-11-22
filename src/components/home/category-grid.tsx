@@ -1,66 +1,133 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { SectionHeading } from "@/components/common/section-heading";
-import { Reveal, RevealGroup, RevealItem } from "@/components/common/reveal";
-import { menuCategories } from "@/data/menu";
-import { cn } from "@/lib/utils";
-import type { MenuCategoryId } from "@/types/menu";
-
-const tint: Record<MenuCategoryId, string> = {
-  classic:
-    "bg-orange-100 text-orange-700 dark:bg-orange-500/15 dark:text-orange-300",
-  vegetarian:
-    "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
-  "meat-lovers":
-    "bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300",
-  specialty:
-    "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
-  sides:
-    "bg-yellow-100 text-yellow-800 dark:bg-yellow-500/15 dark:text-yellow-300",
-  beverages: "bg-purple-100 text-purple-700 dark:bg-purple-500/15 dark:text-purple-300",
-};
+const categories = [
+  {
+    name: "Classic Pizzas",
+    subtitle: "Timeless favorites",
+    image:
+      "https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=800&q=85",
+    emoji: "🍕",
+  },
+  {
+    name: "Veggie Pizzas",
+    subtitle: "Fresh & healthy",
+    image:
+      "https://images.unsplash.com/photo-1579751626657-72bc17010498?auto=format&fit=crop&w=800&q=85",
+    emoji: "🥬",
+  },
+  {
+    name: "Meat Lovers",
+    subtitle: "For true meat fans",
+    image:
+      "https://images.unsplash.com/photo-1628840042765-356cda07504e?auto=format&fit=crop&w=800&q=85",
+    emoji: "🥩",
+  },
+  {
+    name: "BBQ Special",
+    subtitle: "Smoky & bold",
+    image:
+      "https://images.unsplash.com/photo-1604382355076-af4b0eb60143?auto=format&fit=crop&w=800&q=85",
+    emoji: "🔥",
+  },
+  {
+    name: "Spicy Pizzas",
+    subtitle: "For the brave",
+    image:
+      "https://images.unsplash.com/photo-1593560708920-61dd98c46a4e?auto=format&fit=crop&w=800&q=85",
+    emoji: "🌶️",
+  },
+  {
+    name: "Cheese Burst",
+    subtitle: "Extra cheese, extra joy",
+    image:
+      "https://img-cdn.publive.online/fit-in/1200x675/filters:format(webp)/sanjeev-kapoor/media/post_banners/dd1fda8c2a3f9dc1e4b3dc2cb420485923a6a49fd8160ed926dfb667276de8c4.jpg",
+    emoji: "🧀",
+  },
+];
 
 export function CategoryGrid() {
   return (
-    <section
-      id="categories"
-      className="scroll-mt-24 border-y border-border/60 bg-secondary/30"
-    >
-      <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <Reveal>
-          <SectionHeading
-            title="Find your kind of slice"
-            description="Explore the menu by the flavors you love."
-          />
-        </Reveal>
+    <section className="relative py-24 px-6 bg-background">
+      {/* CATEGORY SECTION */}
+      <div className="max-w-7xl mx-auto">
+        {/* HEADING */}
+        <div className="text-center mb-14">
+          <span
+            className="text-[#FF404C] dark:text-[#FFB340] text-sm font-bold
+              uppercase tracking-[0.25em]"
+          >
+            Our Categories
+          </span>
 
-        <RevealGroup className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {menuCategories.map((category) => (
-            <RevealItem key={category.id} className="h-full">
-              <Link
-                href={category.href}
-                className="group flex h-full items-center gap-3 rounded-2xl border bg-card p-4 shadow-xs transition duration-300 hover:border-primary/30 hover:shadow-md motion-safe:hover:-translate-y-0.5"
-              >
-                <span
-                  className={cn(
-                    "grid size-11 shrink-0 place-items-center rounded-xl text-xl",
-                    tint[category.id],
-                  )}
-                  aria-hidden
-                >
-                  {category.emoji}
-                </span>
-                <span className="flex-1 text-[15px] font-semibold sm:text-base">
-                  {category.name}
-                </span>
-                <ArrowRight
-                  className="size-4 text-muted-foreground transition-transform duration-300 group-hover:translate-x-0.5 group-hover:text-primary"
-                  aria-hidden
+          <h2 className="text-4xl md:text-5xl font-black mt-4">
+            Explore{" "}
+            <span className="text-[#FF404C] dark:text-[#FFB340]">
+              6 Delicious Categories
+            </span>
+          </h2>
+
+          <p className="text-muted-foreground mt-4 text-lg">
+            Find your favorite pizza style and enjoy every bite.
+          </p>
+        </div>
+
+        {/* CATEGORY CARDS */}
+        <div
+          className="grid grid-cols-2 md:grid-cols-3
+            lg:grid-cols-6 gap-5"
+        >
+          {categories.map((category, index) => (
+            <a
+              href="#menu"
+              key={category.name}
+              className="group relative rounded-2xl overflow-hidden
+                  border border-border hover:border-ember
+                  transition duration-300 hover:-translate-y-2
+                  bg-card text-card-foreground"
+            >
+              {/* IMAGE */}
+              <div className="h-48 overflow-hidden">
+                <img
+                  src={category.image}
+                  alt={category.name}
+                  className="w-full h-full object-cover
+                      group-hover:scale-110 transition
+                      duration-500"
                 />
-              </Link>
-            </RevealItem>
+              </div>
+
+              {/* CONTENT */}
+              <div className="p-5 text-center">
+                <div className="text-2xl mb-2">{category.emoji}</div>
+
+                <h3
+                  className="font-bold text-card-foreground
+                    group-hover:text-ember
+                    transition"
+                >
+                  {category.name}
+                </h3>
+
+                <p className="text-muted-foreground text-sm mt-2">
+                  {category.subtitle}
+                </p>
+
+                <div
+                  className="mt-4 text-[#FF404C] dark:text-[#FFB340]
+                    text-sm font-bold"
+                >
+                  Explore →
+                </div>
+              </div>
+
+              {/* Hover glow */}
+              <div
+                className="absolute inset-0 pointer-events-none
+                  opacity-0 group-hover:opacity-100
+                  transition duration-300
+                  shadow-[inset_0_0_30px_rgba(255,179,64,0.15)]"
+              />
+            </a>
           ))}
-        </RevealGroup>
+        </div>
       </div>
     </section>
   );

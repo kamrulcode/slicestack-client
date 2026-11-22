@@ -55,30 +55,30 @@
 
 /*
  * Palette source of truth: the home hero.
- * The hero sits on a warm "dough" canvas (#fff8ed) lit by ember accents
- * (#ff8a00 / #ffb340) over a near-black oven backdrop (#07080a) in dark mode.
+ * The hero uses a peach canvas with coral and orange accents over a near-black
+ * oven backdrop in dark mode.
  * Every surface below is derived from those four families so the storefront,
  * auth pages and dashboards read as one product.
  */
 :root {
-  --background: #fff8ed;
-  --foreground: #241b14;
-  --card: #fffdf8;
-  --card-foreground: #241b14;
-  --popover: #fffdf8;
-  --popover-foreground: #241b14;
+  --background: #ffe2bd;
+  --foreground: #21150f;
+  --card: #fff0dc;
+  --card-foreground: #21150f;
+  --popover: #fff0dc;
+  --popover-foreground: #21150f;
 
   --primary: #ff404c;
-  --primary-foreground: #ffffff;
+  --primary-foreground: #21150f;
 
-  --secondary: #f8ead6;
-  --secondary-foreground: #241b14;
+  --secondary: #fff0dc;
+  --secondary-foreground: #21150f;
 
-  --muted: #faefdf;
+  --muted: #fff0dc;
   --muted-foreground: #6d5b4b;
 
-  --accent: #ffe4cc;
-  --accent-foreground: #241b14;
+  --accent: #ffb340;
+  --accent-foreground: #21150f;
 
   --destructive: #d92d3a;
 
@@ -87,78 +87,78 @@
   --ring: #ff404c;
 
   --chart-1: #ff404c;
-  --chart-2: #ff8a00;
-  --chart-3: #241b14;
+  --chart-2: #ffb340;
+  --chart-3: #21150f;
   --chart-4: #6d5b4b;
   --chart-5: #d8c1a2;
 
   --radius: 0.75rem;
 
   /* Hero accent families. */
-  --ember: #ff8a00;
+  --ember: #ffb340;
   --ember-soft: #ffb340;
   /* Warm near-black used by the auth brand panel and dashboard sidebar. */
-  --brand-ink: #17100b;
+  --brand-ink: #121619;
 
-  --auth-canvas: #fff8ed;
-  --auth-accent: #ff8a00;
+  --auth-canvas: #ffe2bd;
+  --auth-accent: #ffb340;
 
-  --sidebar: #fff8ed;
-  --sidebar-foreground: #241b14;
+  --sidebar: #fff0dc;
+  --sidebar-foreground: #21150f;
   --sidebar-primary: #ff404c;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #ffe4cc;
-  --sidebar-accent-foreground: #241b14;
+  --sidebar-primary-foreground: #21150f;
+  --sidebar-accent: #ffe2bd;
+  --sidebar-accent-foreground: #21150f;
   --sidebar-border: #eedcc5;
   --sidebar-ring: #ff404c;
 }
 
 .dark {
-  --background: #07080a;
-  --foreground: #f7f1e8;
-  --card: #141110;
-  --card-foreground: #f7f1e8;
-  --popover: #141110;
-  --popover-foreground: #f7f1e8;
+  --background: #121619;
+  --foreground: #f4f1eb;
+  --card: #1b2328;
+  --card-foreground: #f4f1eb;
+  --popover: #242e34;
+  --popover-foreground: #f4f1eb;
 
   --primary: #ff404c;
-  --primary-foreground: #ffffff;
+  --primary-foreground: #21150f;
 
-  --secondary: #1b1613;
-  --secondary-foreground: #f7f1e8;
+  --secondary: #202a30;
+  --secondary-foreground: #f4f1eb;
 
-  --muted: #191512;
-  --muted-foreground: #b3a494;
+  --muted: #1b2328;
+  --muted-foreground: #b8c2c7;
 
-  --accent: #2b1e17;
-  --accent-foreground: #ffe6cf;
+  --accent: #2b353b;
+  --accent-foreground: #f4f1eb;
 
   --destructive: #ff626d;
 
-  --border: #2c241d;
-  --input: #352b23;
+  --border: #30383d;
+  --input: #394349;
   --ring: #ff626d;
 
   --chart-1: #ff404c;
-  --chart-2: #ff9a1f;
-  --chart-3: #f7f1e8;
-  --chart-4: #b3a494;
-  --chart-5: #6d5c4d;
+  --chart-2: #ffb340;
+  --chart-3: #f4f1eb;
+  --chart-4: #b8c2c7;
+  --chart-5: #829098;
 
-  --ember: #ff8a00;
+  --ember: #ffb340;
   --ember-soft: #ffb340;
-  --brand-ink: #0b0908;
+  --brand-ink: #121619;
 
-  --auth-canvas: #0f0c0a;
-  --auth-accent: #ff8a00;
+  --auth-canvas: #121619;
+  --auth-accent: #ffb340;
 
-  --sidebar: #0f0d0b;
-  --sidebar-foreground: #f7f1e8;
+  --sidebar: #0e1316;
+  --sidebar-foreground: #f4f1eb;
   --sidebar-primary: #ff404c;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #2b1e17;
-  --sidebar-accent-foreground: #ffe6cf;
-  --sidebar-border: #2c241d;
+  --sidebar-primary-foreground: #21150f;
+  --sidebar-accent: #1b2328;
+  --sidebar-accent-foreground: #f4f1eb;
+  --sidebar-border: #30383d;
   --sidebar-ring: #ff626d;
 }
 

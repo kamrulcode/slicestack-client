@@ -100,7 +100,9 @@ export function NavUser({
             <IconNotification />
             Notifications
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem
+            render={<Link href={`/dashboard/${user.role}/profile`}></Link>}
+          >
             <Settings />
             Settings
           </DropdownMenuItem>

@@ -40,11 +40,11 @@ export function HeroCopy() {
         transition={{ duration: 0.8, ease: EASE }}
         className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-4 py-1.5 text-[10px] font-semibold tracking-[0.22em] text-foreground uppercase backdrop-blur-sm dark:border-white/15 dark:bg-white/[0.04] dark:text-white/75 sm:text-[11px]"
       >
-        <Flame className="size-3.5 text-[#ff9a1f]" aria-hidden />
+        <Flame className="size-3.5 text-[#FFB340]" aria-hidden />
         Fresh from the oven
         <span className="relative flex size-1.5" aria-hidden>
-          <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#ff9a1f] opacity-70" />
-          <span className="relative inline-flex size-1.5 rounded-full bg-[#ff9a1f]" />
+          <span className="absolute inline-flex size-full animate-ping rounded-full bg-[#FFB340] opacity-70" />
+          <span className="relative inline-flex size-1.5 rounded-full bg-[#FFB340]" />
         </span>
       </motion.span>
 
@@ -56,7 +56,7 @@ export function HeroCopy() {
       >
         <span className="block">Crave more</span>
         <span className="relative mt-1 block">
-          <span className="text-[#c2410c] dark:text-[#ff9a1f]">Bite</span>{" "}
+          <span className="text-[#FF404C] dark:text-[#FFB340]">Bite</span>{" "}
           better
           <svg
             aria-hidden
@@ -67,7 +67,7 @@ export function HeroCopy() {
           >
             <motion.path
               d="M4 9.5C58 3.5 132 2.5 190 5.5C238 8 284 8.5 316 5"
-              stroke="#ff8a00"
+              stroke="#FFB340"
               strokeWidth={5}
               strokeLinecap="round"
               initial={reduceMotion ? false : { pathLength: 0, opacity: 0 }}
@@ -99,7 +99,7 @@ export function HeroCopy() {
           href="/menu"
           className={cn(
             buttonVariants({ size: "lg" }),
-            "group/cta h-13 gap-2.5 rounded-full bg-[#ff404c] px-7 text-[15px] tracking-wide text-white shadow-[0_18px_45px_-14px_rgba(255,64,76,0.95)] transition-transform duration-300 hover:-translate-y-0.5 hover:bg-[#ff2f3d] sm:h-14 sm:px-9 sm:text-base",
+            "group/cta h-13 gap-2.5 rounded-full bg-primary px-7 text-[15px] tracking-wide text-foreground shadow-[0_18px_45px_-14px_rgba(255,64,76,0.95)] transition-transform duration-300 hover:-translate-y-0.5 hover:bg-primary/90 sm:h-14 sm:px-9 sm:text-base",
           )}
         >
           Explore Pizza Menu
@@ -128,7 +128,7 @@ export function HeroCopy() {
                 "sm:border-l sm:border-white/12 sm:pl-9",
             )}
           >
-            <span className="flex size-9 items-center justify-center rounded-full border border-[#ff9a1f]/30 bg-[#ff9a1f]/10 text-[#ffb340]">
+            <span className="flex size-9 items-center justify-center rounded-full border border-[#FFB340]/30 bg-[#FFB340]/10 text-[#FFB340]">
               <Icon className="size-4" aria-hidden />
             </span>
             <span className="text-left [text-shadow:0_2px_16px_rgba(7,8,10,0.95)]">

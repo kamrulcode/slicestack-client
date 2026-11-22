@@ -117,7 +117,7 @@ function FeatureIcon({ type }: { type: string }) {
 
 export default function FeaturesSection() {
   return (
-    <section className="relative w-full bg-ember-soft px-4 pt-12 pb-16 text-brand-ink sm:px-6 sm:pt-14">
+    <section className="relative w-full bg-ember-soft px-4 pt-12 pb-16 text-brand-ink/80 sm:px-6 sm:pt-14">
       <BrushEdge
         className="text-ember-soft -top-20 absolute
       z-30"

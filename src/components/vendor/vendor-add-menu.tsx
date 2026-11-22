@@ -301,7 +301,7 @@ export default function AddMenuItemForm() {
         {/* Submit */}
         <Button
           type="submit"
-          className="w-full bg-[#FF404C] text-white hover:bg-[#e93440]"
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
           disabled={isSubmitting}
         >
           {isSubmitting ? (

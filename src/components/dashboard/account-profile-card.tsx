@@ -2,15 +2,10 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import {
-  LoaderCircle,
-  Save,
-  ShieldCheck,
-  Trash2,
-} from "lucide-react";
+import { LoaderCircle, Pencil, Save, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,6 +14,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { SessionUser } from "@/lib/authorization";
@@ -29,6 +33,7 @@ import { uploadService } from "@/services/uploads.service";
 
 export function AccountProfileCard({ user }: { user: SessionUser }) {
   const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState(user.name);
   const [email, setEmail] = useState(user.email);
   const [image, setImage] = useState(user.image);
@@ -42,6 +47,18 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
     if (imagePreviewUrl) return () => URL.revokeObjectURL(imagePreviewUrl);
   }, [imagePreviewUrl]);
 
+  function handleOpenChange(open: boolean) {
+    setIsOpen(open);
+    if (!open) return;
+
+    setName(user.name);
+    setEmail(user.email);
+    setImage(user.image);
+    setImageFile(null);
+    setImagePreviewUrl(null);
+    if (imageInput.current) imageInput.current.value = "";
+  }
+
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setIsSavingProfile(true);
@@ -54,6 +71,7 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
       setImagePreviewUrl(null);
       if (imageInput.current) imageInput.current.value = "";
       toast.success("Profile updated.");
+      setIsOpen(false);
       router.refresh();
     } catch (error) {
       toast.error(errorMessage(error));
@@ -71,8 +89,13 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
         newEmail: email.trim(),
         callbackURL: window.location.pathname,
       });
-      if (error) throw new Error(error.message || "Email change could not be requested.");
+      if (error) {
+        throw new Error(
+          error.message || "Email change could not be requested.",
+        );
+      }
       toast.success("Check your email to confirm the address change.");
+      setIsOpen(false);
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
@@ -80,7 +103,7 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
     }
   }
 
-  const initials = name
+  const initials = user.name
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
@@ -88,76 +111,171 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
     .join("");
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          Personal profile
-          <Badge variant="outline" className="capitalize">
-            {user.role}
-          </Badge>
-        </CardTitle>
-        <CardDescription>
-          Update your name and profile photo. Email changes require verification.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4 text-sm">
-        <form className="flex flex-col gap-4" onSubmit={saveProfile}>
+    <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+      <Card>
+        <CardHeader className="flex-row items-start justify-between gap-4">
+          <div className="flex flex-col gap-1.5">
+            <CardTitle className="flex items-center gap-2">
+              Account
+              <Badge variant="outline" className="capitalize">
+                {user.role}
+              </Badge>
+            </CardTitle>
+            <CardDescription>
+              Your SliceStack account details.
+            </CardDescription>
+          </div>
+          <SheetTrigger
+            render={
+              <Button variant="outline" size="sm">
+                <Pencil aria-hidden />
+                Edit
+              </Button>
+            }
+          />
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4 text-sm">
           <div className="flex items-center gap-4">
             <Avatar size="lg">
-              {imagePreviewUrl || image ? (
-                <AvatarImage
-                  src={imagePreviewUrl || image || ""}
-                  alt={`${name}'s profile`}
-                />
+              {user.image ? (
+                <AvatarImage src={user.image} alt={`${user.name}'s profile`} />
               ) : null}
               <AvatarFallback>{initials || "SS"}</AvatarFallback>
             </Avatar>
-            <div className="flex min-w-0 flex-1 flex-col gap-2">
-              <Label htmlFor="profile-image">Profile photo</Label>
-              <Input
-                id="profile-image"
-                ref={imageInput}
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
-                onChange={(event) => {
-                  const file = event.currentTarget.files?.[0] ?? null;
-                  setImageFile(file);
-                  setImagePreviewUrl(file ? URL.createObjectURL(file) : null);
-                }}
-              />
-              {image || imageFile ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="w-fit"
-                  onClick={() => {
-                    setImage(null);
-                    setImageFile(null);
-                    setImagePreviewUrl(null);
-                    if (imageInput.current) imageInput.current.value = "";
-                  }}
-                >
-                  <Trash2 aria-hidden />
-                  Remove photo
-                </Button>
-              ) : null}
-            </div>
+            <ProfileRow label="Full name" value={user.name} />
           </div>
+          <ProfileRow label="Email address" value={user.email} />
+          <ProfileRow label="Account id" value={user.id} mono />
+          <p className="flex items-start gap-2 rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
+            <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
+            Your role is read-only and managed by the server.
+          </p>
+        </CardContent>
+      </Card>
 
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="profile-name">Full name</Label>
-            <Input
-              id="profile-name"
-              value={name}
-              onChange={(event) => setName(event.currentTarget.value)}
-              minLength={2}
-              maxLength={100}
-              autoComplete="name"
-              required
-            />
-          </div>
-          <Button type="submit" disabled={isSavingProfile}>
+      <SheetContent side="right" className="w-[90vw] gap-0 p-0 sm:max-w-md">
+        <SheetHeader className="border-b border-border p-5 pr-14">
+          <SheetTitle>Edit profile</SheetTitle>
+          <SheetDescription>
+            Update your name, photo, or email. Your account role cannot be
+            changed here.
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="flex-1 space-y-5 overflow-y-auto p-5">
+          <form
+            id="profile-details-form"
+            className="flex flex-col gap-4"
+            onSubmit={saveProfile}
+          >
+            <div className="flex items-center gap-4">
+              <Avatar size="lg">
+                {imagePreviewUrl || image ? (
+                  <AvatarImage
+                    src={imagePreviewUrl || image || ""}
+                    alt={`${name}'s profile`}
+                  />
+                ) : null}
+                <AvatarFallback>{initials || "SS"}</AvatarFallback>
+              </Avatar>
+              <div className="flex min-w-0 flex-1 flex-col gap-2">
+                <Label htmlFor="profile-image">Profile photo</Label>
+                <Input
+                  id="profile-image"
+                  ref={imageInput}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif"
+                  onChange={(event) => {
+                    const file = event.currentTarget.files?.[0] ?? null;
+                    setImageFile(file);
+                    setImagePreviewUrl(
+                      file ? URL.createObjectURL(file) : null,
+                    );
+                  }}
+                />
+                {image || imageFile ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="w-fit"
+                    onClick={() => {
+                      setImage(null);
+                      setImageFile(null);
+                      setImagePreviewUrl(null);
+                      if (imageInput.current) imageInput.current.value = "";
+                    }}
+                  >
+                    <Trash2 aria-hidden />
+                    Remove photo
+                  </Button>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="profile-name">Full name</Label>
+              <Input
+                id="profile-name"
+                value={name}
+                onChange={(event) => setName(event.currentTarget.value)}
+                minLength={2}
+                maxLength={100}
+                autoComplete="name"
+                required
+              />
+            </div>
+          </form>
+
+          <form
+            id="profile-email-form"
+            className="flex flex-col gap-3 border-t border-border/60 pt-4"
+            onSubmit={requestEmailChange}
+          >
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="profile-email">Email address</Label>
+              <Input
+                id="profile-email"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.currentTarget.value)}
+                autoComplete="email"
+                required
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="outline"
+              disabled={
+                isRequestingEmailChange ||
+                email.trim().toLowerCase() === user.email.toLowerCase()
+              }
+            >
+              {isRequestingEmailChange ? (
+                <LoaderCircle className="animate-spin" aria-hidden />
+              ) : null}
+              {isRequestingEmailChange
+                ? "Sending verification..."
+                : "Change email"}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Your email is updated only after you confirm the verification
+              link.
+            </p>
+          </form>
+
+          <p className="flex items-start gap-2 rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
+            <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
+            Your role is read-only and managed by the server.
+          </p>
+        </div>
+
+        <SheetFooter className="border-t border-border p-5">
+          <Button
+            type="submit"
+            form="profile-details-form"
+            disabled={isSavingProfile}
+          >
             {isSavingProfile ? (
               <LoaderCircle className="animate-spin" aria-hidden />
             ) : (
@@ -165,51 +283,9 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
             )}
             {isSavingProfile ? "Saving..." : "Save profile"}
           </Button>
-        </form>
-
-        <form
-          className="flex flex-col gap-3 border-t border-border/60 pt-4"
-          onSubmit={requestEmailChange}
-        >
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="profile-email">Email address</Label>
-            <Input
-              id="profile-email"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.currentTarget.value)}
-              autoComplete="email"
-              required
-            />
-          </div>
-          <Button
-            type="submit"
-            variant="outline"
-            disabled={
-              isRequestingEmailChange ||
-              email.trim().toLowerCase() === user.email.toLowerCase()
-            }
-          >
-            {isRequestingEmailChange ? (
-              <LoaderCircle className="animate-spin" aria-hidden />
-            ) : null}
-            {isRequestingEmailChange ? "Sending verification..." : "Change email"}
-          </Button>
-          <p className="text-xs text-muted-foreground">
-            Your email is updated only after you confirm the verification link.
-          </p>
-        </form>
-
-        <div className="flex flex-col gap-3 border-t border-border/60 pt-4">
-          <ProfileRow label="Account id" value={user.id} mono />
-          <p className="flex items-start gap-2 rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
-            <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
-            Your role is read-only and managed by the server. Profile updates
-            cannot change account permissions.
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet>
   );
 }
 
@@ -223,9 +299,11 @@ function ProfileRow({
   mono?: boolean;
 }) {
   return (
-    <div className="flex flex-col gap-1 border-b border-border/60 pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex min-w-0 flex-col gap-1 border-b border-border/60 pb-3 last:border-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between">
       <span className="text-muted-foreground">{label}</span>
-      <span className={mono ? "font-mono text-xs" : "font-semibold"}>
+      <span
+        className={`${mono ? "font-mono text-xs" : "font-semibold"} break-all`}
+      >
         {value}
       </span>
     </div>

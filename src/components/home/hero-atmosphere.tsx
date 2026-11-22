@@ -48,8 +48,8 @@ export function HeroAtmosphere() {
       >
         <defs>
           <linearGradient id="hero-arc" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="#ff8a00" stopOpacity="0" />
-            <stop offset="45%" stopColor="#ffb340" />
+            <stop offset="0%" stopColor="#FFB340" stopOpacity="0" />
+            <stop offset="45%" stopColor="#FFB340" />
             <stop offset="100%" stopColor="#ff6a00" stopOpacity="0" />
           </linearGradient>
         </defs>
@@ -104,7 +104,7 @@ export function HeroAtmosphere() {
       {EMBERS.map((ember, index) => (
         <motion.span
           key={index}
-          className="absolute rounded-full bg-[#ff9a1f]"
+          className="absolute rounded-full bg-[#FFB340]"
           style={{
             left: ember.left,
             top: ember.top,

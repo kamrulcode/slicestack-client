@@ -6,7 +6,13 @@ import Newsletter from "./Newsletter";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-border/60 bg-secondary/40">
+    <footer className="relative border-t border-border/60 bg-secondary/40">
+      {/* BOTTOM DECORATION */}
+      <div
+        className="absolute top-0 left-0 w-full h-[1px]
+    bg-linear-to-r from-primary via-ember
+    to-primary"
+      />
       <div className="mx-auto w-full max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
           <div className="max-w-sm">

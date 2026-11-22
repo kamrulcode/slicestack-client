@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
-import { SectionHeading } from "@/components/common/section-heading";
 import { Reveal } from "@/components/common/reveal";
 import { MenuFilters } from "@/components/menu/menu-filters";
 import { MenuItemCard } from "@/components/menu/pizza-card";
@@ -49,6 +48,11 @@ export default async function MenuPage({
       items: menuItems.filter((item) => item.category === menuCategory.name),
     }))
     .filter(({ items }) => items.length > 0);
+  const categoryAnchorByItemId = groups.reduce((anchors, { category, items }) => {
+    const firstItem = items[0];
+    if (firstItem) anchors.set(firstItem._id, category.id);
+    return anchors;
+  }, new Map<string, string>());
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
@@ -60,8 +64,7 @@ export default async function MenuPage({
           Find your next favorite slice
         </h1>
         <p className="mt-4 text-muted-foreground text-pretty">
-          Hand-tossed dough, fresh toppings and a stone-baked finish. Search,
-          filter by category or location, and order from local shops.
+          Search, filter by category or location, and order from local shops.
         </p>
       </Reveal>
 
@@ -71,14 +74,21 @@ export default async function MenuPage({
 
       {loadError ? (
         <div className="mt-12 rounded-2xl border border-destructive/30 bg-destructive/5 p-8 text-center">
-          <AlertTriangle className="mx-auto size-8 text-destructive" aria-hidden />
+          <AlertTriangle
+            className="mx-auto size-8 text-destructive"
+            aria-hidden
+          />
           <h2 className="mt-3 font-heading text-xl font-semibold">
             We could not load the menu
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">{loadError}</p>
           <Link
             href="/menu"
-            className={buttonVariants({ variant: "outline", size: "sm", className: "mt-4" })}
+            className={buttonVariants({
+              variant: "outline",
+              size: "sm",
+              className: "mt-4",
+            })}
           >
             Try again
           </Link>
@@ -96,7 +106,11 @@ export default async function MenuPage({
           {hasFilters ? (
             <Link
               href="/menu"
-              className={buttonVariants({ variant: "outline", size: "sm", className: "mt-4" })}
+              className={buttonVariants({
+                variant: "outline",
+                size: "sm",
+                className: "mt-4",
+              })}
             >
               Clear filters
             </Link>
@@ -117,23 +131,19 @@ export default async function MenuPage({
             ))}
           </div>
 
-          <div className="mt-12 space-y-16">
-            {groups.map(({ category: itemCategory, items }) => (
-              <Reveal key={itemCategory.id}>
-                <section id={itemCategory.id} className="scroll-mt-24">
-                  <SectionHeading
-                    title={itemCategory.name}
-                    description={itemCategory.blurb}
-                  />
-                  <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                    {items.map((item) => (
-                      <MenuItemCard key={item._id} menuItem={item} />
-                    ))}
-                  </div>
-                </section>
-              </Reveal>
-            ))}
-          </div>
+          <Reveal>
+            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {menuItems.map((item) => (
+                <div
+                  key={item._id}
+                  id={categoryAnchorByItemId.get(item._id)}
+                  className="h-full scroll-mt-24"
+                >
+                  <MenuItemCard menuItem={item} />
+                </div>
+              ))}
+            </div>
+          </Reveal>
         </>
       )}
     </div>

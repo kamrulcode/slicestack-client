@@ -124,9 +124,7 @@ export async function getVendorApplicationForUser(userId: string) {
   return doc ? toVendorApplication(doc) : null;
 }
 
-export async function listVendorApplications(
-  status?: VendorApplicationStatus,
-) {
+export async function listVendorApplications(status?: VendorApplicationStatus) {
   await ensureIndexes();
   const docs = await applications()
     .find(status ? { status } : {})
@@ -249,11 +247,13 @@ export async function activateVendorAccount(
 
       // Server-only role assignment. Better Auth keeps `role` as `input: false`,
       // so no client payload can reach this value.
-      await db.collection(USERS_COLLECTION).updateOne(
-        { _id: userObjectId },
-        { $set: { role: "vendor", updatedAt: now } },
-        { session },
-      );
+      await db
+        .collection(USERS_COLLECTION)
+        .updateOne(
+          { _id: userObjectId },
+          { $set: { role: "vendor", updatedAt: now } },
+          { session },
+        );
     });
   } finally {
     await session.endSession();
@@ -328,7 +328,7 @@ export async function reviewVendorApplication({
           $set: {
             status: nextStatus[action],
             rejectionReason:
-              action === "reject" ? (reason?.trim() || null) : null,
+              action === "reject" ? reason?.trim() || null : null,
             reviewedBy: adminId,
             reviewedAt: now,
             updatedAt: now,
@@ -361,11 +361,13 @@ export async function reviewVendorApplication({
 
         // Trusted, server-only role assignment. `role` is `input: false` in
         // Better Auth, so it cannot be set from the browser.
-        await db.collection(USERS_COLLECTION).updateOne(
-          { _id: userObjectId },
-          { $set: { role: "vendor", updatedAt: now } },
-          { session },
-        );
+        await db
+          .collection(USERS_COLLECTION)
+          .updateOne(
+            { _id: userObjectId },
+            { $set: { role: "vendor", updatedAt: now } },
+            { session },
+          );
 
         await shops().updateOne(
           { ownerId: application.userId },

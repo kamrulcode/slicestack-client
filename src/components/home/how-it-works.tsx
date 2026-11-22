@@ -1,69 +1,120 @@
-import { Flame, Pizza, Truck } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
-import { SectionHeading } from "@/components/common/section-heading";
-import { Reveal, RevealGroup, RevealItem } from "@/components/common/reveal";
-
-const steps: { icon: LucideIcon; title: string; description: string }[] = [
-  {
-    icon: Pizza,
-    title: "Pick your slice",
-    description:
-      "Browse the menu and choose from classic, veggie and specialty pies.",
-  },
-  {
-    icon: Flame,
-    title: "We fire it up",
-    description:
-      "Hand-tossed dough, fresh toppings and a stone-baked finish, every time.",
-  },
-  {
-    icon: Truck,
-    title: "Delivered hot",
-    description:
-      "Straight from the oven to your door in about 30 minutes, still steaming.",
-  },
-];
-
-export function HowItWorks() {
+export default function PizzaSections() {
   return (
-    <section id="how-it-works" className="scroll-mt-24">
-      <div className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-        <Reveal>
-          <SectionHeading
-            title="From our oven to your door"
-            description="Three simple steps between you and your next favorite slice."
-            align="center"
-          />
-        </Reveal>
+    <main className="text-foreground overflow-hidden">
+      {/* POPULAR PIZZA COMBOS HERO */}
+      <section
+        className="relative bg-background min-h-140 flex items-center
+  erflow-hidden"
+      >
+        {/* Background glow */}
+        <div
+          className="absolute top-0 right-0 w-[600px] h-150
+    bg-[#FF404C]/10 blur-[150px] rounded-full"
+        />
 
-        <RevealGroup className="mt-10 grid gap-4 sm:grid-cols-3">
-          {steps.map((step, index) => {
-            const Icon = step.icon;
+        {/* COMBO OFFER SVG - TOP RIGHT */}
+        <img
+          src="/images/combo-offer.png"
+          alt="Limited time combo offer"
+          className="absolute top-4 right-4 md:top-8 md:right-50
+      w-28 md:w-40 lg:w-48 z-30
+      hover:rotate-6 transition duration-300"
+        />
 
-            return (
-              <RevealItem key={step.title} className="h-full">
-                <div className="relative h-full rounded-2xl border bg-card p-6 shadow-xs transition duration-300 hover:border-primary/25 hover:shadow-md motion-safe:hover:-translate-y-1">
-                  <span
-                    className="absolute top-4 right-5 font-heading text-4xl font-semibold text-primary/15"
-                    aria-hidden
-                  >
-                    0{index + 1}
-                  </span>
-                  <span className="grid size-11 place-items-center rounded-xl bg-primary/10 text-primary">
-                    <Icon className="size-5" aria-hidden />
-                  </span>
-                  <h3 className="mt-4 font-sans text-[1.375rem] font-bold sm:text-[1.625rem]">
-                    {step.title}
-                  </h3>
-                  <p className="mt-1.5 text-[15px] leading-relaxed text-muted-foreground sm:text-base">
-                    {step.description}
-                  </p>
-                </div>
-              </RevealItem>
-            );
-          })}
-        </RevealGroup>
-      </div>
-    </section>
+        <div
+          className="max-w-7xl mx-auto px-6 py-14 grid
+    lg:grid-cols-2 gap-10 items-center relative z-10"
+        >
+          {/* LEFT CONTENT */}
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.03] px-4 py-1.5 text-[10px] font-semibold tracking-[0.22em] text-foreground uppercase backdrop-blur-sm dark:border-white/15 dark:bg-white/[0.04] dark:text-white/75 sm:text-[11px] mb-6">
+              🔥 HOT & TRENDING
+            </span>
+
+            <h1
+              className="text-5xl md:text-7xl font-black
+        leading-[1.05] tracking-tight"
+            >
+              Popular
+              <br />
+              <span className="text-[#FF404C] dark:text-[#FFB340]">
+                Pizza
+              </span>{" "}
+              Combos
+            </h1>
+
+            <p className="mt-6 text-2xl font-semibold text-foreground">
+              More Pizza. More Savings.
+            </p>
+
+            <p className="mt-3 text-muted-foreground max-w-lg text-lg leading-relaxed">
+              Perfect combos for every pizza lover. Delicious pizza, crispy
+              sides and refreshing drinks packed together for the perfect meal.
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-4">
+              <button
+                className="bg-primary hover:bg-primary/90
+          px-8 py-4 rounded-full font-bold text-foreground
+          transition duration-300 hover:scale-105 shadow-lg
+          shadow-primary/20"
+              >
+                Order Your Combo →
+              </button>
+
+              <button
+                className="border border-slate-900 hover:border-ember
+          px-8 py-4 rounded-full font-semibold transition dark:border-slate-500"
+              >
+                Explore Menu
+              </button>
+            </div>
+
+            {/* TRUST */}
+            <div className="mt-8 flex items-center gap-4">
+              <div className="flex -space-x-3">
+                {[1, 2, 3, 4].map((n) => (
+                  <img
+                    key={n}
+                    src={`https://i.pravatar.cc/100?img=${n + 10}`}
+                    alt="Customer"
+                    className="w-11 h-11 rounded-full border-2
+                border-background"
+                  />
+                ))}
+              </div>
+
+              <div>
+                <p className="font-bold text-sm">50K+ Happy Customers</p>
+                <p className="text-ember text-sm">★★★★★</p>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT IMAGE - SHORTER HEIGHT */}
+          <div className="relative flex items-center justify-center">
+            <div
+              className="absolute inset-0 bg-ember/20
+        blur-[100px] rounded-full"
+            />
+
+            <img
+              src="/images/combo-pizza.png"
+              alt="Delicious pizza combo"
+              className="relative z-10 w-full max-h-[420px]
+          object-contain rounded-[30px] drop-shadow-2xl
+          hover:scale-[1.02] transition duration-500"
+            />
+          </div>
+        </div>
+
+        {/* BOTTOM DECORATION */}
+        {/* <div
+          className="absolute bottom-0 left-0 w-full h-2
+    bg-linear-to-r from-primary via-ember
+    to-primary"
+        /> */}
+      </section>
+    </main>
   );
 }
