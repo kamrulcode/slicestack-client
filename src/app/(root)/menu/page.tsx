@@ -48,11 +48,14 @@ export default async function MenuPage({
       items: menuItems.filter((item) => item.category === menuCategory.name),
     }))
     .filter(({ items }) => items.length > 0);
-  const categoryAnchorByItemId = groups.reduce((anchors, { category, items }) => {
-    const firstItem = items[0];
-    if (firstItem) anchors.set(firstItem._id, category.id);
-    return anchors;
-  }, new Map<string, string>());
+  const categoryAnchorByItemId = groups.reduce(
+    (anchors, { category, items }) => {
+      const firstItem = items[0];
+      if (firstItem) anchors.set(firstItem._id, category.id);
+      return anchors;
+    },
+    new Map<string, string>(),
+  );
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-14 sm:px-6 sm:py-16 lg:px-8">
@@ -120,14 +123,13 @@ export default async function MenuPage({
         <>
           <div className="mt-8 flex flex-wrap gap-2">
             {groups.map(({ category: itemCategory }) => (
-              <Link
+              <div
                 key={itemCategory.id}
-                href={`#${itemCategory.id}`}
                 className={buttonVariants({ variant: "outline", size: "sm" })}
               >
                 <span aria-hidden>{itemCategory.emoji}</span>
                 {itemCategory.name}
-              </Link>
+              </div>
             ))}
           </div>
 
