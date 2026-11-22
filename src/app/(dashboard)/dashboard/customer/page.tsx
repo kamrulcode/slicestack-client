@@ -27,7 +27,11 @@ import { getAccountContext, requireRole } from "@/lib/authorization";
 import { errorMessage } from "@/lib/api/client";
 import { formatPrice } from "@/lib/format";
 import { serverApi } from "@/services/server";
-import { ORDER_STATUS_LABEL, type CustomerDashboardStats, type Order } from "@/types/order";
+import {
+  ORDER_STATUS_LABEL,
+  type CustomerDashboardStats,
+  type Order,
+} from "@/types/order";
 import { VENDOR_STATUS_LABEL } from "@/types/vendor";
 
 export const metadata: Metadata = {
@@ -103,7 +107,7 @@ export default async function CustomerDashboardPage() {
             />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] my-4">
             <PerformanceChart
               title="Your order activity"
               description="Orders across the last seven days"
@@ -112,7 +116,7 @@ export default async function CustomerDashboardPage() {
             <VendorApplicationStatusCard application={application} />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
             {orders.length === 0 ? (
               <EmptyState
                 icon={<ShoppingBag aria-hidden />}

@@ -86,4 +86,11 @@ export const auth = betterAuth({
   // The Express API verifies these JWTs through /api/auth/jwks. The token's
   // `sub` is the Better Auth user id.
   plugins: [jwt()],
+  session: {
+    cookieCache: {
+      enabled: true,
+      strategy: "jwt",
+      maxAge: 7 * 24 * 60 * 60,
+    },
+  },
 });

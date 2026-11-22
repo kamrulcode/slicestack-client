@@ -4,9 +4,8 @@ export const siteConfig = {
   description:
     "Discover amazing pizzas from restaurants around you. Pick your favorite, place an order, and enjoy every bite.",
   nav: [
-    { label: "Home", href: "/" },
     { label: "Browse Menu", href: "/menu" },
-    { label: "How it works", href: "/#how-it-works" },
+    { label: "Offers", href: "/offers" },
   ],
   company: [
     { label: "Home", href: "/" },
