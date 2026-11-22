@@ -72,7 +72,7 @@ const featuredOffer = {
 
 export default function OffersPage() {
   return (
-    <main className="min-h-screen bg-[#100D0B] text-white">
+    <main className="min-h-screen bg-background text-foreground">
       {/* Page Heading */}
       <section className="mx-auto max-w-7xl px-5 pb-10 pt-24 md:px-8 md:pt-32">
         <motion.div
@@ -91,7 +91,7 @@ export default function OffersPage() {
             <span className="text-[#FFB340]"> Better Prices.</span>
           </h1>
 
-          <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-white/50 md:text-base">
+          <p className="mx-auto mt-5 max-w-xl text-sm leading-7 text-muted-foreground md:text-base">
             Great food tastes even better with great deals. Explore our
             exclusive offers and enjoy more for less.
           </p>
@@ -104,7 +104,7 @@ export default function OffersPage() {
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="relative isolate overflow-hidden rounded-[28px] border border-white/10 bg-[#1B1512]"
+          className="relative isolate overflow-hidden rounded-[28px] border border-border bg-card"
         >
           <div className="absolute -right-20 -top-20 -z-10 h-80 w-80 rounded-full bg-[#FF404C]/15 blur-[100px]" />
           <div className="absolute -bottom-32 left-1/4 -z-10 h-80 w-80 rounded-full bg-[#FFB340]/10 blur-[100px]" />
@@ -125,7 +125,7 @@ export default function OffersPage() {
                 {featuredOffer.title}
               </h2>
 
-              <p className="mt-5 max-w-md text-sm leading-7 text-white/55">
+              <p className="mt-5 max-w-md text-sm leading-7 text-muted-foreground">
                 {featuredOffer.description}
               </p>
 
@@ -138,7 +138,7 @@ export default function OffersPage() {
                   <span className="text-3xl font-black">
                     ৳{featuredOffer.price}
                   </span>
-                  <span className="text-base text-white/35 line-through">
+                  <span className="text-base text-muted-foreground line-through">
                     ৳{featuredOffer.oldPrice}
                   </span>
                 </div>
@@ -152,7 +152,7 @@ export default function OffersPage() {
                 <ArrowRight size={18} />
               </Link>
 
-              <div className="mt-6 flex items-center gap-2 text-xs text-white/35">
+              <div className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
                 <Clock size={14} />
                 Limited time offer. While available.
               </div>
@@ -198,7 +198,7 @@ export default function OffersPage() {
             <h2 className="mt-3 text-3xl font-black sm:text-4xl">
               More Deals, More Cravings.
             </h2>
-            <p className="mt-3 text-sm text-white/45">
+            <p className="mt-3 text-sm text-muted-foreground">
               Find your next favorite deal at an unbeatable price.
             </p>
           </div>
@@ -219,7 +219,7 @@ export default function OffersPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.15 }}
               transition={{ duration: 0.45, delay: index * 0.08 }}
-              className="group overflow-hidden rounded-2xl border border-white/[0.07] bg-[#1B1512] transition-all duration-300 hover:-translate-y-1 hover:border-[#FFB340]/30"
+              className="group overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:-translate-y-1 hover:border-[#FFB340]/30"
             >
               {/* Image */}
               <div
@@ -248,14 +248,14 @@ export default function OffersPage() {
                   {offer.title}
                 </h3>
 
-                <p className="mt-2 min-h-[48px] text-xs leading-6 text-white/45">
+                <p className="mt-2 min-h-[48px] text-xs leading-6 text-muted-foreground">
                   {offer.description}
                 </p>
 
-                <div className="mt-5 flex items-center justify-between gap-2 border-t border-white/[0.07] pt-4">
+                <div className="mt-5 flex items-center justify-between gap-2 border-t border-border pt-4">
                   <div>
                     <span className="text-xl font-black">৳{offer.price}</span>
-                    <span className="ml-2 text-xs text-white/35 line-through">
+                    <span className="ml-2 text-xs text-muted-foreground line-through">
                       ৳{offer.oldPrice}
                     </span>
                   </div>
@@ -276,7 +276,7 @@ export default function OffersPage() {
 
       {/* Bottom CTA */}
       <section className="mx-auto max-w-7xl px-5 pb-20 md:px-8">
-        <div className="flex flex-col items-center justify-between gap-6 rounded-2xl border border-[#FFB340]/15 bg-[#FFB340]/[0.06] px-7 py-10 text-center sm:flex-row sm:text-left md:px-12">
+        <div className="flex flex-col items-center justify-between gap-6 rounded-2xl border border-[#FFB340]/30 bg-[#FFB340]/10 px-7 py-10 text-center sm:flex-row sm:text-left md:px-12">
           <div>
             <div className="flex items-center justify-center gap-2 text-[#FFB340] sm:justify-start">
               <Gift size={20} />
@@ -289,7 +289,7 @@ export default function OffersPage() {
               Your next favorite pizza awaits.
             </h2>
 
-            <p className="mt-2 text-sm text-white/45">
+            <p className="mt-2 text-sm text-muted-foreground">
               Explore our complete menu and discover something delicious.
             </p>
           </div>
