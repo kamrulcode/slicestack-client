@@ -9,8 +9,15 @@ export const siteConfig = {
     { label: "How it works", href: "/#how-it-works" },
   ],
   company: [
-    { label: "Browse Menu", href: "/menu" },
-    { label: "Terms", href: "/terms" },
-    { label: "Privacy", href: "/privacy" },
+    { label: "Home", href: "/" },
+    { label: "Upcomming Offers", href: "/offers" },
+    { label: "Location", href: "/location" },
+    { label: "About Us", href: "/about" },
+  ],
+  support: [
+    { label: "Help Center", href: "/help" },
+    { label: "Privacy Policy", href: "/privacy" },
+    { label: "Terms & Conditions", href: "/terms" },
+    { label: "Contact", href: "/contact" },
   ],
 } as const;

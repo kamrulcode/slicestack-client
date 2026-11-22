@@ -20,6 +20,8 @@ type VendorDetailsFieldsProps = {
   idPrefix?: string;
   defaults?: Partial<VendorDetailsValues>;
   onUploadingChange?: (uploading: boolean) => void;
+  deferLogoUpload?: boolean;
+  onLogoFileChange?: (file: File | null) => void;
 };
 
 /**
@@ -33,8 +35,11 @@ export function VendorDetailsFields({
   idPrefix = "vendor",
   defaults,
   onUploadingChange,
+  deferLogoUpload = false,
+  onLogoFileChange,
 }: VendorDetailsFieldsProps) {
   const [logoUrl, setLogoUrl] = useState(defaults?.logoUrl ?? "");
+  const [deferredLogoFile, setDeferredLogoFile] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState<string>();
   const [isUploading, setIsUploading] = useState(false);
 
@@ -49,18 +54,31 @@ export function VendorDetailsFields({
 
     if (!file) {
       setLogoUrl("");
+      setDeferredLogoFile(null);
+      onLogoFileChange?.(null);
       return;
     }
 
     if (!file.type.startsWith("image/")) {
       setUploadError("Choose an image file.");
+      setDeferredLogoFile(null);
+      onLogoFileChange?.(null);
       event.currentTarget.value = "";
       return;
     }
 
     if (file.size > MAX_LOGO_BYTES) {
       setUploadError("The logo must be 5MB or smaller.");
+      setDeferredLogoFile(null);
+      onLogoFileChange?.(null);
       event.currentTarget.value = "";
+      return;
+    }
+
+    if (deferLogoUpload) {
+      setLogoUrl("");
+      setDeferredLogoFile(file);
+      onLogoFileChange?.(file);
       return;
     }
 
@@ -195,6 +213,11 @@ export function VendorDetailsFields({
             <>
               <Loader2 className="size-3.5 animate-spin" aria-hidden />
               Uploading logo...
+            </>
+          ) : deferredLogoFile ? (
+            <>
+              <ImagePlus className="size-3.5" aria-hidden />
+              Logo will upload after account creation.
             </>
           ) : logoUrl ? (
             <>

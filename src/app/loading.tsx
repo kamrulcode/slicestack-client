@@ -1,34 +1,63 @@
-import { Skeleton } from "@/components/ui/skeleton";
+"use client";
 
-export default function Loading() {
+import Image from "next/image";
+import { motion, AnimatePresence } from "motion/react";
+
+export default function Loading({ isLoading = true }) {
   return (
-    <main
-      aria-busy="true"
-      className="mx-auto w-full max-w-6xl flex-1 px-4 py-14 sm:px-6 sm:py-16 lg:px-8"
-    >
-      <span className="sr-only" role="status">
-        Loading page content
-      </span>
-      <Skeleton className="h-4 w-32" />
-      <Skeleton className="mt-4 h-10 w-full max-w-xl sm:h-12" />
-      <Skeleton className="mt-4 h-4 w-full max-w-lg" />
-      <Skeleton className="mt-2 h-4 w-3/4 max-w-md" />
+    <AnimatePresence>
+      {isLoading && (
+        <motion.div
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, filter: "blur(12px)" }}
+          transition={{ duration: 0.6 }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center
+          bg-[#100b09]/70 backdrop-blur-xl"
+        >
+          <div className="flex flex-col items-center gap-6">
+            {/* Logo Animation */}
+            <motion.div
+              animate={{
+                scale: [1, 1.06, 1],
+                y: [0, -8, 0],
+              }}
+              transition={{
+                duration: 1.8,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <Image
+                src="/logo.png"
+                alt="SliceStack"
+                width={150}
+                height={150}
+                priority
+                className="h-28 w-auto object-contain"
+              />
+            </motion.div>
 
-      <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }, (_, index) => (
-          <div
-            key={index}
-            className="overflow-hidden rounded-3xl border border-border/70 bg-card p-0"
-          >
-            <Skeleton className="aspect-[4/3] w-full rounded-none" />
-            <div className="space-y-3 p-4 sm:p-5">
-              <Skeleton className="h-5 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-9 w-full rounded-xl" />
+            {/* Loading Bar */}
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-1 w-32 overflow-hidden rounded-full bg-white/10">
+                <motion.div
+                  className="h-full w-1/2 rounded-full bg-gradient-to-r from-[#FFB340] to-[#FF404C]"
+                  animate={{ x: ["-100%", "200%"] }}
+                  transition={{
+                    duration: 1.2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                />
+              </div>
+
+              <p className="text-xs font-medium tracking-[0.25em] text-white/70">
+                FRESHNESS IS LOADING...
+              </p>
             </div>
           </div>
-        ))}
-      </div>
-    </main>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

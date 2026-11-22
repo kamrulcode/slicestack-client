@@ -77,6 +77,11 @@ function validatePassword(value: string) {
   return errors;
 }
 
+async function saveProfileImage(file: File) {
+  const image = await uploadService.image(file);
+  await profileService.updateProfile({ image });
+}
+
 export function SignUpForm({
   defaultMode = "customer",
 }: {
@@ -91,6 +96,8 @@ export function SignUpForm({
   const [successMessage, setSuccessMessage] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [vendorLogoFile, setVendorLogoFile] = useState<File | null>(null);
+  const [vendorLogoUrl, setVendorLogoUrl] = useState<string>();
   // A vendor account exists as soon as Better Auth creates it. If shop
   // activation fails (for example a network drop), we keep this flag so the
   // retry only re-runs the secure activation step.
@@ -151,22 +158,27 @@ export function SignUpForm({
     try {
       if (!isVendor) {
         const imageFile = formData.get("image");
-        const imageUrl =
-          imageFile instanceof File && imageFile.size > 0
-            ? await uploadService.image(imageFile)
-            : undefined;
-
         const { error } = await authClient.signUp.email({
           name,
           email,
           password,
-          ...(imageUrl ? { image: imageUrl } : {}),
           callbackURL: "/dashboard",
         });
 
         if (error) {
           toast.error(error.message || "Unable to create your account.");
           return;
+        }
+
+        if (imageFile instanceof File && imageFile.size > 0) {
+          try {
+            await saveProfileImage(imageFile);
+          } catch (error) {
+            toast.error(
+              "Your account was created, but the profile image could not be uploaded. You can add it later from your account settings.",
+              { description: errorMessage(error) },
+            );
+          }
         }
 
         toast.success("Account created. Welcome to SliceStack!");
@@ -178,11 +190,6 @@ export function SignUpForm({
 
       if (!vendorAccountCreated) {
         const imageFile = formData.get("image");
-        const imageUrl =
-          imageFile instanceof File && imageFile.size > 0
-            ? await uploadService.image(imageFile)
-            : undefined;
-
         // Better Auth creates the account with its default `customer` role and
         // signs the browser in. The role is raised to `vendor` only after the
         // backend validates and stores the shop data.
@@ -190,7 +197,6 @@ export function SignUpForm({
           name,
           email,
           password,
-          ...(imageUrl ? { image: imageUrl } : {}),
           callbackURL: "/dashboard/vendor",
         });
 
@@ -200,6 +206,30 @@ export function SignUpForm({
         }
 
         setVendorAccountCreated(true);
+
+        if (imageFile instanceof File && imageFile.size > 0) {
+          try {
+            await saveProfileImage(imageFile);
+          } catch (error) {
+            toast.error(
+              "Your account was created, but the profile image could not be uploaded. You can add it later from your account settings.",
+              { description: errorMessage(error) },
+            );
+          }
+        }
+      }
+
+      let logoUrl = vendorLogoUrl ?? vendorValues.logoUrl;
+      if (!logoUrl && vendorLogoFile) {
+        try {
+          logoUrl = await uploadService.image(vendorLogoFile);
+          setVendorLogoUrl(logoUrl);
+        } catch (error) {
+          toast.error(
+            "Your account was created, but the shop logo could not be uploaded. You can add it later from your vendor profile.",
+            { description: errorMessage(error) },
+          );
+        }
       }
 
       const result = await profileService.applyVendor({
@@ -207,7 +237,7 @@ export function SignUpForm({
         phone: vendorValues.phone,
         address: vendorValues.address,
         description: vendorValues.description,
-        logoUrl: vendorValues.logoUrl || null,
+        logoUrl: logoUrl || null,
       });
 
       if (!result.ok) {
@@ -475,6 +505,11 @@ export function SignUpForm({
                 disabled={!isVendor}
                 idPrefix="sign-up-vendor"
                 onUploadingChange={setIsUploadingLogo}
+                deferLogoUpload
+                onLogoFileChange={(file) => {
+                  setVendorLogoFile(file);
+                  setVendorLogoUrl(undefined);
+                }}
               />
             </div>
           </div>
