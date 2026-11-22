@@ -99,7 +99,7 @@ export function HeroCopy() {
           href="/menu"
           className={cn(
             buttonVariants({ size: "lg" }),
-            "group/cta h-13 gap-2.5 rounded-full bg-primary px-7 text-[15px] tracking-wide text-foreground shadow-[0_18px_45px_-14px_rgba(255,64,76,0.95)] transition-transform duration-300 hover:-translate-y-0.5 hover:bg-primary/90 sm:h-14 sm:px-9 sm:text-base",
+            "group/cta h-13 gap-2.5 rounded-full bg-primary px-7 text-[15px] tracking-wide  shadow-[0_18px_45px_-14px_rgba(255,64,76,0.95)] transition-transform duration-300 hover:-translate-y-0.5 hover:bg-primary/90 sm:h-14 sm:px-9 sm:text-base",
           )}
         >
           Explore Pizza Menu
@@ -108,40 +108,7 @@ export function HeroCopy() {
             aria-hidden
           />
         </Link>
-        {/* <span className="rounded-full bg-black/60 px-4 py-2 text-[10px] font-semibold tracking-[0.18em] text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.9)] backdrop-blur-sm uppercase sm:text-[11px]">
-          No minimum order &middot; Delivered with love
-        </span> */}
       </motion.div>
-
-      {/* <motion.ul
-        initial={hidden(18)}
-        animate={show}
-        transition={{ duration: 0.9, delay: 0.46, ease: EASE }}
-        className="mt-7 flex flex-col items-center gap-3 sm:mt-9 sm:flex-row sm:gap-9"
-      >
-        {highlights.map(({ icon: Icon, title, description }, index) => (
-          <li
-            key={title}
-            className={cn(
-              "flex items-center gap-3",
-              index > 0 &&
-                "sm:border-l sm:border-white/12 sm:pl-9",
-            )}
-          >
-            <span className="flex size-9 items-center justify-center rounded-full border border-[#FFB340]/30 bg-[#FFB340]/10 text-[#FFB340]">
-              <Icon className="size-4" aria-hidden />
-            </span>
-            <span className="text-left [text-shadow:0_2px_16px_rgba(7,8,10,0.95)]">
-              <span className="block text-[13px] font-semibold text-white sm:text-sm">
-                {title}
-              </span>
-              <span className="block text-[11px] text-white/60 sm:text-xs">
-                {description}
-              </span>
-            </span>
-          </li>
-        ))}
-      </motion.ul> */}
     </div>
   );
 }

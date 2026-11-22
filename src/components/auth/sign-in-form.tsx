@@ -7,11 +7,14 @@ import { AuthField } from "@/components/auth/auth-field";
 import { GoogleButton } from "@/components/auth/google-button";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
+import { errorMessage } from "@/lib/api/client";
+import { toast } from "sonner";
+import { Eye, EyeClosed } from "lucide-react";
 
 export function SignInForm({ nextPath }: { nextPath?: string }) {
   const router = useRouter();
-  const [error, setError] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -20,7 +23,7 @@ export function SignInForm({ nextPath }: { nextPath?: string }) {
     const email = String(formData.get("email") ?? "").trim();
     const password = String(formData.get("password") ?? "");
 
-    setError(undefined);
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
@@ -30,20 +33,17 @@ export function SignInForm({ nextPath }: { nextPath?: string }) {
       });
 
       if (signInError) {
-        setError(signInError.message || "Unable to sign in.");
+        toast.error(signInError.message || "Unable to sign in.");
         return;
       }
 
+      toast.success("Welcome back!");
       // The dashboard dispatcher reads the role from the database on the
       // server and redirects to the right workspace.
       router.replace(nextPath || "/dashboard");
       router.refresh();
     } catch (signInError) {
-      setError(
-        signInError instanceof Error
-          ? signInError.message
-          : "Unable to sign in. Please try again.",
-      );
+      toast.error(errorMessage(signInError));
     } finally {
       setIsSubmitting(false);
     }
@@ -77,6 +77,24 @@ export function SignInForm({ nextPath }: { nextPath?: string }) {
             autoComplete="current-password"
             placeholder="Enter password"
             required
+            endAdornment={
+              <Button
+                type="button"
+                aria-label={isVisible ? "Hide password" : "Show password"}
+                aria-pressed={isVisible}
+                aria-controls="sign-up-password"
+                size="icon"
+                variant="ghost"
+                className="size-9 sm:size-10"
+                onClick={() => setIsVisible((visible) => !visible)}
+              >
+                {isVisible ? (
+                  <EyeClosed className="size-4" aria-hidden />
+                ) : (
+                  <Eye className="size-4" aria-hidden />
+                )}
+              </Button>
+            }
           />
         </div>
 
@@ -89,12 +107,6 @@ export function SignInForm({ nextPath }: { nextPath?: string }) {
           {isSubmitting ? "Signing in..." : "Continue with email"}
         </Button>
 
-        {error && (
-          <p role="alert" className="mt-3 text-sm text-destructive">
-            {error}
-          </p>
-        )}
-
         <div className="mt-3">
           <GoogleButton />
         </div>
@@ -103,14 +115,14 @@ export function SignInForm({ nextPath }: { nextPath?: string }) {
       <p className="mt-8 text-[13px] leading-6 text-muted-foreground">
         By continuing, you agree to our{" "}
         <Link
-          href="#"
+          href="/terms"
           className="font-semibold text-foreground/80 underline-offset-2 transition-colors hover:text-foreground hover:underline"
         >
           Terms
         </Link>{" "}
         and{" "}
         <Link
-          href="#"
+          href="/privacy"
           className="font-semibold text-foreground/80 underline-offset-2 transition-colors hover:text-foreground hover:underline"
         >
           Privacy Policy

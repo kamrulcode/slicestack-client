@@ -12,14 +12,16 @@ import {
   Store,
   UserRound,
 } from "lucide-react";
-import { activateVendorAccountAction } from "@/app/(auth)/sign-up/actions";
 import { AuthField } from "@/components/auth/auth-field";
 import { GoogleButton } from "@/components/auth/google-button";
 import { VendorDetailsFields } from "@/components/vendor/vendor-details-fields";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { uploadImage } from "@/config/imgbb";
+import { errorMessage } from "@/lib/api/client";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { profileService } from "@/services/profile.service";
+import { uploadService } from "@/services/uploads.service";
+import { toast } from "sonner";
 import {
   readVendorDetails,
   validateVendorDetails,
@@ -86,7 +88,6 @@ export function SignUpForm({
   const [errors, setErrors] = useState<SignUpErrors>({});
   const [vendorErrors, setVendorErrors] = useState<VendorFieldErrors>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [submissionError, setSubmissionError] = useState<string>();
   const [successMessage, setSuccessMessage] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -104,7 +105,6 @@ export function SignUpForm({
     setMode(next);
     setErrors({});
     setVendorErrors({});
-    setSubmissionError(undefined);
     setHasSubmitted(false);
   }
 
@@ -134,7 +134,6 @@ export function SignUpForm({
     setHasSubmitted(true);
     setErrors(nextErrors);
     setVendorErrors(nextVendorErrors);
-    setSubmissionError(undefined);
 
     if (
       Object.values(nextErrors).some(Boolean) ||
@@ -144,7 +143,7 @@ export function SignUpForm({
     }
 
     if (isVendor && isUploadingLogo) {
-      setSubmissionError("Please wait for the shop logo to finish uploading.");
+      toast.info("Please wait for the shop logo to finish uploading.");
       return;
     }
 
@@ -154,7 +153,7 @@ export function SignUpForm({
         const imageFile = formData.get("image");
         const imageUrl =
           imageFile instanceof File && imageFile.size > 0
-            ? await uploadImage(imageFile)
+            ? await uploadService.image(imageFile)
             : undefined;
 
         const { error } = await authClient.signUp.email({
@@ -166,10 +165,11 @@ export function SignUpForm({
         });
 
         if (error) {
-          setSubmissionError(error.message || "Unable to create your account.");
+          toast.error(error.message || "Unable to create your account.");
           return;
         }
 
+        toast.success("Account created. Welcome to SliceStack!");
         // The /dashboard dispatcher reads the new user's role on the server.
         router.replace("/dashboard");
         router.refresh();
@@ -180,12 +180,12 @@ export function SignUpForm({
         const imageFile = formData.get("image");
         const imageUrl =
           imageFile instanceof File && imageFile.size > 0
-            ? await uploadImage(imageFile)
+            ? await uploadService.image(imageFile)
             : undefined;
 
         // Better Auth creates the account with its default `customer` role and
-        // signs the browser in. The role is raised to `vendor` only by the
-        // server action below, after the shop data is validated and saved.
+        // signs the browser in. The role is raised to `vendor` only after the
+        // backend validates and stores the shop data.
         const { error } = await authClient.signUp.email({
           name,
           email,
@@ -195,14 +195,14 @@ export function SignUpForm({
         });
 
         if (error) {
-          setSubmissionError(error.message || "Unable to create your account.");
+          toast.error(error.message || "Unable to create your account.");
           return;
         }
 
         setVendorAccountCreated(true);
       }
 
-      const result = await activateVendorAccountAction({
+      const result = await profileService.applyVendor({
         shopName: vendorValues.shopName,
         phone: vendorValues.phone,
         address: vendorValues.address,
@@ -211,11 +211,11 @@ export function SignUpForm({
       });
 
       if (!result.ok) {
-        setVendorErrors(result.errors ?? {});
-        setSubmissionError(result.message);
+        toast.error(result.message);
         return;
       }
 
+      toast.success(result.message);
       setSuccessMessage(result.message);
       // Give the confirmation a beat, then open the vendor workspace.
       window.setTimeout(() => {
@@ -223,11 +223,7 @@ export function SignUpForm({
         router.refresh();
       }, 800);
     } catch (error) {
-      setSubmissionError(
-        error instanceof Error
-          ? error.message
-          : "Unable to create your account.",
-      );
+      toast.error(errorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -505,12 +501,6 @@ export function SignUpForm({
                 : "Create customer account"}
         </Button>
 
-        {submissionError && (
-          <p role="alert" className="mt-3 text-sm text-destructive">
-            {submissionError}
-          </p>
-        )}
-
         {!isVendor && (
           <div className="mt-3">
             <GoogleButton />
@@ -521,14 +511,14 @@ export function SignUpForm({
       <p className="mt-8 text-[13px] leading-6 text-muted-foreground">
         By continuing, you agree to our{" "}
         <Link
-          href="#"
+          href="/terms"
           className="font-semibold text-foreground/80 underline-offset-2 transition-colors hover:text-foreground hover:underline"
         >
           Terms
         </Link>{" "}
         and{" "}
         <Link
-          href="#"
+          href="/privacy"
           className="font-semibold text-foreground/80 underline-offset-2 transition-colors hover:text-foreground hover:underline"
         >
           Privacy Policy

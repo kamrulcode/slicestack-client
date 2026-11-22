@@ -29,6 +29,8 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { authClient } from "@/lib/auth-client";
+import { errorMessage } from "@/lib/api/client";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { SessionUser } from "@/lib/authorization";
 
@@ -102,8 +104,11 @@ export function DashboardShell({
     setIsSigningOut(true);
     try {
       await authClient.signOut();
+      toast.success("You have been signed out.");
       router.replace("/");
       router.refresh();
+    } catch (error) {
+      toast.error(errorMessage(error));
     } finally {
       setIsSigningOut(false);
     }

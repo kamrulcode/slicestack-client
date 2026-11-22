@@ -1,21 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { errorMessage } from "@/lib/api/client";
+import { newsletterService } from "@/services/newsletter.service";
 
 export default function Newsletter() {
   const [email, setEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubscribe = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubscribe = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSubmitting) return;
 
-    if (!email.trim()) return;
+    const value = email.trim();
+    if (!value) return;
 
-    setSubscribed(true);
-    setEmail("");
+    setIsSubmitting(true);
+    try {
+      const result = await newsletterService.subscribe(value);
+      toast.success(result.message);
+      setEmail("");
+    } catch (error) {
+      toast.error(errorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -42,31 +55,35 @@ export default function Newsletter() {
           placeholder="you@example.com"
           autoComplete="email"
           value={email}
-          onChange={(event) => {
-            setEmail(event.target.value);
-            setSubscribed(false);
-          }}
+          onChange={(event) => setEmail(event.target.value)}
           required
+          disabled={isSubmitting}
           className="h-10 bg-background text-[15px] sm:text-base"
         />
 
-        <Button type="submit" className="h-10 shrink-0 gap-1.5">
-          Subscribe
-          <ArrowRight className="size-4" aria-hidden />
+        <Button
+          type="submit"
+          className="h-10 shrink-0 gap-1.5"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="size-4 animate-spin" aria-hidden />
+              Joining...
+            </>
+          ) : (
+            <>
+              Subscribe
+              <ArrowRight className="size-4" aria-hidden />
+            </>
+          )}
         </Button>
       </form>
 
       <p
         aria-live="polite"
         className="mt-3 min-h-5 text-[13px] leading-5 text-muted-foreground"
-      >
-        {subscribed ? (
-          <span className="inline-flex items-center gap-1.5 font-medium text-primary">
-            <Check className="size-3.5" aria-hidden />
-            You&apos;re on the list — watch your inbox.
-          </span>
-        ) : null}
-      </p>
+      />
     </div>
   );
 }

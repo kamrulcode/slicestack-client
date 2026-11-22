@@ -9,8 +9,8 @@ export const siteConfig = {
     { label: "How it works", href: "/#how-it-works" },
   ],
   company: [
-    { label: "About", href: "#" },
-    { label: "Contact", href: "#" },
-    { label: "Privacy", href: "#" },
+    { label: "Browse Menu", href: "/menu" },
+    { label: "Terms", href: "/terms" },
+    { label: "Privacy", href: "/privacy" },
   ],
 } as const;

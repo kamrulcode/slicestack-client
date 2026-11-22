@@ -3,7 +3,6 @@
 import {
   IconDotsVertical,
   IconLogout,
-  IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -19,6 +18,8 @@ import {
 import { UserTooltip } from "@/components/utils/Tooltip";
 import { Settings } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
+import { errorMessage } from "@/lib/api/client";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 export function NavUser({
@@ -42,9 +43,14 @@ export function NavUser({
       .toUpperCase() || "U";
 
   const handleSignOut = async () => {
-    await authClient.signOut();
-    router.replace("/sign-in");
-    router.refresh();
+    try {
+      await authClient.signOut();
+      toast.success("You have been signed out.");
+      router.replace("/sign-in");
+      router.refresh();
+    } catch (error) {
+      toast.error(errorMessage(error));
+    }
   };
 
   return (
@@ -96,10 +102,6 @@ export function NavUser({
             Dashboard
           </DropdownMenuItem>
 
-          <DropdownMenuItem>
-            <IconNotification />
-            Notifications
-          </DropdownMenuItem>
           <DropdownMenuItem
             render={<Link href={`/dashboard/${user.role}/profile`}></Link>}
           >

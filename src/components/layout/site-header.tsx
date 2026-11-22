@@ -3,6 +3,7 @@ import { Logo } from "@/components/brand/logo";
 import { MobileNav } from "@/components/layout/mobile-nav";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
+
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { LogIn, User } from "lucide-react";
@@ -53,7 +54,7 @@ export async function SiteHeader() {
                 href="/sign-up"
                 className={cn(
                   buttonVariants({ size: "sm" }),
-                  "hidden rounded-full px-4 py-4 shadow-sm shadow-primary/25 lg:inline-flex",
+                  "hidden rounded-full px-4 py-4 shadow-sm shadow-primary/25 lg:inline-flex ",
                 )}
               >
                 <User />

@@ -5,7 +5,7 @@ import { ImagePlus, Loader2 } from "lucide-react";
 import { AuthField } from "@/components/auth/auth-field";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { uploadImage } from "@/config/imgbb";
+import { uploadService } from "@/services/uploads.service";
 import {
   VENDOR_LIMITS,
   type VendorDetailsValues,
@@ -66,7 +66,7 @@ export function VendorDetailsFields({
 
     setUploading(true);
     try {
-      setLogoUrl(await uploadImage(file));
+      setLogoUrl(await uploadService.image(file));
     } catch (error) {
       setUploadError(
         error instanceof Error ? error.message : "Logo upload failed.",

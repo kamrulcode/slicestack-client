@@ -5,11 +5,7 @@ import { ShieldAlert } from "lucide-react";
 import { AuthShell } from "@/components/auth/auth-shell";
 import { buttonVariants } from "@/components/ui/button";
 import { VendorOnboardingForm } from "@/components/vendor/vendor-onboarding-form";
-import { getCurrentUser } from "@/lib/authorization";
-import {
-  getShopForOwner,
-  getVendorApplicationForUser,
-} from "@/lib/vendor-applications";
+import { getAccountContext, getCurrentUser } from "@/lib/authorization";
 import { dashboardPathForRole } from "@/types/auth";
 
 export const metadata: Metadata = {
@@ -29,10 +25,9 @@ export default async function RegisterVendorPage() {
     redirect(dashboardPathForRole(user.role));
   }
 
-  const [application, shop] = await Promise.all([
-    getVendorApplicationForUser(user.id),
-    getShopForOwner(user.id),
-  ]);
+  const context = await getAccountContext();
+  const application = context?.application ?? null;
+  const shop = context?.shop ?? null;
 
   const suspended =
     application?.status === "SUSPENDED" || shop?.status === "suspended";

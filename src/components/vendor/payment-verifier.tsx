@@ -62,10 +62,10 @@ export function PaymentVerifier({
         }
       } catch (error) {
         if (cancelled) return;
-        console.error("Payment verification:", errorMessage(error));
-        toast.error("We could not verify your payment with Stripe.", {
-          position: "top-center",
-        });
+        toast.error(
+          errorMessage(error) || "We could not verify your payment with Stripe.",
+          { position: "top-center" },
+        );
       } finally {
         if (!cancelled) {
           setVerifying(false);

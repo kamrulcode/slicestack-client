@@ -5,13 +5,7 @@ import {
   ShopSummaryCard,
   VendorApplicationSummary,
 } from "@/components/vendor/vendor-application-status";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { ShopProfileCard } from "@/components/vendor/shop-profile-card";
 import { requireVendorWorkspace } from "@/lib/authorization";
 
 export const metadata: Metadata = {
@@ -34,18 +28,10 @@ export default async function VendorProfilePage() {
         <ShopSummaryCard shop={shop} />
         {application ? <VendorApplicationSummary application={application} /> : null}
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Editing shop details</CardTitle>
-          <CardDescription>
-            Profile editing will be added with the shop settings module.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="text-sm text-muted-foreground">
-          To change your shop name, address or contact number today, contact the
-          SliceStack team. Only the shop owner can modify shop data.
-        </CardContent>
-      </Card>
+      <ShopProfileCard
+        key={`${shop.id}-${shop.name}-${shop.updatedAt}`}
+        shop={shop}
+      />
     </DashboardPage>
   );
 }

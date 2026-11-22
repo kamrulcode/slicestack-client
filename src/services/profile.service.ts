@@ -37,7 +37,7 @@ export function createProfileService(request: ApiFetcher) {
 
     applyVendor(input: {
       shopName: string;
-      ownerName: string;
+      ownerName?: string;
       phone: string;
       address: string;
       description: string;

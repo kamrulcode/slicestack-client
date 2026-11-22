@@ -61,7 +61,6 @@ export default async function VendorSubscriptionPage({
 
   try {
     subscription = await serverApi.subscriptions.get();
-    console.log(subscription);
   } catch (error) {
     loadError = errorMessage(error);
   }

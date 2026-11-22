@@ -4,10 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Store } from "lucide-react";
-import { activateVendorAccountAction } from "@/app/(auth)/sign-up/actions";
+import { toast } from "sonner";
 import { VendorDetailsFields } from "@/components/vendor/vendor-details-fields";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { errorMessage } from "@/lib/api/client";
+import { profileService } from "@/services/profile.service";
 import {
   readVendorDetails,
   validateVendorDetails,
@@ -16,8 +17,8 @@ import {
 } from "@/lib/vendor-validation";
 
 /**
- * Instantly upgrades an existing customer account to a vendor account. No
- * admin review is involved; the server action owns the role change.
+ * Upgrades an existing customer account to a vendor account. The Express API
+ * owns validation, the role change and the shop records.
  */
 export function VendorOnboardingForm({
   defaults,
@@ -26,7 +27,6 @@ export function VendorOnboardingForm({
 }) {
   const router = useRouter();
   const [errors, setErrors] = useState<VendorFieldErrors>({});
-  const [message, setMessage] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
@@ -40,18 +40,17 @@ export function VendorOnboardingForm({
     const nextErrors = validateVendorDetails(values);
 
     setErrors(nextErrors);
-    setMessage(undefined);
 
     if (Object.keys(nextErrors).length > 0) return;
 
     if (isUploadingLogo) {
-      setMessage("Please wait for the shop logo to finish uploading.");
+      toast.info("Please wait for the shop logo to finish uploading.");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const result = await activateVendorAccountAction({
+      const result = await profileService.applyVendor({
         shopName: values.shopName,
         phone: values.phone,
         address: values.address,
@@ -60,19 +59,15 @@ export function VendorOnboardingForm({
       });
 
       if (!result.ok) {
-        setErrors(result.errors ?? {});
-        setMessage(result.message);
+        toast.error(result.message);
         return;
       }
 
+      toast.success(result.message);
       router.replace("/dashboard/vendor");
       router.refresh();
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "We could not activate your shop. Please try again.",
-      );
+      toast.error(errorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
@@ -114,15 +109,6 @@ export function VendorOnboardingForm({
               : "Activate my shop"}
           <ArrowRight className="size-4" aria-hidden />
         </Button>
-
-        {message && (
-          <p
-            role="alert"
-            className={cn("mt-3 text-sm", "text-destructive")}
-          >
-            {message}
-          </p>
-        )}
 
         <p className="mt-4 text-center text-sm text-muted-foreground">
           Just here to order?{" "}

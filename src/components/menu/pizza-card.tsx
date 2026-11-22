@@ -105,15 +105,12 @@ export function MenuItemCard({
           href={`/menu/${menuItem._id}`}
           aria-label={`View details for ${menuItem.itemName}`}
           className={cn(
-            buttonVariants({ variant: "default", size: "sm" }),
-            "group/cta h-13 gap-2.5 rounded-full bg-primary px-7 text-[15px] tracking-wide text-foreground transition-transform duration-300 hover:-translate-y-0.5 hover:bg-primary/90 sm:h-14 sm:px-9 sm:text-bas w-full",
+            buttonVariants({ variant: "outline", size: "sm" }),
+            "hidden rounded-full px-7  h-13 shadow-sm shadow-primary/25 lg:inline-flex w-full",
           )}
         >
           View Details
-          <ArrowRight
-            className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5"
-            aria-hidden
-          />
+          <ArrowRight />
         </Link>
       </CardFooter>
     </Card>

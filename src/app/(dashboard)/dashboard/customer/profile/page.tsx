@@ -6,8 +6,7 @@ import { EmptyState } from "@/components/dashboard/empty-state";
 import { AccountProfileCard } from "@/components/dashboard/account-profile-card";
 import { VendorApplicationStatusCard } from "@/components/vendor/vendor-application-status";
 import { buttonVariants } from "@/components/ui/button";
-import { requireRole } from "@/lib/authorization";
-import { getVendorApplicationForUser } from "@/lib/vendor-applications";
+import { requireRole, getAccountContext } from "@/lib/authorization";
 
 export const metadata: Metadata = {
   title: "My profile",
@@ -15,7 +14,8 @@ export const metadata: Metadata = {
 
 export default async function CustomerProfilePage() {
   const user = await requireRole(["customer"], "/dashboard/customer/profile");
-  const application = await getVendorApplicationForUser(user.id);
+  const context = await getAccountContext();
+  const application = context?.application ?? null;
 
   return (
     <DashboardPage

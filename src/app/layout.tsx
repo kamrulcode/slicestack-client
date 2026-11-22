@@ -3,6 +3,7 @@ import { Fredoka, Nunito } from "next/font/google";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import "./globals.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
 
 const nunito = Nunito({
   variable: "--font-nunito",
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           {" "}
           <TooltipProvider>{children}</TooltipProvider>
+          <Toaster position="top-center" richColors closeButton />
         </ThemeProvider>
       </body>
     </html>

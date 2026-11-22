@@ -1,4 +1,9 @@
-export default function PizzaSections() {
+import { cn } from "cn";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { buttonVariants } from "../ui/button";
+
+export default function ComboOffer() {
   return (
     <main className="text-foreground overflow-hidden">
       {/* POPULAR PIZZA COMBOS HERO */}
@@ -8,7 +13,7 @@ export default function PizzaSections() {
       >
         {/* Background glow */}
         <div
-          className="absolute top-0 right-0 w-[600px] h-150
+          className="absolute top-0 right-0 w-150 h-150
     bg-[#FF404C]/10 blur-[150px] rounded-full"
         />
 
@@ -53,21 +58,32 @@ export default function PizzaSections() {
             </p>
 
             <div className="mt-8 flex flex-wrap gap-4">
-              <button
-                className="bg-primary hover:bg-primary/90
-          px-8 py-4 rounded-full font-bold text-foreground
-          transition duration-300 hover:scale-105 shadow-lg
-          shadow-primary/20"
+              <Link
+                href="/menu"
+                className={cn(
+                  buttonVariants({ size: "lg" }),
+                  "group/cta h-13 gap-2.5 rounded-full bg-primary px-7 text-[15px] tracking-wide  shadow-[0_18px_45px_-14px_rgba(255,64,76,0.95)] transition-transform duration-300 hover:-translate-y-0.5 hover:bg-primary/90 sm:h-14 sm:px-9 sm:text-base",
+                )}
               >
-                Order Your Combo →
-              </button>
-
-              <button
-                className="border border-slate-900 hover:border-ember
-          px-8 py-4 rounded-full font-semibold transition dark:border-slate-500"
+                Order Your Combo
+                <ArrowRight
+                  className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </Link>
+              <Link
+                href="/menu"
+                className={cn(
+                  buttonVariants({ variant: "outline", size: "lg" }),
+                  "hidden rounded-full px-7  h-13 shadow-sm shadow-primary/25 lg:inline-flex",
+                )}
               >
                 Explore Menu
-              </button>
+                <ArrowRight
+                  className="size-3.5 transition-transform duration-300 group-hover:translate-x-0.5"
+                  aria-hidden
+                />
+              </Link>
             </div>
 
             {/* TRUST */}
