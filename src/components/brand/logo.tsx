@@ -37,7 +37,7 @@ export function Logo({
       )}
     >
       <Image
-        src="/logo.png"
+        src="/logo.webp"
         alt=""
         width={904}
         height={571}

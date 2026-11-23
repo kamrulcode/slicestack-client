@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -43,25 +43,64 @@ type NavItem = {
 
 const NAV_BY_ROLE: Record<SessionUser["role"], NavItem[]> = {
   customer: [
-    { label: "Overview", href: "/dashboard/customer", icon: LayoutDashboard, exact: true },
-    { label: "My orders", href: "/dashboard/customer/orders", icon: ShoppingBag },
+    {
+      label: "Overview",
+      href: "/dashboard/customer",
+      icon: LayoutDashboard,
+      exact: true,
+    },
+    {
+      label: "My orders",
+      href: "/dashboard/customer/orders",
+      icon: ShoppingBag,
+    },
     { label: "Favorites", href: "/dashboard/customer/favorites", icon: Heart },
     { label: "Profile", href: "/dashboard/customer/profile", icon: UserRound },
   ],
   vendor: [
-    { label: "Overview", href: "/dashboard/vendor", icon: LayoutDashboard, exact: true },
-    { label: "Menu items", href: "/dashboard/vendor/menu-items", icon: UtensilsCrossed },
+    {
+      label: "Overview",
+      href: "/dashboard/vendor",
+      icon: LayoutDashboard,
+      exact: true,
+    },
+    {
+      label: "Menu items",
+      href: "/dashboard/vendor/menu-items",
+      icon: UtensilsCrossed,
+    },
     { label: "Orders", href: "/dashboard/vendor/orders", icon: ClipboardList },
     { label: "Profile", href: "/dashboard/vendor/profile", icon: Store },
-    { label: "Subscription", href: "/dashboard/vendor/subscription", icon: Receipt },
+    {
+      label: "Subscription",
+      href: "/dashboard/vendor/subscription",
+      icon: Receipt,
+    },
   ],
   admin: [
-    { label: "Overview", href: "/dashboard/admin", icon: LayoutDashboard, exact: true },
+    {
+      label: "Overview",
+      href: "/dashboard/admin",
+      icon: LayoutDashboard,
+      exact: true,
+    },
     { label: "Profile", href: "/dashboard/admin/profile", icon: UserRound },
-    { label: "Vendor applications", href: "/dashboard/admin/vendors", icon: Store },
+    {
+      label: "Vendor applications",
+      href: "/dashboard/admin/vendors",
+      icon: Store,
+    },
     { label: "Users", href: "/dashboard/admin/users", icon: Users },
-    { label: "Menu items", href: "/dashboard/admin/menu-items", icon: UtensilsCrossed },
-    { label: "Transactions", href: "/dashboard/admin/transactions", icon: Receipt },
+    {
+      label: "Menu items",
+      href: "/dashboard/admin/menu-items",
+      icon: UtensilsCrossed,
+    },
+    {
+      label: "Transactions",
+      href: "/dashboard/admin/transactions",
+      icon: Receipt,
+    },
   ],
 };
 
@@ -91,6 +130,13 @@ export function DashboardShell({
   const router = useRouter();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const nav = NAV_BY_ROLE[user.role];
+
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  // Automatically close mobile sidebar whenever the route changes
+  useEffect(() => {
+    setMobileSidebarOpen(false);
+  }, [pathname]);
 
   const activeItem =
     nav.find((item) =>
@@ -130,6 +176,7 @@ export function DashboardShell({
             <Link
               key={item.href}
               href={item.href}
+              onClick={() => setMobileSidebarOpen(false)}
               aria-current={isActive(item) ? "page" : undefined}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors",
@@ -148,6 +195,7 @@ export function DashboardShell({
       <div className="mt-6 border-t border-white/10 pt-4">
         <Link
           href="/menu"
+          onClick={() => setMobileSidebarOpen(false)}
           className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-white/60 transition-colors hover:bg-white/5 hover:text-white"
         >
           <ShoppingBag className="size-4.5" aria-hidden />
@@ -175,7 +223,10 @@ export function DashboardShell({
       <div className="lg:pl-64">
         <header className="sticky top-0 z-20 border-b border-border/70 bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/80">
           <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
-            <Sheet>
+            <Sheet
+              open={mobileSidebarOpen}
+              onOpenChange={(open) => setMobileSidebarOpen(open)}
+            >
               <SheetTrigger
                 render={
                   <Button
@@ -188,10 +239,16 @@ export function DashboardShell({
               >
                 <MenuIcon className="size-5" aria-hidden />
               </SheetTrigger>
-              <SheetContent side="left" className="w-72 p-0" showCloseButton={false}>
+
+              <SheetContent
+                side="left"
+                className="w-72 p-0"
+                showCloseButton={false}
+              >
                 <SheetHeader className="sr-only">
                   <SheetTitle>Dashboard navigation</SheetTitle>
                 </SheetHeader>
+
                 {sidebar}
               </SheetContent>
             </Sheet>
@@ -205,7 +262,10 @@ export function DashboardShell({
               </p>
             </div>
 
-            <Badge variant="outline" className="hidden capitalize sm:inline-flex">
+            <Badge
+              variant="outline"
+              className="hidden capitalize sm:inline-flex"
+            >
               {user.role}
             </Badge>
             <ThemeToggle />

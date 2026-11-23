@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
@@ -24,25 +25,33 @@ const profileApi = createProfileService(serverApiFetch);
 /**
  * Read the Better Auth session on the server. The role is always read from
  * the database-backed user record, never from a cookie or client payload.
+ *
+ * Wrapped in React `cache` so the layout, header and page share a single
+ * session lookup per request, and guarded so a transient database/session
+ * failure degrades to "signed out" instead of throwing an error page.
  */
-export async function getCurrentUser(): Promise<SessionUser | null> {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return null;
+export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
+  try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session?.user) return null;
 
-  const user = session.user as typeof session.user & {
-    role?: unknown;
-    blocked?: unknown;
-  };
+    const user = session.user as typeof session.user & {
+      role?: unknown;
+      blocked?: unknown;
+    };
 
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    image: user.image ?? null,
-    role: normalizeRole(user.role),
-    blocked: user.blocked === true,
-  };
-}
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image ?? null,
+      role: normalizeRole(user.role),
+      blocked: user.blocked === true,
+    };
+  } catch {
+    return null;
+  }
+});
 
 export async function requireAuth(nextPath?: string): Promise<SessionUser> {
   const user = await getCurrentUser();

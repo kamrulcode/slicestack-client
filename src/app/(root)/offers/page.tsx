@@ -175,7 +175,7 @@ export default function OffersPage() {
                 className="relative aspect-square w-full max-w-[430px]"
               >
                 <Image
-                  src="/images/combo-pizza.png"
+                  src="/images/combo-pizza.webp"
                   alt="SliceStack ultimate pizza combo offer"
                   fill
                   priority

@@ -33,11 +33,11 @@ export default function Newsletter() {
 
   return (
     <div>
-      <h3 className="text-xs font-bold tracking-[0.16em] uppercase sm:text-[13px]">
+      <h3 className="text-xs font-bold tracking-[0.16em] uppercase sm:text-[13px] text-primary">
         Newsletter
       </h3>
 
-      <p className="mt-4 text-[15px] text-muted-foreground sm:text-base">
+      <p className="mt-1 text-xs text-muted-foreground sm:text-base">
         Weekly slices, new drops and the odd voucher. No spam, ever.
       </p>
 
@@ -82,7 +82,7 @@ export default function Newsletter() {
 
       <p
         aria-live="polite"
-        className="mt-3 min-h-5 text-[13px] leading-5 text-muted-foreground"
+        className=" min-h-5 text-[13px] leading-5 text-muted-foreground"
       />
     </div>
   );

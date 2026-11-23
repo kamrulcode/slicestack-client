@@ -80,7 +80,7 @@ const floaters: Floater[] = [
     from: { x: -110, y: 26, rotate: -34, scale: 0.7 },
     content: (
       <Image
-        src="/images/basil.png"
+        src="/images/basil.webp"
         alt=""
         width={1101}
         height={887}
@@ -99,7 +99,7 @@ const floaters: Floater[] = [
     from: { x: 110, y: 22, rotate: 30, scale: 0.72 },
     content: (
       <Image
-        src="/images/onion.png"
+        src="/images/onion.webp"
         alt=""
         width={731}
         height={887}

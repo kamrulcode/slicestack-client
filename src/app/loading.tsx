@@ -28,7 +28,7 @@ export default function Loading({ isLoading = true }) {
               }}
             >
               <Image
-                src="/logo.png"
+                src="/logo.webp"
                 alt="SliceStack"
                 width={150}
                 height={150}

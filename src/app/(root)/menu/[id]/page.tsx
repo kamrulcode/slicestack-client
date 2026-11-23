@@ -42,7 +42,10 @@ export async function generateMetadata({
 
   try {
     const detail = await serverApi.menu.detail(id);
-    return { title: detail.item.itemName, description: detail.item.description };
+    return {
+      title: detail.item.itemName,
+      description: detail.item.description,
+    };
   } catch {
     return { title: "Menu item not found" };
   }
@@ -50,7 +53,10 @@ export async function generateMetadata({
 
 function Stars({ value, className }: { value: number; className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-0.5", className)} aria-hidden>
+    <span
+      className={cn("inline-flex items-center gap-0.5", className)}
+      aria-hidden
+    >
       {[1, 2, 3, 4, 5].map((star) => (
         <Star
           key={star}
@@ -94,11 +100,17 @@ export default async function MenuItemPage({
     serverApi.menu.reviews(id).catch((): MenuItemReview[] => []),
   ]);
 
+  console.log(viewer, reviews);
+
   const isCustomer = viewer?.role === "customer" && !viewer.blocked;
-  const favoriteIds = isCustomer ? await serverApi.favorites.ids().catch(() => []) : [];
+  const favoriteIds = isCustomer
+    ? await serverApi.favorites.ids().catch(() => [])
+    : [];
   const isFavorite = favoriteIds.includes(id);
 
   const { item, shop, rating } = detail;
+
+  console.log(isCustomer, item, shop, rating);
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
@@ -273,43 +285,47 @@ export default async function MenuItemPage({
               Reviews
               {rating.count > 0 ? (
                 <Badge variant="secondary">
-                  {rating.average.toFixed(1)} / 5 · {rating.count}
+                  {rating.average.toFixed(1)} / 5 ({rating.count})
                 </Badge>
               ) : null}
             </CardTitle>
             <CardDescription>
               {isCustomer
-                ? "You can review this item once the shop accepts an order for it."
+                ? reviews.length === 0
+                  ? "You can review this item once the shop accepts an order for it."
+                  : "Thanks for the feedback! You’re always welcome add something later."
                 : "Real reviews from customers who ordered this item."}
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-5">
+          <CardContent className="flex flex-col gap-5 ">
             {reviews.length === 0 ? (
               <p className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
                 No reviews yet.
               </p>
             ) : (
-              <ul className="flex flex-col gap-4">
-                {reviews.map((review) => (
-                  <li
-                    key={review._id}
-                    className="border-b border-border/60 pb-4 last:border-0 last:pb-0"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="font-semibold">{review.customerName}</p>
-                      <span className="text-xs text-muted-foreground">
-                        {formatReviewDate(review.createdAt)}
-                      </span>
-                    </div>
-                    <Stars value={review.rating} className="mt-1" />
-                    {review.comment ? (
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        {review.comment}
-                      </p>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
+              <div className="max-h-45 overflow-y-auto pr-2">
+                <ul className="flex flex-col gap-4">
+                  {reviews.map((review) => (
+                    <li
+                      key={review._id}
+                      className="border-b border-border/60 pb-4 last:border-0 last:pb-0"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <p className="font-semibold">{review.customerName}</p>
+                        <span className="text-xs text-muted-foreground">
+                          {formatReviewDate(review.createdAt)}
+                        </span>
+                      </div>
+                      <Stars value={review.rating} className="mt-1" />
+                      {review.comment ? (
+                        <p className="mt-2 text-sm text-muted-foreground">
+                          {review.comment}
+                        </p>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
 
             {isCustomer ? <ReviewForm menuItemId={item._id} /> : null}

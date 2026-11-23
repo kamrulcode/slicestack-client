@@ -8,7 +8,9 @@ if (!mongoUrl) {
 
 /**
  * Reuse one client across hot reloads in development (Next.js re-evaluates
- * modules on change) and across Better Auth + application queries.
+ * modules on change) and across Better Auth + application queries. Cached in
+ * production too so serverless instances don't open a new connection pool per
+ * module evaluation.
  */
 const globalForMongo = globalThis as typeof globalThis & {
   __slicestackMongoClient?: MongoClient;
@@ -17,9 +19,7 @@ const globalForMongo = globalThis as typeof globalThis & {
 export const mongoClient =
   globalForMongo.__slicestackMongoClient ?? new MongoClient(mongoUrl);
 
-if (process.env.NODE_ENV !== "production") {
-  globalForMongo.__slicestackMongoClient = mongoClient;
-}
+globalForMongo.__slicestackMongoClient = mongoClient;
 
 export const db = mongoClient.db("slicestack");
 

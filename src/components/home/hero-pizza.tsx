@@ -63,7 +63,7 @@ export function HeroPizza() {
             }}
           >
             <Image
-              src="/images/hero-image.png"
+              src="/images/hero-image.webp"
               alt="A whole SliceStack pizza with a cheese-pull slice being lifted"
               width={1534}
               height={1025}

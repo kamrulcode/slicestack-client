@@ -20,7 +20,7 @@ export default function ComboOffer() {
 
         {/* COMBO OFFER SVG - TOP RIGHT */}
         <Image
-          src="/images/combo-offer.png"
+          src="/images/combo-offer.webp"
           alt="Limited time combo offer"
           width={192}
           height={192}
@@ -121,7 +121,7 @@ export default function ComboOffer() {
             />
 
             <Image
-              src="/images/combo-pizza.png"
+              src="/images/combo-pizza.webp"
               alt="Delicious pizza combo"
               width={800}
               height={600}
