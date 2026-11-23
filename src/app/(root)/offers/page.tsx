@@ -237,6 +237,7 @@ export default function OffersPage() {
                   src={offer.image}
                   alt={offer.title}
                   fill
+                  unoptimized
                   sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 25vw"
                   className="object-contain p-5 transition-transform duration-500 group-hover:scale-105"
                 />

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 const categories = [
   {
@@ -92,11 +93,14 @@ export function CategoryGrid() {
                   bg-card text-card-foreground"
             >
               {/* IMAGE */}
-              <div className="h-48 overflow-hidden">
-                <img
+              <div className="relative h-48 overflow-hidden">
+                <Image
                   src={category.image}
                   alt={category.name}
-                  className="w-full h-full object-cover
+                  fill
+                  sizes="(min-width: 1024px) 16vw, (min-width: 768px) 33vw, 50vw"
+                  unoptimized
+                  className="object-cover
                       group-hover:scale-110 transition
                       duration-500"
                 />

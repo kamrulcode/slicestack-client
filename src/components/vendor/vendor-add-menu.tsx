@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -64,11 +64,19 @@ export default function AddMenuItemForm() {
     name: "category",
   });
 
+  const previewsRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    previewsRef.current = previews;
+  }, [previews]);
+
+  // Revoke any remaining object URLs only when the form unmounts, so
+  // adding another image does not invalidate previews that are still shown.
   useEffect(() => {
     return () => {
-      previews.forEach((preview) => URL.revokeObjectURL(preview));
+      previewsRef.current.forEach((preview) => URL.revokeObjectURL(preview));
     };
-  }, [previews]);
+  }, []);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -145,14 +153,6 @@ export default function AddMenuItemForm() {
 
   return (
     <div className="mx-auto w-full max-w-3xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">Add Menu Item</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Add a delicious pizza or food item to your restaurant menu. New items
-          are reviewed by an admin before they appear publicly.
-        </p>
-      </div>
-
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         {/* Item Name */}
         <div className="space-y-2">
@@ -172,7 +172,7 @@ export default function AddMenuItemForm() {
         <div className="space-y-2">
           <label className="text-sm font-medium">Category *</label>
           <Select
-            value={selectedCategory}
+            value={selectedCategory || null}
             onValueChange={(value) => {
               if (!value) return;
               form.setValue("category", value, {

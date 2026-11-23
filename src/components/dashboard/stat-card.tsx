@@ -16,7 +16,7 @@ export function StatCard({
   accent?: "primary" | "amber" | "emerald" | "neutral";
 }) {
   const accents = {
-    primary: "bg-accent text-primary",
+    primary: "bg-accent/30 text-primary",
     amber:
       "bg-amber-100 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
     emerald:

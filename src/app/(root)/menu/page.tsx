@@ -72,7 +72,9 @@ export default async function MenuPage({
       </Reveal>
 
       <div className="mt-8">
-        <MenuFilters />
+        <MenuFilters
+          key={`${search ?? ""}|${category ?? ""}|${location ?? ""}`}
+        />
       </div>
 
       {loadError ? (

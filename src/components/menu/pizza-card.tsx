@@ -1,18 +1,21 @@
-import Link from "next/link";
-import { ArrowRight, MapPin, Store } from "lucide-react";
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Heart, Loader2, MapPin, Store } from "lucide-react";
+import { toast } from "sonner";
+
+import { authClient } from "@/lib/auth-client";
+import { Card } from "@/components/ui/card";
 import { getCategoryName } from "@/data/menu";
 import { formatPrice } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { MenuItem } from "@/types/menu";
+import { buttonVariants } from "../ui/button";
+import { favoriteService } from "@/services/favorites.service";
+import { errorMessage } from "@/lib/api/client";
 
 export function MenuItemCard({
   menuItem,
@@ -21,16 +24,77 @@ export function MenuItemCard({
   menuItem: MenuItem;
   className?: string;
 }) {
+  // Better Auth session
+  const router = useRouter();
+  const { data: session, isPending } = authClient.useSession();
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavoritePending, setIsFavoritePending] = useState(false);
+
   const image = menuItem.images?.[0];
+  const user = session?.user;
+  const userRole = (user as { role?: string } | undefined)?.role;
+  const isCustomer = Boolean(user && userRole === "customer");
+
+  useEffect(() => {
+    if (!isCustomer) {
+      return;
+    }
+
+    let cancelled = false;
+    favoriteService
+      .ids()
+      .then((favoriteIds) => {
+        if (!cancelled) {
+          setIsFavorite(favoriteIds.includes(menuItem._id));
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setIsFavorite(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isCustomer, menuItem._id]);
+
+  async function toggleFavorite() {
+    if (isFavoritePending) return;
+
+    setIsFavoritePending(true);
+    try {
+      if (isFavorite) {
+        await favoriteService.remove(menuItem._id);
+        setIsFavorite(false);
+        toast.success("Removed from favorites.");
+      } else {
+        await favoriteService.add(menuItem._id);
+        setIsFavorite(true);
+        toast.success("Saved to favorites.");
+      }
+      router.refresh();
+    } catch (error) {
+      toast.error(errorMessage(error));
+    } finally {
+      setIsFavoritePending(false);
+    }
+  }
+
+  // Actual shop owner name should come from the menu item data.
+  const ownerName = menuItem.shopName || "SliceStack Partner";
 
   return (
     <Card
       className={cn(
-        "group h-full gap-0 overflow-hidden rounded-3xl border border-border/70 bg-card p-0 [--card-spacing:0px] ring-1 ring-foreground/5 transition duration-300 ease-out hover:border-primary/35 hover:shadow-xl hover:shadow-foreground/10 motion-safe:hover:-translate-y-1",
+        "group relative flex h-full flex-col gap-0 overflow-hidden",
+        "rounded-[24px] border border-border/70 bg-card p-0",
+        "shadow-sm transition-all duration-500 ease-out",
+        "hover:-translate-y-2 hover:border-primary/40",
+        "hover:shadow-xl hover:shadow-primary/10",
         className,
       )}
     >
-      <div className="relative aspect-4/3 overflow-hidden bg-secondary/60 ">
+      {/* Pizza Image */}
+      <div className="relative aspect-4/3 overflow-hidden bg-muted">
         {image ? (
           <Image
             src={image}
@@ -38,81 +102,123 @@ export function MenuItemCard({
             fill
             sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
             unoptimized
-            className="object-cover transition-transform  duration-700 ease-out motion-safe:group-hover:scale-105"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
           />
         ) : (
-          <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-secondary via-background to-accent/25">
-            <div className="flex flex-col items-center gap-2 text-muted-foreground">
-              <span className="grid size-14 place-items-center rounded-2xl bg-card/80 text-primary shadow-sm">
-                <Store className="size-6" aria-hidden />
-              </span>
-              <span className="text-xs font-medium">Fresh from the oven</span>
-            </div>
+          <div className="absolute inset-0 grid place-items-center bg-linear-to-br from-muted via-secondary to-primary/10">
+            <Store className="size-16 text-muted-foreground/40" />
           </div>
         )}
-        {image ? (
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-80"
-          />
+
+        {/* Image Gradient */}
+        <div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-black/10" />
+
+        {/* Category */}
+        <div className="absolute left-4 top-4">
+          <span className="rounded-full border border-white/20 bg-black/40 px-3.5 py-1.5 text-[11px] font-bold tracking-wide text-white shadow-lg backdrop-blur-md">
+            {getCategoryName(menuItem.category)}
+          </span>
+        </div>
+
+        {/* Favorite Button */}
+        {isCustomer ? (
+          <button
+            type="button"
+            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            aria-pressed={isFavorite}
+            onClick={toggleFavorite}
+            disabled={isFavoritePending}
+            className={cn(
+              "absolute right-4 top-4 grid size-10 place-items-center",
+              "rounded-full border border-white/30 bg-black/35",
+              "text-white backdrop-blur-md transition-all duration-300",
+              "hover:scale-110 hover:bg-white hover:text-rose-500",
+              "active:scale-90",
+              isFavorite && "bg-white text-rose-500",
+            )}
+          >
+            {isFavoritePending ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : (
+              <Heart
+                className={cn(
+                  "size-5 transition-all duration-300",
+                  isFavorite && "scale-110 fill-current",
+                )}
+              />
+            )}
+          </button>
         ) : null}
-        <span className="absolute top-4 left-4 rounded-full border border-border/60 bg-card/90 px-3 py-1 text-[11px] font-bold tracking-wide text-card-foreground shadow-sm backdrop-blur-md">
-          {getCategoryName(menuItem.category)}
-        </span>
-        <span className="absolute right-4 bottom-4 rounded-xl border border-white/40 bg-card/95 px-3 py-1.5 font-heading text-base font-bold text-card-foreground shadow-lg backdrop-blur-md">
-          {formatPrice(menuItem.price)}
-        </span>
+
+        {/* Image Bottom Accent */}
+        <div className="absolute bottom-0 left-0 h-1 w-0 bg-primary transition-all duration-500 group-hover:w-full" />
       </div>
 
-      <CardHeader className="gap-1 px-4 pt-4 sm:px-5 sm:pt-5">
-        <CardTitle className="line-clamp-2 min-h-12 font-sans text-xl font-bold tracking-tight sm:text-[22px]">
-          {menuItem.itemName}
-        </CardTitle>
-      </CardHeader>
+      {/* Card Details */}
+      <div className="flex flex-1 flex-col p-5">
+        {/* Pizza Name + Price */}
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="min-w-0 flex-1 line-clamp-2 text-lg font-extrabold leading-snug tracking-tight text-card-foreground transition-colors group-hover:text-primary sm:text-xl">
+            {menuItem.itemName}
+          </h3>
 
-      <CardContent className="flex-1 px-4 pt-3 sm:px-5">
-        <div className="flex items-center gap-2">
-          {menuItem.logoUrl ? (
-            <span className="relative size-8 shrink-0 overflow-hidden rounded-full bg-secondary border border-foreground">
-              <Image
-                src={menuItem.logoUrl}
-                alt=""
-                fill
-                sizes="28px"
-                unoptimized
-                className="object-cover "
-              />
-            </span>
-          ) : (
-            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-primary/10 font-heading text-[0.7rem] font-bold text-primary">
-              <Store className="size-3" aria-hidden />
-            </span>
-          )}
-          <div className="flex gap-2">
-            <span className="truncate text-xs font-medium text-muted-foreground sm:text-base">
-              {menuItem.shopName || "SliceStack partner"}
-            </span>
+          <div className="shrink-0 rounded-xl bg-primary/10 px-4 py-1 text-right">
+            <p className="whitespace-nowrap text-lg font-extrabold tracking-tight text-primary">
+              {formatPrice(menuItem.price)}
+            </p>
           </div>
         </div>
-        <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground sm:text-[13px]">
-          <MapPin className="size-3.5 shrink-0 text-ember" aria-hidden />
-          {menuItem.location || "Location not listed"}
-        </p>
-      </CardContent>
 
-      <CardFooter className="mt-5 border-t border-border/70 bg-transparent p-4 sm:px-5">
-        <Link
-          href={`/menu/${menuItem._id}`}
-          aria-label={`View details for ${menuItem.itemName}`}
-          className={cn(
-            buttonVariants({ variant: "outline", size: "sm" }),
-            "hidden rounded-full px-7  h-13 shadow-sm shadow-primary/25 lg:inline-flex w-full",
+        {/* Shop Owner */}
+        <div className="mt-4 flex items-center gap-2.5">
+          <div className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-muted-foreground">
+            <Store className="size-4" />
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+              Shop owner
+            </p>
+            <p className="truncate text-sm font-semibold text-card-foreground">
+              {ownerName}
+            </p>
+          </div>
+
+          {user && (
+            <span className="shrink-0 rounded-full bg-primary/10 px-2 py-1 text-[10px] font-semibold text-primary">
+              {isPending ? "Loading..." : "Welcome"}
+            </span>
           )}
-        >
-          View Details
-          <ArrowRight />
-        </Link>
-      </CardFooter>
+        </div>
+
+        {/* Location */}
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-muted/60 px-3 py-2.5">
+          <MapPin className="size-4 shrink-0 text-primary" />
+
+          <span className="truncate text-xs font-medium text-muted-foreground">
+            {menuItem.location || "Location not listed"}
+          </span>
+        </div>
+
+        {/* Flexible Space */}
+        <div className="flex-1" />
+
+        {/* Footer */}
+        <div className="mt-5 border-t border-border/70 pt-4">
+          <Link
+            href={`/menu/${menuItem._id}`}
+            aria-label={`View details for ${menuItem.itemName}`}
+            className={cn(
+              buttonVariants({ variant: "outline", size: "lg" }),
+              "group/btn relative flex h-12 w-full items-center justify-center gap-2  rounded-full",
+            )}
+          >
+            <span>View Details</span>
+
+            <ArrowRight className="size-4 transition-transform duration-300 group-hover/btn:translate-x-1.5" />
+          </Link>
+        </div>
+      </div>
     </Card>
   );
 }

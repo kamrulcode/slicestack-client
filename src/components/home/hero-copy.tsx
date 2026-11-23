@@ -1,25 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Flame, Truck, Zap } from "lucide-react";
+import { ArrowRight, Flame } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-
-const highlights = [
-  {
-    icon: Zap,
-    title: "Hot in 30 minutes",
-    description: "Straight from the stone oven",
-  },
-  {
-    icon: Truck,
-    title: "Free delivery",
-    description: "On every order over $25",
-  },
-];
 
 /**
  * Hero copy: badge, split-colour headline with a hand-drawn underline, CTA and
@@ -108,6 +95,19 @@ export function HeroCopy() {
             aria-hidden
           />
         </Link>
+        {/* <Link
+          href="/"
+          className={cn(
+            buttonVariants({ size: "lg" }),
+            "group/cta gap-2.5 rounded-full bg-primary   tracking-wide    hover:-translate-y-0.5 hover:bg-primary/90 sm:h-14 sm:px-9 sm:text-base group h-14.5   bg-linear-to-r from-[#FF9C18] to-[#F51E50] px-8  font-bold text-white shadow-[0_8px_25px_rgba(244,91,42,0.25)] transition-all duration-300 hover:scale-105 hover:shadow-[0_12px_30px_rgba(244,91,42,0.35)] hover:from-[#F98B13] hover:to-[#EA164A]",
+          )}
+        >
+          Explore Pizza Menu
+          <ArrowRight
+            className="size-4 transition-transform duration-300 group-hover/cta:translate-x-1"
+            aria-hidden
+          />
+        </Link> */}
       </motion.div>
     </div>
   );

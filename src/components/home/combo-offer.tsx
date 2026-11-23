@@ -1,5 +1,6 @@
 import { cn } from "cn";
 import { ArrowRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { buttonVariants } from "../ui/button";
 
@@ -18,11 +19,13 @@ export default function ComboOffer() {
         />
 
         {/* COMBO OFFER SVG - TOP RIGHT */}
-        <img
+        <Image
           src="/images/combo-offer.png"
           alt="Limited time combo offer"
+          width={192}
+          height={192}
           className="absolute top-4 right-4 md:top-8 md:right-50
-      w-28 md:w-40 lg:w-48 z-30
+      w-28 md:w-40 lg:w-48 h-auto z-30
       hover:rotate-6 transition duration-300"
         />
 
@@ -90,10 +93,13 @@ export default function ComboOffer() {
             <div className="mt-8 flex items-center gap-4">
               <div className="flex -space-x-3">
                 {[1, 2, 3, 4].map((n) => (
-                  <img
+                  <Image
                     key={n}
                     src={`https://i.pravatar.cc/100?img=${n + 10}`}
                     alt="Customer"
+                    width={44}
+                    height={44}
+                    unoptimized
                     className="w-11 h-11 rounded-full border-2
                 border-background"
                   />
@@ -114,10 +120,12 @@ export default function ComboOffer() {
         blur-[100px] rounded-full"
             />
 
-            <img
+            <Image
               src="/images/combo-pizza.png"
               alt="Delicious pizza combo"
-              className="relative z-10 w-full max-h-[420px]
+              width={800}
+              height={600}
+              className="relative z-10 w-full h-auto max-h-[420px]
           object-contain rounded-[30px] drop-shadow-2xl
           hover:scale-[1.02] transition duration-500"
             />

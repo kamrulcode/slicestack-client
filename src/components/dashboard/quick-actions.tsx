@@ -22,7 +22,9 @@ export function QuickActions({ actions }: { actions: QuickAction[] }) {
     <Card>
       <CardHeader>
         <CardTitle>Quick actions</CardTitle>
-        <CardDescription>Jump straight to the work that matters.</CardDescription>
+        <CardDescription>
+          Jump straight to the work that matters.
+        </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-2 sm:grid-cols-2">
         {actions.map((action) => (
@@ -33,7 +35,7 @@ export function QuickActions({ actions }: { actions: QuickAction[] }) {
               "group flex items-start gap-3 rounded-lg border border-border/70 p-3 transition-colors hover:border-primary/40 hover:bg-accent/60",
             )}
           >
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent text-primary [&_svg]:size-4">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent/30 text-primary [&_svg]:size-4">
               {action.icon}
             </span>
             <span className="min-w-0 flex-1">

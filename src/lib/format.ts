@@ -3,5 +3,5 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
 });
 
 export function formatPrice(price: number) {
-  return `৳${priceFormatter.format(price)}`;
+  return `${priceFormatter.format(price)}/৳ `;
 }

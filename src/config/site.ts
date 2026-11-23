@@ -9,7 +9,7 @@ export const siteConfig = {
   ],
   company: [
     { label: "Home", href: "/" },
-    { label: "Upcomming Offers", href: "/offers" },
+    { label: "Upcoming Offers", href: "/offers" },
     { label: "Location", href: "/location" },
     { label: "About Us", href: "/about" },
   ],

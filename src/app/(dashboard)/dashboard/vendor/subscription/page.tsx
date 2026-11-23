@@ -39,10 +39,15 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function formatUsd(amount: number, currency: string) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency.toUpperCase(),
-  }).format(amount);
+  const code = (currency || "usd").toUpperCase();
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: code,
+    }).format(amount);
+  } catch {
+    return `${code} ${amount.toFixed(2)}`;
+  }
 }
 
 export default async function VendorSubscriptionPage({

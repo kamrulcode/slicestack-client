@@ -73,7 +73,7 @@ export function SignInForm({ nextPath }: { nextPath?: string }) {
             id="sign-in-password"
             name="password"
             label="Password"
-            type="password"
+            type={isVisible ? "text" : "password"}
             autoComplete="current-password"
             placeholder="Enter password"
             required
@@ -82,7 +82,7 @@ export function SignInForm({ nextPath }: { nextPath?: string }) {
                 type="button"
                 aria-label={isVisible ? "Hide password" : "Show password"}
                 aria-pressed={isVisible}
-                aria-controls="sign-up-password"
+                aria-controls="sign-in-password"
                 size="icon"
                 variant="ghost"
                 className="size-9 sm:size-10"

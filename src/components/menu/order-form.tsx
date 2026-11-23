@@ -19,6 +19,12 @@ import { errorMessage } from "@/lib/api/client";
 import { formatPrice } from "@/lib/format";
 import { orderService } from "@/services/orders.service";
 
+/** Today's date in the visitor's local timezone (yyyy-mm-dd). */
+function localDateInputValue(date = new Date()) {
+  const offsetMs = date.getTimezoneOffset() * 60_000;
+  return new Date(date.getTime() - offsetMs).toISOString().slice(0, 10);
+}
+
 export function OrderForm({
   menuItemId,
   price,
@@ -29,7 +35,7 @@ export function OrderForm({
   shopName: string;
 }) {
   const router = useRouter();
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateInputValue();
   const [deliveryDate, setDeliveryDate] = useState(today);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [message, setMessage] = useState("");

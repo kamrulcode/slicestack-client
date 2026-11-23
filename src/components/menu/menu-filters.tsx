@@ -17,6 +17,8 @@ import { menuCategories } from "@/data/menu";
 export function MenuFilters() {
   const router = useRouter();
   const params = useSearchParams();
+  // The parent remounts this component (via a key derived from the URL) when
+  // the query changes, so these initial values always match the URL.
   const [category, setCategory] = useState(params.get("category") ?? "all");
   const [search, setSearch] = useState(params.get("search") ?? "");
   const [location, setLocation] = useState(params.get("location") ?? "");

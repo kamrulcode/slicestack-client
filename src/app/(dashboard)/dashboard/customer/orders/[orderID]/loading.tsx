@@ -1,4 +1,3 @@
-import { ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardPage } from "@/components/dashboard/dashboard-page";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";

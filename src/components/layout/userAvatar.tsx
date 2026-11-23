@@ -56,7 +56,7 @@ export function NavUser({
   return (
     <DropdownMenu>
       <UserTooltip user={user}>
-        <DropdownMenuTrigger className="flex items-center justify-center gap-2">
+        <DropdownMenuTrigger className="sm:flex items-center justify-center gap-2 hidden">
           <Avatar className="size-8 shrink-0 overflow-hidden rounded-full grayscale">
             {user.image ? (
               <AvatarImage src={user.image} alt={user.name} />
@@ -68,7 +68,7 @@ export function NavUser({
       </UserTooltip>
 
       <DropdownMenuContent
-        className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
+        className="w-(--anchor-width) min-w-56 rounded-lg"
         align="end"
         sideOffset={4}
       >
