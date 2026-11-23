@@ -143,7 +143,7 @@ export default function FeaturesSection() {
             </h3>
 
             {/* Description */}
-            <p className="mt-2 max-w-[19rem] text-[13px] leading-[1.8] sm:text-sm">
+            <p className="mt-2 max-w-[19rem] text-[13px] leading-[1.8] sm:text-base">
               {feature.description}
             </p>
           </RevealItem>
