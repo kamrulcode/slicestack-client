@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function AdminDashboardPage() {
-  const admin = await requireRole(["admin"], "/dashboard/admin");
+  const admin = await requireRole(["admin"]);
 
   let stats: AdminDashboardStats | null = null;
   let pending: VendorApplication[] = [];
@@ -104,7 +104,7 @@ export default async function AdminDashboardPage() {
             />
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+          <div className="grid gap-4 my-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
             <PerformanceChart
               title="Platform activity"
               description="Orders across the last seven days"
@@ -159,7 +159,7 @@ export default async function AdminDashboardPage() {
             </Card>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="grid gap-4 mb-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <Card>
               <CardHeader>
                 <CardTitle>Menu moderation</CardTitle>
@@ -168,9 +168,18 @@ export default async function AdminDashboardPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid gap-3 text-sm sm:grid-cols-3">
-                <Summary label="Approved" value={stats?.menuItems.approved ?? 0} />
-                <Summary label="Pending" value={stats?.menuItems.pending ?? 0} />
-                <Summary label="Rejected" value={stats?.menuItems.rejected ?? 0} />
+                <Summary
+                  label="Approved"
+                  value={stats?.menuItems.approved ?? 0}
+                />
+                <Summary
+                  label="Pending"
+                  value={stats?.menuItems.pending ?? 0}
+                />
+                <Summary
+                  label="Rejected"
+                  value={stats?.menuItems.rejected ?? 0}
+                />
               </CardContent>
             </Card>
 

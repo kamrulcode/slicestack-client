@@ -5,7 +5,10 @@ import type { AdminDashboardStats, PlatformUser } from "@/types/admin";
 import type { MenuItemStatus, VendorMenuItemRecord } from "@/types/menu";
 import type { Role } from "@/types/auth";
 import type { TransactionRecord } from "@/types/order";
-import type { VendorApplication, VendorApplicationStatus } from "@/types/vendor";
+import type {
+  VendorApplication,
+  VendorApplicationStatus,
+} from "@/types/vendor";
 
 export type AdminMutation = { ok: boolean; message: string };
 
@@ -31,7 +34,9 @@ export function createAdminService(request: ApiFetcher) {
       );
     },
 
-    menuItems(filters: { search?: string; status?: MenuItemStatus | "all" } = {}) {
+    menuItems(
+      filters: { search?: string; status?: MenuItemStatus | "all" } = {},
+    ) {
       return request<VendorMenuItemRecord[]>(
         `/api/admin/menu-items${toQuery({
           search: filters.search,

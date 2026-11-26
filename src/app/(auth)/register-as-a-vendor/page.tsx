@@ -20,6 +20,10 @@ export default async function RegisterVendorPage() {
   // New accounts should use the vendor tab on the signup page.
   if (!user) redirect("/sign-up?mode=vendor");
 
+  // Blocked accounts are treated as signed out everywhere else; don't let them
+  // reach the vendor onboarding form.
+  if (user.blocked) redirect("/sign-in");
+
   // Vendors and admins already have a workspace.
   if (user.role !== "customer") {
     redirect(dashboardPathForRole(user.role));

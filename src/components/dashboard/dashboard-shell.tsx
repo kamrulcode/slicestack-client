@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   LogOut,
   Menu as MenuIcon,
+  Plus,
   Receipt,
   ShoppingBag,
   Store,
@@ -68,6 +69,11 @@ const NAV_BY_ROLE: Record<SessionUser["role"], NavItem[]> = {
       label: "Menu items",
       href: "/dashboard/vendor/menu-items",
       icon: UtensilsCrossed,
+    },
+    {
+      label: "Add menu item",
+      href: "/dashboard/vendor/menu-items/add",
+      icon: Plus,
     },
     { label: "Orders", href: "/dashboard/vendor/orders", icon: ClipboardList },
     { label: "Profile", href: "/dashboard/vendor/profile", icon: Store },
@@ -131,20 +137,30 @@ export function DashboardShell({
   const [isSigningOut, setIsSigningOut] = useState(false);
   const nav = NAV_BY_ROLE[user.role];
 
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [mobileSidebarPath, setMobileSidebarPath] = useState<string | null>(
+    null,
+  );
+  const mobileSidebarOpen = mobileSidebarPath === pathname;
 
-  // Automatically close mobile sidebar whenever the route changes
   useEffect(() => {
-    setMobileSidebarOpen(false);
-  }, [pathname]);
+    const signupMessage = window.sessionStorage.getItem(
+      "slicestack:signup-success",
+    );
+    if (!signupMessage) return;
 
-  const activeItem =
-    nav.find((item) =>
-      item.exact ? pathname === item.href : pathname.startsWith(item.href),
-    ) ?? nav[0];
+    window.sessionStorage.removeItem("slicestack:signup-success");
+    toast.success(signupMessage);
+  }, []);
 
-  const isActive = (item: NavItem) =>
+  const matchesItem = (item: NavItem) =>
     item.exact ? pathname === item.href : pathname.startsWith(item.href);
+  const activeItem =
+    nav
+      .filter(matchesItem)
+      .sort((first, second) => second.href.length - first.href.length)[0] ??
+    nav[0];
+
+  const isActive = (item: NavItem) => item.href === activeItem.href;
 
   async function handleSignOut() {
     setIsSigningOut(true);
@@ -176,7 +192,7 @@ export function DashboardShell({
             <Link
               key={item.href}
               href={item.href}
-              onClick={() => setMobileSidebarOpen(false)}
+              onClick={() => setMobileSidebarPath(null)}
               aria-current={isActive(item) ? "page" : undefined}
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors",
@@ -195,7 +211,7 @@ export function DashboardShell({
       <div className="mt-6 border-t border-white/10 pt-4">
         <Link
           href="/menu"
-          onClick={() => setMobileSidebarOpen(false)}
+          onClick={() => setMobileSidebarPath(null)}
           className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-white/60 transition-colors hover:bg-white/5 hover:text-white"
         >
           <ShoppingBag className="size-4.5" aria-hidden />
@@ -225,7 +241,9 @@ export function DashboardShell({
           <div className="flex h-16 items-center gap-3 px-4 sm:px-6 lg:px-8">
             <Sheet
               open={mobileSidebarOpen}
-              onOpenChange={(open) => setMobileSidebarOpen(open)}
+              onOpenChange={(open) =>
+                setMobileSidebarPath(open ? pathname : null)
+              }
             >
               <SheetTrigger
                 render={
@@ -269,11 +287,12 @@ export function DashboardShell({
               {user.role}
             </Badge>
             <ThemeToggle />
-            <div className="flex items-center gap-2">
+            <div className="relative flex items-center gap-2">
               <Avatar size="sm">
                 {user.image ? <AvatarImage src={user.image} alt="" /> : null}
                 <AvatarFallback>{initials(user.name) || "SS"}</AvatarFallback>
               </Avatar>
+
               <div className="hidden min-w-0 sm:block">
                 <p className="truncate text-sm font-semibold text-foreground">
                   {user.name}

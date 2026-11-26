@@ -6,6 +6,6 @@ import { requireRole } from "@/lib/authorization";
  * review workspace lives inside the admin dashboard shell.
  */
 export default async function AdminVendorsRedirectPage() {
-  await requireRole(["admin"], "/dashboard/admin/vendors");
+  await requireRole(["admin"]);
   redirect("/dashboard/admin/vendors");
 }

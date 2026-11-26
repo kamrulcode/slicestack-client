@@ -42,12 +42,29 @@ export function NavUser({
       .join("")
       .toUpperCase() || "U";
 
+  // const handleSignOut = async () => {
+  //   try {
+  //     await authClient.signOut();
+  //     toast.success("You have been signed out.");
+  //     router.replace("/sign-in");
+  //     router.refresh();
+  //   } catch (error) {
+  //     toast.error(errorMessage(error));
+  //   }
+  // };
+
   const handleSignOut = async () => {
     try {
-      await authClient.signOut();
+      const result = await authClient.signOut();
+
+      if (result.error) {
+        toast.error(result.error.message || "Sign out failed.");
+        return;
+      }
+
       toast.success("You have been signed out.");
-      router.replace("/sign-in");
-      router.refresh();
+
+      window.location.replace("/sign-in");
     } catch (error) {
       toast.error(errorMessage(error));
     }

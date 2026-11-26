@@ -2,20 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  ArrowRight,
-  CheckCircle2,
-  Eye,
-  EyeClosed,
-  Loader2,
-  Store,
-  UserRound,
-} from "lucide-react";
+import { Eye, EyeClosed, Store, UserRound } from "lucide-react";
 import { AuthField } from "@/components/auth/auth-field";
 import { GoogleButton } from "@/components/auth/google-button";
 import { VendorDetailsFields } from "@/components/vendor/vendor-details-fields";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { errorMessage } from "@/lib/api/client";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
@@ -82,18 +73,45 @@ async function saveProfileImage(file: File) {
   await profileService.updateProfile({ image });
 }
 
+/**
+ * Re-read the session before navigating away from sign-up.
+ *
+ * `disableCookieCache` is the important part: Better Auth caches the user
+ * record (including `role`) in the `session_data` cookie for 7 days. Vendor
+ * sign-up upgrades the account to `vendor` through the Express API after the
+ * session was created, so the cached snapshot still says `customer`. Reading
+ * the session with the cache disabled returns the database record and rewrites
+ * the cookie cache with the new role, so the dashboard (and every client
+ * `useSession()` consumer) sees the vendor immediately.
+ *
+ * If the session cookie did not stick at all (for example a stale cookie jar
+ * that still holds a `session_data` cookie without its `session_token`), fall
+ * back to a normal sign-in with the credentials the user just chose so they
+ * still land in their dashboard instead of being bounced back to the form.
+ */
+async function ensureSession(email: string, password: string) {
+  try {
+    const { data } = await authClient.getSession({
+      query: { disableCookieCache: true },
+    });
+    if (data?.user) return;
+
+    await authClient.signIn.email({ email, password });
+  } catch {
+    // The sign-in page is still available if this recovery attempt fails.
+  }
+}
+
 export function SignUpForm({
   defaultMode = "customer",
 }: {
   defaultMode?: SignUpMode;
 }) {
   const [isVisible, setIsVisible] = useState(false);
-  const router = useRouter();
   const [mode, setMode] = useState<SignUpMode>(defaultMode);
   const [errors, setErrors] = useState<SignUpErrors>({});
   const [vendorErrors, setVendorErrors] = useState<VendorFieldErrors>({});
   const [hasSubmitted, setHasSubmitted] = useState(false);
-  const [successMessage, setSuccessMessage] = useState<string>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [vendorLogoFile, setVendorLogoFile] = useState<File | null>(null);
@@ -162,7 +180,7 @@ export function SignUpForm({
           name,
           email,
           password,
-          callbackURL: "/dashboard",
+          callbackURL: "/dashboard/customer",
         });
 
         if (error) {
@@ -181,10 +199,12 @@ export function SignUpForm({
           }
         }
 
-        toast.success("Account created. Welcome to SliceStack!");
-        // The /dashboard dispatcher reads the new user's role on the server.
-        router.replace("/dashboard");
-        router.refresh();
+        await ensureSession(email, password);
+        window.sessionStorage.setItem(
+          "slicestack:signup-success",
+          "Account created. Welcome to SliceStack!",
+        );
+        window.location.replace("/dashboard/customer");
         return;
       }
 
@@ -245,44 +265,18 @@ export function SignUpForm({
         return;
       }
 
-      toast.success(result.message);
-      setSuccessMessage(result.message);
-      // Give the confirmation a beat, then open the vendor workspace.
-      window.setTimeout(() => {
-        router.replace("/dashboard/vendor");
-        router.refresh();
-      }, 800);
+      await ensureSession(email, password);
+      window.sessionStorage.setItem(
+        "slicestack:signup-success",
+        result.message,
+      );
+      window.location.replace("/dashboard/vendor");
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  if (successMessage) {
-    return (
-      <div>
-        <div className="flex size-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300">
-          <CheckCircle2 className="size-6" aria-hidden />
-        </div>
-        <h2 className="mt-5 font-heading text-[2.25rem] leading-tight font-bold tracking-tight text-foreground">
-          Your shop is live
-        </h2>
-        <p className="mt-3 text-base text-muted-foreground">{successMessage}</p>
-        <p className="mt-2 flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" aria-hidden />
-          Opening your vendor dashboard...
-        </p>
-        <Link
-          href="/dashboard/vendor"
-          className={cn(buttonVariants(), "mt-6 h-12")}
-        >
-          Go to vendor dashboard
-          <ArrowRight className="size-4" aria-hidden />
-        </Link>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -302,7 +296,7 @@ export function SignUpForm({
               disabled={vendorAccountCreated}
               onClick={() => switchMode(value)}
               className={cn(
-                "flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-2.5 transition-all duration-200 outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                "flex flex-col items-center justify-center gap-1 rounded-xl px-3 py-2.5 transition-all duration-200 outline-none select-none focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer",
                 active
                   ? "bg-primary text-primary-foreground shadow-sm shadow-primary/25"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -315,7 +309,7 @@ export function SignUpForm({
               </span>
               <span
                 className={cn(
-                  "text-[11px]",
+                  "text-[12px]",
                   active
                     ? "text-primary-foreground/80"
                     : "text-muted-foreground/80",
@@ -336,16 +330,6 @@ export function SignUpForm({
           ? "Set up your shop and start selling on SliceStack. No approval queue — your workspace unlocks instantly."
           : "Join the SliceStack community and get your next pizza sorted."}
       </p>
-
-      {vendorAccountCreated && (
-        <div className="mt-5 rounded-lg border border-amber-300/60 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
-          <p className="font-semibold">Your account was created</p>
-          <p className="mt-1">
-            We just need to finish your shop setup. Fix any highlighted fields
-            and press &ldquo;Retry shop setup&rdquo;.
-          </p>
-        </div>
-      )}
 
       <form className="mt-6" onSubmit={handleSignUp} noValidate>
         <div className="flex flex-col gap-3.5">
@@ -542,6 +526,15 @@ export function SignUpForm({
           </div>
         )}
       </form>
+      {vendorAccountCreated && (
+        <div className="absolute top-0 z-999 mt-5 rounded-lg border border-amber-300/60 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+          <p className="font-semibold">Your account was created</p>
+          <p className="mt-1">
+            We just need to finish your shop setup. Fix any highlighted fields
+            and press &ldquo;Retry shop setup&rdquo;.
+          </p>
+        </div>
+      )}
 
       <p className="mt-8 text-[13px] leading-6 text-muted-foreground">
         By continuing, you agree to our{" "}

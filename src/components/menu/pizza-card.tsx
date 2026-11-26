@@ -85,16 +85,17 @@ export function MenuItemCard({
   return (
     <Card
       className={cn(
-        "group relative flex h-full flex-col gap-0 overflow-hidden",
-        "rounded-[24px] border border-border/70 bg-card p-0",
-        "shadow-sm transition-all duration-500 ease-out",
-        "hover:-translate-y-2 hover:border-primary/40",
-        "hover:shadow-xl hover:shadow-primary/10",
+        "group relative flex h-full min-w-0 flex-col overflow-hidden ",
+        "rounded-2xl border border-border/70 bg-card p-0",
+        "shadow-sm transition-all duration-300",
+        "sm:rounded-[24px]",
+        "sm:hover:-translate-y-2 sm:hover:border-primary/40",
+        "sm:hover:shadow-xl sm:hover:shadow-primary/10",
         className,
       )}
     >
       {/* Pizza Image */}
-      <div className="relative aspect-4/3 overflow-hidden bg-muted">
+      <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted sm:aspect-[4/3]">
         {image ? (
           <Image
             src={image}
@@ -124,7 +125,9 @@ export function MenuItemCard({
         {isCustomer ? (
           <button
             type="button"
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            aria-label={
+              isFavorite ? "Remove from favorites" : "Add to favorites"
+            }
             aria-pressed={isFavorite}
             onClick={toggleFavorite}
             disabled={isFavoritePending}
@@ -155,22 +158,22 @@ export function MenuItemCard({
       </div>
 
       {/* Card Details */}
-      <div className="flex flex-1 flex-col p-5">
+      <div className="flex min-w-0 flex-1 flex-col p-3.5 sm:p-5">
         {/* Pizza Name + Price */}
-        <div className="flex items-start justify-between gap-3">
-          <h3 className="min-w-0 flex-1 line-clamp-2 text-lg font-extrabold leading-snug tracking-tight text-card-foreground transition-colors group-hover:text-primary sm:text-xl">
+        <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <h3 className="min-w-0 flex-1 line-clamp-2 text-base font-extrabold leading-snug tracking-tight text-card-foreground transition-colors group-hover:text-primary sm:text-xl">
             {menuItem.itemName}
           </h3>
 
-          <div className="shrink-0 rounded-xl bg-primary/10 px-4 py-1 text-right">
-            <p className="whitespace-nowrap text-lg font-extrabold tracking-tight text-primary">
+          <div className="w-fit shrink-0 rounded-lg bg-primary/10 px-3 py-1 text-left sm:text-right">
+            <p className="whitespace-nowrap text-base font-extrabold tracking-tight text-primary sm:text-lg">
               {formatPrice(menuItem.price)}
             </p>
           </div>
         </div>
 
         {/* Shop Owner */}
-        <div className="mt-4 flex items-center gap-2.5">
+        <div className="mt-3 flex min-w-0 items-center gap-2 sm:mt-4 sm:gap-2.5">
           <div className="grid size-9 shrink-0 place-items-center rounded-full bg-secondary text-muted-foreground">
             <Store className="size-4" />
           </div>
@@ -192,7 +195,7 @@ export function MenuItemCard({
         </div>
 
         {/* Location */}
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-muted/60 px-3 py-2.5">
+        <div className="mt-3 flex min-w-0 items-center gap-2 rounded-xl bg-muted/60 px-2.5 py-2 sm:px-3 sm:py-2.5">
           <MapPin className="size-4 shrink-0 text-primary" />
 
           <span className="truncate text-xs font-medium text-muted-foreground">
@@ -210,11 +213,10 @@ export function MenuItemCard({
             aria-label={`View details for ${menuItem.itemName}`}
             className={cn(
               buttonVariants({ variant: "outline", size: "lg" }),
-              "group/btn relative flex h-12 w-full items-center justify-center gap-2  rounded-full",
+              "group/btn flex h-11 w-full items-center justify-center gap-2 rounded-full sm:h-12",
             )}
           >
             <span>View Details</span>
-
             <ArrowRight className="size-4 transition-transform duration-300 group-hover/btn:translate-x-1.5" />
           </Link>
         </div>

@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CustomerDashboardPage() {
-  const user = await requireRole(["customer"], "/dashboard/customer");
+  const user = await requireRole(["customer"]);
   const me = await getAccountContext();
   const application = me?.application ?? null;
 

@@ -119,7 +119,7 @@ export default function FeaturesSection() {
   return (
     <section
       id="how-it-works"
-      className="relative w-full scroll-mt-24 bg-ember-soft px-4 pt-12 pb-16 text-brand-ink/80 sm:px-6 sm:pt-14"
+      className="relative w-full scroll-mt-24 bg-ember-soft px-4 pt-12 pb-16 text-catg-ink sm:px-6 sm:pt-14"
     >
       <BrushEdge
         className="text-ember-soft -top-20 absolute
@@ -133,7 +133,7 @@ export default function FeaturesSection() {
             className="flex flex-col items-center text-center"
           >
             {/* Custom SVG Icon */}
-            <div className="flex h-[90px] items-center justify-center">
+            <div className="flex h-22.5items-center justify-center">
               <FeatureIcon type={feature.icon} />
             </div>
 
@@ -143,7 +143,7 @@ export default function FeaturesSection() {
             </h3>
 
             {/* Description */}
-            <p className="mt-2 max-w-[19rem] text-[13px] leading-[1.8] sm:text-base">
+            <p className="mt-2 max-w-76 text-[13px] leading-[1.8] sm:text-base">
               {feature.description}
             </p>
           </RevealItem>

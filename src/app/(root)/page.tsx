@@ -4,6 +4,7 @@ import { FeaturedPizzas } from "@/components/home/featured-pizzas";
 import { Hero } from "@/components/home/hero";
 import FeaturesSection from "@/components/home/hero-features";
 import CustomerReviews from "@/components/layout/customerReview";
+import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,9 @@ export default function HomePage() {
       <FeaturedPizzas />
       <CategoryGrid />
       <ComboOffer />
-      <CustomerReviews />
+      <Suspense>
+        <CustomerReviews />
+      </Suspense>
     </>
   );
 }

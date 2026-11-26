@@ -16,7 +16,9 @@ export default async function SignUpPage({
   searchParams: Promise<{ mode?: string }>;
 }) {
   const user = await getCurrentUser();
-  if (user) redirect("/dashboard");
+  // Same rule as requireAuth(): blocked accounts must not be sent to a
+  // dashboard that will only redirect them back here.
+  if (user && !user.blocked) redirect("/dashboard");
 
   const params = await searchParams;
   const defaultMode: SignUpMode =

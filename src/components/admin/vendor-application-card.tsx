@@ -243,7 +243,9 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-start gap-2">
-      <span className="mt-0.5 text-muted-foreground [&_svg]:size-4">{icon}</span>
+      <span className="mt-0.5 text-muted-foreground [&_svg]:size-4">
+        {icon}
+      </span>
       <div className="min-w-0">
         <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
           {label}

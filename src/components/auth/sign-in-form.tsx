@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { AuthField } from "@/components/auth/auth-field";
 import { GoogleButton } from "@/components/auth/google-button";
@@ -12,7 +11,6 @@ import { toast } from "sonner";
 import { Eye, EyeClosed } from "lucide-react";
 
 export function SignInForm({ nextPath }: { nextPath?: string }) {
-  const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -39,9 +37,11 @@ export function SignInForm({ nextPath }: { nextPath?: string }) {
 
       toast.success("Welcome back!");
       // The dashboard dispatcher reads the role from the database on the
-      // server and redirects to the right workspace.
-      router.replace(nextPath || "/dashboard");
-      router.refresh();
+      // server and redirects to the right workspace. Use a full document
+      // navigation: a client-side router.replace() can reuse an RSC payload
+      // cached while signed out, which made the dashboard only show up after
+      // a manual reload in production.
+      window.location.replace(nextPath || "/dashboard");
     } catch (signInError) {
       toast.error(errorMessage(signInError));
     } finally {

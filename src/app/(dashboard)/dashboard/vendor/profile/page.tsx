@@ -23,10 +23,13 @@ export default async function VendorProfilePage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <AccountProfileCard
           key={`${user.id}-${user.name}-${user.email}-${user.image ?? ""}`}
+          plan={shop.plan}
           user={user}
         />
-        <ShopSummaryCard shop={shop} />
-        {application ? <VendorApplicationSummary application={application} /> : null}
+        <ShopSummaryCard shop={shop} plan={shop.plan} />
+        {application ? (
+          <VendorApplicationSummary application={application} />
+        ) : null}
       </div>
       <ShopProfileCard
         key={`${shop.id}-${shop.name}-${shop.updatedAt}`}

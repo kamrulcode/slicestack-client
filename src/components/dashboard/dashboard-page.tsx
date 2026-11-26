@@ -5,11 +5,13 @@ export function DashboardPage({
   title,
   description,
   actions,
+  animateChildren = true,
   children,
 }: {
   title: string;
   description?: string;
   actions?: ReactNode;
+  animateChildren?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -29,13 +31,15 @@ export function DashboardPage({
           ) : null}
         </div>
       </Reveal>
-      {Children.map(children, (child, index) =>
-        child == null ? child : (
-          <Reveal key={index} delay={0.05 + index * 0.06} y={20}>
-            {child}
-          </Reveal>
-        ),
-      )}
+      {animateChildren
+        ? Children.map(children, (child, index) =>
+            child == null ? child : (
+              <Reveal key={index} delay={0.05 + index * 0.06} y={20}>
+                {child}
+              </Reveal>
+            ),
+          )
+        : children}
     </div>
   );
 }

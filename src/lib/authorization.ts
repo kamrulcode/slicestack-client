@@ -26,31 +26,42 @@ const profileApi = createProfileService(serverApiFetch);
  * Read the Better Auth session on the server. The role is always read from
  * the database-backed user record, never from a cookie or client payload.
  *
+ * `disableCookieCache` is required: without it Better Auth answers from the
+ * `session_data` cookie, which snapshots the user (including `role`) for up to
+ * 7 days. Vendor sign-up raises the role from `customer` to `vendor` through
+ * the Express API right after the session is created, so a cached snapshot
+ * would keep sending the new vendor to the customer dashboard until they
+ * signed out and back in.
+ *
  * Wrapped in React `cache` so the layout, header and page share a single
- * session lookup per request, and guarded so a transient database/session
- * failure degrades to "signed out" instead of throwing an error page.
+ * session lookup per request.
+ *
+ * Errors are deliberately not swallowed: a failed lookup is an infrastructure
+ * problem, not a signed-out visitor. Turning it into `null` used to bounce
+ * signed-in admins (and everyone else) to `/sign-in` whenever the session read
+ * hiccuped. Letting it throw shows the dashboard error boundary, which offers
+ * a retry and keeps the session intact.
  */
 export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
-  try {
-    const session = await auth.api.getSession({ headers: await headers() });
-    if (!session?.user) return null;
+  const session = await auth.api.getSession({
+    headers: await headers(),
+    query: { disableCookieCache: true },
+  });
+  if (!session?.user) return null;
 
-    const user = session.user as typeof session.user & {
-      role?: unknown;
-      blocked?: unknown;
-    };
+  const user = session.user as typeof session.user & {
+    role?: unknown;
+    blocked?: unknown;
+  };
 
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      image: user.image ?? null,
-      role: normalizeRole(user.role),
-      blocked: user.blocked === true,
-    };
-  } catch {
-    return null;
-  }
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    image: user.image ?? null,
+    role: normalizeRole(user.role),
+    blocked: user.blocked === true,
+  };
 });
 
 export async function requireAuth(nextPath?: string): Promise<SessionUser> {
@@ -63,15 +74,17 @@ export async function requireAuth(nextPath?: string): Promise<SessionUser> {
 }
 
 /**
- * Server-side authorization. Use this in pages and server actions; never rely
- * on middleware or hidden UI alone.
+ * Role check for dashboard pages. The dashboard layout is the single place
+ * that sends signed-out visitors to `/sign-in`, so this only compares the
+ * role and forwards a mismatch to the dashboard that belongs to the account.
+ * This keeps role permissions intact without a second sign-in redirect.
  */
 export async function requireRole(
   allowedRoles: readonly Role[],
-  nextPath?: string,
 ): Promise<SessionUser> {
-  const user = await requireAuth(nextPath);
+  const user = await getCurrentUser();
 
+  if (!user || user.blocked) redirect("/dashboard");
   if (!allowedRoles.includes(user.role)) {
     redirect(dashboardPathForRole(user.role));
   }

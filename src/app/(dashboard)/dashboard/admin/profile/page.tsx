@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminProfilePage() {
-  const user = await requireRole(["admin"], "/dashboard/admin/profile");
+  const user = await requireRole(["admin"]);
 
   return (
     <DashboardPage

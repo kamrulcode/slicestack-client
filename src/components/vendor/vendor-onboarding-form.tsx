@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowRight, Store } from "lucide-react";
 import { toast } from "sonner";
 import { VendorDetailsFields } from "@/components/vendor/vendor-details-fields";
 import { Button } from "@/components/ui/button";
 import { errorMessage } from "@/lib/api/client";
+import { authClient } from "@/lib/auth-client";
 import { profileService } from "@/services/profile.service";
 import {
   readVendorDetails,
@@ -25,7 +25,6 @@ export function VendorOnboardingForm({
 }: {
   defaults?: Partial<VendorDetailsValues>;
 }) {
-  const router = useRouter();
   const [errors, setErrors] = useState<VendorFieldErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -64,8 +63,17 @@ export function VendorOnboardingForm({
       }
 
       toast.success(result.message);
-      router.replace("/dashboard/vendor");
-      router.refresh();
+      // The Express API has just raised this account to `vendor`. Re-read the
+      // session with the cookie cache disabled so the `session_data` cookie
+      // stops reporting the old `customer` role, then use a full document
+      // navigation so the dashboard renders from the database record rather
+      // than a cached RSC payload.
+      try {
+        await authClient.getSession({ query: { disableCookieCache: true } });
+      } catch {
+        // The server still reads the role from the database on navigation.
+      }
+      window.location.replace("/dashboard/vendor");
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {

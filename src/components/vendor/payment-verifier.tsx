@@ -15,9 +15,12 @@ import { errorMessage } from "@/lib/api/client";
 export function PaymentVerifier({
   sessionId,
   returnState,
+  redirectTo = "/dashboard/vendor/subscription",
 }: {
   sessionId?: string;
   returnState: "success" | "cancelled";
+  /** Where to go after a confirmed payment. Pass `null` to stay on the page. */
+  redirectTo?: string | null;
 }) {
   const router = useRouter();
   const [verifying, setVerifying] = useState(true);
@@ -38,7 +41,9 @@ export function PaymentVerifier({
             "Payment successful! Your Premium subscription is now active.",
             { position: "top-center" },
           );
-          router.replace("/dashboard/vendor/subscription");
+          if (redirectTo) {
+            router.replace(redirectTo);
+          }
         } else if (
           result.transactionStatus === "failed" &&
           returnState === "cancelled"
@@ -79,7 +84,7 @@ export function PaymentVerifier({
     return () => {
       cancelled = true;
     };
-  }, [sessionId, returnState, router]);
+  }, [sessionId, returnState, redirectTo, router]);
 
   if (!verifying) return null;
 

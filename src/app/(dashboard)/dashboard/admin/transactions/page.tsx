@@ -45,7 +45,7 @@ function formatAmount(amount: number, currency: string) {
 }
 
 export default async function AdminTransactionsPage() {
-  await requireRole(["admin"], "/dashboard/admin/transactions");
+  await requireRole(["admin"]);
 
   let transactions: TransactionRecord[] = [];
   let loadError: string | null = null;
@@ -154,22 +154,6 @@ export default async function AdminTransactionsPage() {
                             : ""}
                         </p>
                       ) : null}
-                      {transaction.stripeInvoiceId ? (
-                        <p>Invoice: {transaction.stripeInvoiceId}</p>
-                      ) : null}
-                      {transaction.stripePaymentIntentId ? (
-                        <p>Payment: {transaction.stripePaymentIntentId}</p>
-                      ) : null}
-                      {transaction.stripeCustomerId ? (
-                        <p>Customer: {transaction.stripeCustomerId}</p>
-                      ) : null}
-                      {!transaction.stripeSessionId &&
-                      !transaction.stripeSubscriptionId &&
-                      !transaction.stripeInvoiceId &&
-                      !transaction.stripePaymentIntentId &&
-                      !transaction.stripeCustomerId
-                        ? "—"
-                        : null}
                     </td>
                   </tr>
                 ))}

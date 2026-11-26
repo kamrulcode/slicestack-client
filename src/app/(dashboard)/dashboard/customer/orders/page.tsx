@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CustomerOrdersPage() {
-  await requireRole(["customer"], "/dashboard/customer/orders");
+  await requireRole(["customer"]);
 
   let orders: Order[] = [];
   let loadError: string | null = null;

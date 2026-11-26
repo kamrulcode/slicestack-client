@@ -15,7 +15,7 @@ export default function DashboardError({
       reset={reset}
       title="This workspace could not load"
       description="We could not load your dashboard data. Check your connection and try again."
-      homeHref="/dashboard"
+      homeHref="/"
     />
   );
 }

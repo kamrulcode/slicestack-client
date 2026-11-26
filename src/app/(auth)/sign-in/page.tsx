@@ -16,7 +16,9 @@ export default async function SignInPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const user = await getCurrentUser();
-  if (user) {
+  // Mirror requireAuth(): a blocked account must stay on this page. Redirecting
+  // it to /dashboard would bounce straight back here and loop forever.
+  if (user && !user.blocked) {
     const params = await searchParams;
     redirect(safeRedirectPath(params.next));
   }

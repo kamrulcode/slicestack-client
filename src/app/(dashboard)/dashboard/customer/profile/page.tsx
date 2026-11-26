@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CustomerProfilePage() {
-  const user = await requireRole(["customer"], "/dashboard/customer/profile");
+  const user = await requireRole(["customer"]);
   const context = await getAccountContext();
   const application = context?.application ?? null;
 

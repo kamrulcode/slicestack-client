@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 };
 
 export default async function VendorDashboardPage() {
-  const user = await requireRole(["vendor"], "/dashboard/vendor");
+  const user = await requireRole(["vendor"]);
   const me = await getAccountContext();
 
   if (!me) {

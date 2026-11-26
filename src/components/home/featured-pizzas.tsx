@@ -44,7 +44,10 @@ export async function FeaturedPizzas() {
 
         <RevealGroup className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {menuItems.map((menuItem) => (
-            <RevealItem key={menuItem._id} className="h-full">
+            <RevealItem
+              key={menuItem._id}
+              className="h-full w-85/100 xs:w-full"
+            >
               <MenuItemCard menuItem={menuItem} />
             </RevealItem>
           ))}

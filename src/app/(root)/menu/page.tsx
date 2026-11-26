@@ -3,7 +3,7 @@ import Link from "next/link";
 import { AlertTriangle } from "lucide-react";
 import { Reveal } from "@/components/common/reveal";
 import { MenuFilters } from "@/components/menu/menu-filters";
-import { MenuItemCard } from "@/components/menu/pizza-card";
+import { MenuPagination } from "@/components/menu/menu-pagination";
 import { buttonVariants } from "@/components/ui/button";
 import { menuCategories } from "@/data/menu";
 import { errorMessage } from "@/lib/api/client";
@@ -135,19 +135,11 @@ export default async function MenuPage({
             ))}
           </div>
 
-          <Reveal>
-            <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {menuItems.map((item) => (
-                <div
-                  key={item._id}
-                  id={categoryAnchorByItemId.get(item._id)}
-                  className="h-full scroll-mt-24"
-                >
-                  <MenuItemCard menuItem={item} />
-                </div>
-              ))}
-            </div>
-          </Reveal>
+          <MenuPagination
+            key={`${search ?? ""}|${category ?? ""}|${location ?? ""}`}
+            items={menuItems}
+            categoryAnchorByItemId={Object.fromEntries(categoryAnchorByItemId)}
+          />
         </>
       )}
     </div>

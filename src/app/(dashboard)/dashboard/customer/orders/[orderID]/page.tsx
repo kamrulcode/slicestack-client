@@ -30,7 +30,7 @@ export default async function CustomerOrderDetailPage({
 }: {
   params: Promise<{ orderID: string }>;
 }) {
-  await requireRole(["customer"], "/dashboard/customer/orders");
+  await requireRole(["customer"]);
   const { orderID } = await params;
 
   let order: Order;

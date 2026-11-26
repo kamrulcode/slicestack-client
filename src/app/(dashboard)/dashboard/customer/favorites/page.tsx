@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 export default async function CustomerFavoritesPage() {
-  await requireRole(["customer"], "/dashboard/customer/favorites");
+  await requireRole(["customer"]);
 
   let favorites: FavoriteEntry[] = [];
   let loadError: string | null = null;

@@ -14,7 +14,7 @@ export function RouteError({
   error,
   reset,
   title = "Something went wrong",
-  description = "We hit an unexpected problem while loading this page. Please try again.",
+  description = "We hit an unexpected problem while loading this page.",
   homeHref = "/",
 }: {
   error: Error & { digest?: string };
@@ -33,7 +33,7 @@ export function RouteError({
         <span className="grid size-14 place-items-center rounded-2xl bg-destructive/10 text-destructive">
           <AlertTriangle className="size-7" aria-hidden />
         </span>
-        <h1 className="mt-5 font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+        <h1 className="mt-5 font-heading text-2xl font-bold tracking-tight  sm:text-3xl text-[#ff404c]">
           {title}
         </h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">

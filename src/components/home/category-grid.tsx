@@ -54,7 +54,7 @@ const categories = [
 
 export function CategoryGrid() {
   return (
-    <section className="relative py-24 px-6 bg-background">
+    <section className="relative py-12 sm:py-24 px-6 bg-background">
       {/* CATEGORY SECTION */}
       <div className="max-w-7xl mx-auto">
         {/* HEADING */}
@@ -79,66 +79,140 @@ export function CategoryGrid() {
         </div>
 
         {/* CATEGORY CARDS */}
-        <div
-          className="grid grid-cols-2 md:grid-cols-3
-            lg:grid-cols-6 gap-5"
-        >
-          {categories.map((category) => (
-            <Link
-              href={`/menu/menu-catagory?category=${encodeURIComponent(category.category)}`}
-              key={category.name}
-              className="group relative rounded-2xl overflow-hidden
-                  border border-border hover:border-ember
-                  transition duration-300 hover:-translate-y-2
-                  bg-card text-card-foreground"
+        {/* CATEGORY CARDS */}
+        <div className="relative">
+          {/* Mobile Slider */}
+          <div className="md:hidden">
+            <div
+              className="flex gap-5 overflow-x-auto snap-x snap-mandatory
+        scroll-smooth scrollbar-hide pb-4"
             >
-              {/* IMAGE */}
-              <div className="relative h-48 overflow-hidden">
-                <Image
-                  src={category.image}
-                  alt={category.name}
-                  fill
-                  sizes="(min-width: 1024px) 16vw, (min-width: 768px) 33vw, 50vw"
-                  unoptimized
-                  className="object-cover
-                      group-hover:scale-110 transition
-                      duration-500"
-                />
-              </div>
-
-              {/* CONTENT */}
-              <div className="p-5 text-center">
-                <div className="text-2xl mb-2">{category.emoji}</div>
-
-                <h3
-                  className="font-bold text-card-foreground
-                    group-hover:text-ember
-                    transition"
+              {categories.map((category) => (
+                <Link
+                  href={`/menu/menu-catagory?category=${encodeURIComponent(
+                    category.category,
+                  )}`}
+                  key={category.name}
+                  className="group relative min-w-full snap-center
+            rounded-2xl overflow-hidden border border-border
+            bg-card text-card-foreground
+            transition duration-300 active:scale-[0.98]"
                 >
-                  {category.name}
-                </h3>
+                  {/* Image */}
+                  <div className="relative h-56 overflow-hidden">
+                    <Image
+                      src={category.image}
+                      alt={category.name}
+                      fill
+                      sizes="100vw"
+                      unoptimized
+                      className="object-cover group-hover:scale-110
+                transition duration-500"
+                    />
 
-                <p className="text-muted-foreground text-sm mt-2">
-                  {category.subtitle}
-                </p>
+                    <div
+                      className="absolute inset-0 bg-gradient-to-t
+              from-black/50 to-transparent"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-5 text-center">
+                    <div className="text-3xl mb-2">{category.emoji}</div>
+
+                    <h3
+                      className="font-bold text-lg
+              group-hover:text-ember transition"
+                    >
+                      {category.name}
+                    </h3>
+
+                    <p className="text-muted-foreground text-sm mt-2">
+                      {category.subtitle}
+                    </p>
+
+                    <div
+                      className="mt-4 text-[#FF404C]
+              dark:text-[#FFB340] text-sm font-bold"
+                    >
+                      Explore →
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            {/* Slider Indicator */}
+            <div className="flex justify-center gap-2 mt-4">
+              {categories.map((category, index) => (
+                <span
+                  key={category.name}
+                  className="h-1.5 w-5 rounded-full bg-muted
+            transition-all"
+                />
+              ))}
+            </div>
+
+            <p className="text-center text-xs text-muted-foreground mt-3">
+              Swipe to explore categories →
+            </p>
+          </div>
+
+          {/* Tablet & Desktop Grid */}
+          <div className="hidden md:grid grid-cols-3 lg:grid-cols-6 gap-5">
+            {categories.map((category) => (
+              <Link
+                href={`/menu/menu-catagory?category=${encodeURIComponent(
+                  category.category,
+                )}`}
+                key={category.name}
+                className="group relative rounded-2xl overflow-hidden
+          border border-border hover:border-ember
+          transition duration-300 hover:-translate-y-2
+          bg-card text-card-foreground"
+              >
+                <div className="relative h-48 overflow-hidden">
+                  <Image
+                    src={category.image}
+                    alt={category.name}
+                    fill
+                    sizes="(min-width: 1024px) 16vw, 33vw"
+                    unoptimized
+                    className="object-cover group-hover:scale-110
+              transition duration-500"
+                  />
+                </div>
+
+                <div className="p-5 text-center">
+                  <div className="text-2xl mb-2">{category.emoji}</div>
+
+                  <h3
+                    className="font-bold text-card-foreground
+            group-hover:text-ember transition"
+                  >
+                    {category.name}
+                  </h3>
+
+                  <p className="text-muted-foreground text-sm mt-2">
+                    {category.subtitle}
+                  </p>
+
+                  <div
+                    className="mt-4 text-[#FF404C]
+            dark:text-[#FFB340] text-sm font-bold"
+                  >
+                    Explore →
+                  </div>
+                </div>
 
                 <div
-                  className="mt-4 text-[#FF404C] dark:text-[#FFB340]
-                    text-sm font-bold"
-                >
-                  Explore →
-                </div>
-              </div>
-
-              {/* Hover glow */}
-              <div
-                className="absolute inset-0 pointer-events-none
-                  opacity-0 group-hover:opacity-100
-                  transition duration-300
-                  shadow-[inset_0_0_30px_rgba(255,179,64,0.15)]"
-              />
-            </Link>
-          ))}
+                  className="absolute inset-0 pointer-events-none
+          opacity-0 group-hover:opacity-100 transition duration-300
+          shadow-[inset_0_0_30px_rgba(255,179,64,0.15)]"
+                />
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </section>

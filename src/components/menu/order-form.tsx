@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { CalendarDays, Loader2, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,6 @@ export function OrderForm({
   price: number;
   shopName: string;
 }) {
-  const router = useRouter();
   const today = localDateInputValue();
   const [deliveryDate, setDeliveryDate] = useState(today);
   const [deliveryAddress, setDeliveryAddress] = useState("");
@@ -54,6 +52,7 @@ export function OrderForm({
       return;
     }
 
+    if (isSubmitting) return;
     setIsSubmitting(true);
 
     try {
@@ -65,7 +64,10 @@ export function OrderForm({
       });
 
       toast.success(result.message);
-      router.push(`/dashboard/customer/orders/${result.order.id}`);
+      // Replace with a full document navigation. A client-side router.push()
+      // can replay a stale signed-out RSC payload (sending the user to
+      // /sign-in), and replace() means the back button cannot re-submit.
+      window.location.replace(`/dashboard/customer/orders/${result.order.id}`);
     } catch (error) {
       toast.error(errorMessage(error));
     } finally {

@@ -23,9 +23,9 @@ export function SiteFooter() {
 
       <div className="relative mx-auto w-full max-w-7xl px-5 sm:px-8 lg:px-10">
         {/* Main Footer */}
-        <div className="grid gap-12 py-8 sm:grid-cols-2 lg:grid-cols-[1.3fr_0.7fr_0.7fr_1.3fr] lg:gap-10 lg:py-12">
+        <div className="grid gap-10 py-8 sm:grid-cols-2 lg:grid-cols-[1.3fr_1.4fr_1.3fr] lg:gap-10 lg:py-12">
           {/* Brand Section */}
-          <div className="flex flex-col items-start">
+          <div className="flex flex-col items-center  align-center sm:items-start">
             <Logo size="md" />
 
             {/* Brand Highlight */}
@@ -33,7 +33,7 @@ export function SiteFooter() {
               <span className="size-2 animate-pulse rounded-full bg-[#ff404c]" />
               Freshly baked, always loved.
             </div>
-            <p className="mt-5 max-w-xs text-sm leading-7 text-muted-foreground">
+            <p className="mt-5 max-w-xs text-sm leading-7 text-muted-foreground text-center sm:text-start">
               {/* {siteConfig.tagline} */}
               {siteConfig.description}
             </p>
@@ -54,67 +54,59 @@ export function SiteFooter() {
             </div>
           </div>
 
-          {/* Company Links */}
-          <div className="mt-4">
-            <h3 className="text-sm font-bold tracking-wide text-foreground">
-              Company
-            </h3>
+          <div className="flex justify-around">
+            {/* Company Links */}
+            <div className="mt-4">
+              <h3 className="text-sm font-bold tracking-wide text-foreground">
+                Company
+              </h3>
 
-            <div className="mt-5 h-0.5 w-8 rounded-full bg-[#ff404c]" />
+              <div className="mt-5 h-0.5 w-8 rounded-full bg-[#ff404c]" />
 
-            <ul className="mt-6 space-y-4">
-              {siteConfig.company.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    className="group inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-[#ff404c]"
-                  >
-                    {item.label}
-                    <ArrowUpRight className="size-3 -translate-y-0.5 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
+              <ul className="mt-6 space-y-4">
+                {siteConfig.company.map((item) => (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      className="group inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-[#ff404c]"
+                    >
+                      {item.label}
+                      <ArrowUpRight className="size-3 -translate-y-0.5 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Support Links */}
+            <div className="mt-4">
+              <h3 className="text-sm font-bold tracking-wide text-foreground">
+                Support
+              </h3>
+
+              <div className="mt-5 h-0.5 w-8 rounded-full bg-[#ffb340]" />
+
+              <ul className="mt-6 space-y-4">
+                {siteConfig.support.map((item) => (
+                  <li key={item.label}>
+                    <Link
+                      href={item.href}
+                      className="group inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-[#ff404c]"
+                    >
+                      {item.label}
+                      <ArrowUpRight className="size-3 -translate-y-0.5 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
-
-          {/* Support Links */}
-          <div className="mt-4">
-            <h3 className="text-sm font-bold tracking-wide text-foreground">
-              Support
-            </h3>
-
-            <div className="mt-5 h-0.5 w-8 rounded-full bg-[#ffb340]" />
-
-            <ul className="mt-6 space-y-4">
-              {siteConfig.support.map((item) => (
-                <li key={item.label}>
-                  <Link
-                    href={item.href}
-                    className="group inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-[#ff404c]"
-                  >
-                    {item.label}
-                    <ArrowUpRight className="size-3 -translate-y-0.5 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
           {/* Newsletter */}
           <div className="rounded-2xl border border-border/70 bg-secondary/40 px-5 py-2 sm:p-6">
             <div className="mb-1">
-              {/* <span className="text-xs font-bold uppercase tracking-[0.15em] text-[#ff404c]">
-                Stay in the loop
-              </span> */}
-
               <h3 className=" text-xl font-bold tracking-tight">
                 Get the latest <span className="text-[#ff404c]">slice!</span>
               </h3>
-
-              {/* <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Subscribe for delicious updates, special offers, and exclusive
-                deals.
-              </p> */}
             </div>
 
             <Newsletter />
@@ -144,9 +136,12 @@ export function SiteFooter() {
             Made with
             <Heart className="size-3.5 fill-[#ff404c] text-[#ff404c]" />
             by
-            <span className="text-[#ff404c] transition-transform duration-300 hover:scale-110">
+            <Link
+              href="https://kamrullislam.vercel.app"
+              className="text-[#ff404c] transition-transform duration-300 hover:scale-110"
+            >
               KAMRUL
-            </span>
+            </Link>
           </div>
 
           {/* Scroll To Top */}

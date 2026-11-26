@@ -7,8 +7,9 @@ import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { LogIn, User } from "lucide-react";
-import { getCurrentUser } from "@/lib/authorization";
+
 import { NavUser } from "./userAvatar";
+import { getCurrentUser } from "@/lib/authorization";
 
 export async function SiteHeader() {
   const user = await getCurrentUser();
@@ -37,7 +38,13 @@ export async function SiteHeader() {
           <ThemeToggle />
 
           {user ? (
-            <NavUser user={{ ...user, image: user.image ?? "" }} />
+            <NavUser
+              user={{
+                ...user,
+                image: user.image ?? "",
+                role: user.role ?? "customer",
+              }}
+            />
           ) : (
             <>
               <Link

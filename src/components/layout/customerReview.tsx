@@ -16,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { menuService } from "@/services/menu.service";
 import type { MenuItemReview } from "@/types/menu";
+import { ReviewCarouselSkeleton } from "../skeleton/customerreviewskeleton";
 
 type Review = {
   id: string;
@@ -122,9 +123,7 @@ export default function CustomerReviews() {
 
         <Reveal className="mx-auto mt-10 max-w-3xl" delay={0.1}>
           {isLoading ? (
-            <div className="rounded-3xl border bg-card px-6 py-10 text-center text-sm text-muted-foreground shadow-xs sm:px-12">
-              Loading guest reviews...
-            </div>
+            <ReviewCarouselSkeleton />
           ) : reviews.length === 0 ? (
             <div className="rounded-3xl border bg-card px-6 py-10 text-center text-sm text-muted-foreground shadow-xs sm:px-12">
               No guest reviews yet.

@@ -2,7 +2,14 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { LoaderCircle, Pencil, Save, ShieldCheck, Trash2 } from "lucide-react";
+import {
+  Crown,
+  LoaderCircle,
+  Pencil,
+  Save,
+  ShieldCheck,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -31,16 +38,20 @@ import { authClient } from "@/lib/auth-client";
 import { profileService } from "@/services/profile.service";
 import { uploadService } from "@/services/uploads.service";
 
-export function AccountProfileCard({ user }: { user: SessionUser }) {
+export function AccountProfileCard({
+  user,
+  plan,
+}: {
+  user: SessionUser;
+  plan?: "free" | "premium";
+}) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [name, setName] = useState(user.name);
-  const [email, setEmail] = useState(user.email);
   const [image, setImage] = useState(user.image);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [isRequestingEmailChange, setIsRequestingEmailChange] = useState(false);
   const imageInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -52,7 +63,6 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
     if (!open) return;
 
     setName(user.name);
-    setEmail(user.email);
     setImage(user.image);
     setImageFile(null);
     setImagePreviewUrl(null);
@@ -65,7 +75,17 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
 
     try {
       const imageUrl = imageFile ? await uploadService.image(imageFile) : image;
-      await profileService.updateProfile({ name, image: imageUrl });
+      const profile = { name: name.trim(), image: imageUrl };
+      await profileService.updateProfile(profile);
+
+      const { error } = await authClient.updateUser(profile);
+      if (error) {
+        throw new Error(
+          error.message || "Your profile was saved but could not be refreshed.",
+        );
+      }
+
+      setName(profile.name);
       setImage(imageUrl);
       setImageFile(null);
       setImagePreviewUrl(null);
@@ -77,29 +97,6 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
       toast.error(errorMessage(error));
     } finally {
       setIsSavingProfile(false);
-    }
-  }
-
-  async function requestEmailChange(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setIsRequestingEmailChange(true);
-
-    try {
-      const { error } = await authClient.changeEmail({
-        newEmail: email.trim(),
-        callbackURL: window.location.pathname,
-      });
-      if (error) {
-        throw new Error(
-          error.message || "Email change could not be requested.",
-        );
-      }
-      toast.success("Check your email to confirm the address change.");
-      setIsOpen(false);
-    } catch (error) {
-      toast.error(errorMessage(error));
-    } finally {
-      setIsRequestingEmailChange(false);
     }
   }
 
@@ -121,9 +118,7 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
                 {user.role}
               </Badge>
             </CardTitle>
-            <CardDescription>
-              Your SliceStack account details.
-            </CardDescription>
+            <CardDescription>Your SliceStack account details.</CardDescription>
           </div>
           <SheetTrigger
             render={
@@ -140,9 +135,17 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
               {user.image ? (
                 <AvatarImage src={user.image} alt={`${user.name}'s profile`} />
               ) : null}
+
               <AvatarFallback>{initials || "SS"}</AvatarFallback>
             </Avatar>
+
             <ProfileRow label="Full name" value={user.name} />
+            {plan === "premium" && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-400">
+                <Crown size={11} />
+                PRO
+              </span>
+            )}
           </div>
           <ProfileRow label="Email address" value={user.email} />
           <ProfileRow label="Account id" value={user.id} mono />
@@ -157,8 +160,8 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
         <SheetHeader className="border-b border-border p-5 pr-14">
           <SheetTitle>Edit profile</SheetTitle>
           <SheetDescription>
-            Update your name, photo, or email. Your account role cannot be
-            changed here.
+            Update your name or photo. Your email and account role are managed
+            by the server.
           </SheetDescription>
         </SheetHeader>
 
@@ -188,9 +191,7 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
                   onChange={(event) => {
                     const file = event.currentTarget.files?.[0] ?? null;
                     setImageFile(file);
-                    setImagePreviewUrl(
-                      file ? URL.createObjectURL(file) : null,
-                    );
+                    setImagePreviewUrl(file ? URL.createObjectURL(file) : null);
                   }}
                 />
                 {image || imageFile ? (
@@ -227,46 +228,9 @@ export function AccountProfileCard({ user }: { user: SessionUser }) {
             </div>
           </form>
 
-          <form
-            id="profile-email-form"
-            className="flex flex-col gap-3 border-t border-border/60 pt-4"
-            onSubmit={requestEmailChange}
-          >
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="profile-email">Email address</Label>
-              <Input
-                id="profile-email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.currentTarget.value)}
-                autoComplete="email"
-                required
-              />
-            </div>
-            <Button
-              type="submit"
-              variant="outline"
-              disabled={
-                isRequestingEmailChange ||
-                email.trim().toLowerCase() === user.email.toLowerCase()
-              }
-            >
-              {isRequestingEmailChange ? (
-                <LoaderCircle className="animate-spin" aria-hidden />
-              ) : null}
-              {isRequestingEmailChange
-                ? "Sending verification..."
-                : "Change email"}
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Your email is updated only after you confirm the verification
-              link.
-            </p>
-          </form>
-
           <p className="flex items-start gap-2 rounded-lg bg-muted/60 p-3 text-xs text-muted-foreground">
             <ShieldCheck className="mt-0.5 size-4 shrink-0" aria-hidden />
-            Your role is read-only and managed by the server.
+            Your email and role are read-only and managed by the server.
           </p>
         </div>
 
